@@ -2,30 +2,77 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Teacher Attendance App</title>
+<title>Attendance and Homework</title>
 <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    input, select, button { margin: 5px; }
-    table { border-collapse: collapse; margin-top: 10px; }
-    table, th, td { border: 1px solid black; padding: 5px; }
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f2f2f2;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+    }
+    .container {
+        max-width: 900px;
+        width: 100%;
+        padding: 20px;
+        background-color: #ffffff;
+        margin: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+    h1, h2, h3 { color: #333333; }
+    input, select, button { margin: 5px; padding: 5px 10px; }
+    table { border-collapse: collapse; margin-top: 10px; width: 100%; }
+    table, th, td { border: 1px solid #aaa; padding: 5px; text-align: center; }
+    th { background-color: #e6e6e6; }
+    tr:nth-child(even) { background-color: #fafafa; }
     .flagged { background-color: #ffcccc; }
+    .group-buttons { margin: 10px 0; display: flex; flex-wrap: wrap; gap: 10px; }
+    .group-button {
+        padding: 8px 12px;
+        border-radius: 5px;
+        border: 1px solid #555;
+        cursor: pointer;
+        flex: 1 1 100px;
+        text-align: center;
+        font-weight: bold;
+        color: white;
+    }
+    .overlay {
+        position: fixed; top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.3);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+    .overlay-content {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        max-width: 600px;
+        width: 100%;
+    }
+    button:hover { opacity: 0.9; }
 </style>
 </head>
 <body>
-<h1>Teacher Attendance App</h1>
+<div class="container">
+<h1>Attendance and Homework</h1>
 
-<!-- Section to create groups -->
+<!-- Create group -->
 <h2>Create Group</h2>
 <input id="groupName" placeholder="Group Name">
 <button onclick="createGroup()">Add Group</button>
 
-<h2>Groups</h2>
-<select id="groupsSelect" onchange="loadGroup()"></select>
-<button onclick="deleteGroup()">Delete Group</button>
+<div class="group-buttons" id="groupsButtons"></div>
 
 <hr>
 
-<!-- Section to add students -->
+<!-- Students -->
 <h3>Students in Group</h3>
 <input id="studentName" placeholder="Student Name">
 <button onclick="addStudent()">Add Student</button>
@@ -35,21 +82,22 @@
 
 <hr>
 
-<!-- Section for classes -->
+<!-- Classes -->
 <h3>Classes</h3>
 <input type="date" id="classDate">
 <button onclick="addClass()">Add Class</button>
 <table id="classesTable">
-<tr><th>Date</th><th>Mark Attendance & Homework</th></tr>
+<tr><th>Date</th><th>Actions</th></tr>
 </table>
 
 <hr>
 
-<!-- Section for notifications -->
+<!-- Flagged students -->
 <div id="notificationSection" style="display:none;">
 <h3>Flagged Students</h3>
 <textarea id="flaggedMessage" rows="6" cols="80"></textarea><br>
 <button onclick="sendEmail()">Compose Email</button>
+</div>
 </div>
 
 <script>
@@ -57,50 +105,44 @@
 let data = JSON.parse(localStorage.getItem('teacherData')) || { groups: [] };
 let currentGroupIndex = 0;
 
-// ----- Utility Functions -----
+// ----- Save -----
 function saveData() { localStorage.setItem('teacherData', JSON.stringify(data)); }
 
-function updateGroupsSelect() {
-    const select = document.getElementById('groupsSelect');
-    select.innerHTML = '';
-    data.groups.forEach((g,i)=> {
-        const option = document.createElement('option');
-        option.value = i;
-        option.text = g.name;
-        select.add(option);
-    });
-}
-
-// ----- Group Functions -----
+// ----- Groups -----
 function createGroup() {
     const name = document.getElementById('groupName').value.trim();
     if(!name) return alert("Enter group name");
     data.groups.push({ name, students: [], classes: [] });
     saveData();
-    updateGroupsSelect();
     document.getElementById('groupName').value = '';
+    renderGroupButtons();
+    selectGroup(data.groups.length-1);
 }
 
-function loadGroup() {
-    currentGroupIndex = document.getElementById('groupsSelect').value;
+function renderGroupButtons() {
+    const container = document.getElementById('groupsButtons');
+    container.innerHTML = '';
+    const baseHue = 200; // blue shades
+    const total = data.groups.length;
+    data.groups.forEach((g,i)=>{
+        const btn = document.createElement('div');
+        const lightness = 40 + 40*(i/Math.max(total-1,1));
+        btn.style.backgroundColor = `hsl(${baseHue},60%,${lightness}%)`;
+        btn.className = 'group-button';
+        btn.innerText = g.name;
+        btn.onclick = ()=>selectGroup(i);
+        container.appendChild(btn);
+    });
+}
+
+function selectGroup(index) {
+    currentGroupIndex = index;
     renderStudents();
     renderClasses();
     checkFlags();
 }
 
-function deleteGroup() {
-    if(confirm("Delete this group?")) {
-        data.groups.splice(currentGroupIndex,1);
-        currentGroupIndex = 0;
-        saveData();
-        updateGroupsSelect();
-        renderStudents();
-        renderClasses();
-        checkFlags();
-    }
-}
-
-// ----- Student Functions -----
+// ----- Students -----
 function addStudent() {
     const name = document.getElementById('studentName').value.trim();
     if(!name) return alert("Enter student name");
@@ -122,47 +164,61 @@ function renderStudents() {
     const table = document.getElementById('studentsTable');
     table.innerHTML = "<tr><th>Name</th><th>Remove</th></tr>";
     const group = data.groups[currentGroupIndex];
-    group.students.forEach((s,i)=> {
+    group.students.forEach((s,i)=>{
         const row = table.insertRow();
         row.insertCell(0).innerText = s.name;
         const btnCell = row.insertCell(1);
         const btn = document.createElement('button');
         btn.innerText = "Remove";
-        btn.onclick = ()=>{ removeStudent(i); };
+        btn.onclick = ()=>removeStudent(i);
         btnCell.appendChild(btn);
     });
 }
 
-// ----- Class Functions -----
+// ----- Classes -----
 function addClass() {
     const date = document.getElementById('classDate').value;
     if(!date) return alert("Pick a date");
     const group = data.groups[currentGroupIndex];
-    if(group.classes.find(c=>c.date===date)) return alert("Class for this date exists");
-    // initialize attendance/homework
+    if(group.classes.find(c=>c.date===date)) return alert("Class exists");
     const classObj = { date, records: group.students.map(s=>({ name: s.name, attendance:'present', homework:true })) };
     group.classes.push(classObj);
     saveData();
     renderClasses();
     checkFlags();
+    document.getElementById('classDate').value='';
+}
+
+function deleteClass(index) {
+    if(confirm("Delete this class?")) {
+        const group = data.groups[currentGroupIndex];
+        group.classes.splice(index,1);
+        saveData();
+        renderClasses();
+        checkFlags();
+    }
 }
 
 function renderClasses() {
     const table = document.getElementById('classesTable');
-    table.innerHTML = "<tr><th>Date</th><th>Mark Attendance & Homework</th></tr>";
+    table.innerHTML = "<tr><th>Date</th><th>Actions</th></tr>";
     const group = data.groups[currentGroupIndex];
-    group.classes.forEach((c,i)=> {
+    group.classes.forEach((c,i)=>{
         const row = table.insertRow();
         row.insertCell(0).innerText = c.date;
-        const btnCell = row.insertCell(1);
-        const btn = document.createElement('button');
-        btn.innerText = "Mark";
-        btn.onclick = ()=>{ markClass(i); };
-        btnCell.appendChild(btn);
+        const cell = row.insertCell(1);
+        const markBtn = document.createElement('button');
+        markBtn.innerText = "Mark";
+        markBtn.onclick = ()=>markClass(i);
+        const delBtn = document.createElement('button');
+        delBtn.innerText = "Delete";
+        delBtn.onclick = ()=>deleteClass(i);
+        cell.appendChild(markBtn);
+        cell.appendChild(delBtn);
     });
 }
 
-// ----- Mark Attendance & Homework -----
+// ----- Overlay Marking -----
 function markClass(classIndex) {
     const group = data.groups[currentGroupIndex];
     const cls = group.classes[classIndex];
@@ -172,26 +228,21 @@ function markClass(classIndex) {
         html += "<td><select id='att_"+i+"'><option value='present' "+(r.attendance=='present'?'selected':'')+">Present</option><option value='absent' "+(r.attendance=='absent'?'selected':'')+">Absent</option></select></td>";
         html += "<td><select id='hw_"+i+"'><option value='true' "+(r.homework?'selected':'')+">Delivered</option><option value='false' "+(!r.homework?'selected':'')+">Not Delivered</option></select></td></tr>";
     });
-    html += "</table><button onclick='saveClass("+classIndex+")'>Save</button>";
-   
-    // **Add solid background and padding**
+    html += "</table><button onclick='saveClass("+classIndex+")'>Save</button> <button onclick='cancelOverlay()'>Cancel</button>";
+    const div = document.createElement('div');
     div.innerHTML = html;
-    div.style.background = 'white';
-    div.style.padding = '20px';
-    div.style.borderRadius = '8px';
-    div.style.maxWidth = '600px';
-    div.style.margin = '50px auto';
-    div.style.boxShadow = '0 0 10px rgba(0,0,0,0.5)';
+    div.className = 'overlay-content';
 
     const overlay = document.createElement('div');
-    overlay.style.position = 'fixed';
-    overlay.style.top='0'; overlay.style.left='0';
-    overlay.style.width='100%'; overlay.style.height='100%';
-    overlay.style.background='rgba(0,0,0,0.3)';
-    overlay.style.padding='20px';
+    overlay.className = 'overlay';
     overlay.appendChild(div);
     document.body.appendChild(overlay);
 }
+
+function cancelOverlay() {
+    document.body.removeChild(document.body.lastChild);
+}
+
 function saveClass(classIndex) {
     const group = data.groups[currentGroupIndex];
     const cls = group.classes[classIndex];
@@ -203,21 +254,19 @@ function saveClass(classIndex) {
     renderClasses();
     checkFlags();
     alert("Class saved!");
-    // remove overlay
-    document.body.removeChild(document.body.lastChild);
+    cancelOverlay();
 }
 
-// ----- Check Flags -----
+// ----- Flags -----
 function checkFlags() {
     const group = data.groups[currentGroupIndex];
     const classes = group.classes;
-    if(classes.length<2) {
+    if(classes.length<2){
         document.getElementById('notificationSection').style.display='none';
         return;
     }
     const flagged = [];
     group.students.forEach(s=>{
-        // last two classes
         const lastTwo = classes.slice(-2);
         const absences = lastTwo.map(c=>c.records.find(r=>r.name===s.name).attendance);
         const homeworks = lastTwo.map(c=>c.records.find(r=>r.name===s.name).homework);
@@ -236,7 +285,7 @@ function checkFlags() {
     }
 }
 
-// ----- Send Email via mailto -----
+// ----- Email -----
 function sendEmail() {
     const text = encodeURIComponent(document.getElementById('flaggedMessage').value);
     const subject = encodeURIComponent('Flagged Students Notification');
@@ -244,8 +293,9 @@ function sendEmail() {
 }
 
 // ----- Init -----
-updateGroupsSelect();
-if(data.groups.length>0) loadGroup();
+renderGroupButtons();
+if(data.groups.length>0) selectGroup(0);
+
 </script>
 </body>
 </html>
