@@ -173,8 +173,16 @@ function markClass(classIndex) {
         html += "<td><select id='hw_"+i+"'><option value='true' "+(r.homework?'selected':'')+">Delivered</option><option value='false' "+(!r.homework?'selected':'')+">Not Delivered</option></select></td></tr>";
     });
     html += "</table><button onclick='saveClass("+classIndex+")'>Save</button>";
-    const div = document.createElement('div');
+   
+    // **Add solid background and padding**
     div.innerHTML = html;
+    div.style.background = 'white';
+    div.style.padding = '20px';
+    div.style.borderRadius = '8px';
+    div.style.maxWidth = '600px';
+    div.style.margin = '50px auto';
+    div.style.boxShadow = '0 0 10px rgba(0,0,0,0.5)';
+
     const overlay = document.createElement('div');
     overlay.style.position = 'fixed';
     overlay.style.top='0'; overlay.style.left='0';
@@ -184,7 +192,6 @@ function markClass(classIndex) {
     overlay.appendChild(div);
     document.body.appendChild(overlay);
 }
-
 function saveClass(classIndex) {
     const group = data.groups[currentGroupIndex];
     const cls = group.classes[classIndex];
