@@ -288,8 +288,6 @@ function checkFlags() {
         const lastTwo = classes.slice(-2);
         const absences = lastTwo.map(c=>c.records.find(r=>r.name===s.name).attendance);
         const homeworks = lastTwo.map(c=>c.records.find(r=>r.name===s.name).homework);
-        const group = data.groups[currentGroupIndex];
-        const classes = group.classes;
         let reason = '';
         if(absences[0]=='absent' && absences[1]=='absent') reason += 'Missed 2 classes; ';
         if(!homeworks[0] && !homeworks[1]) reason += 'Homework not delivered 2x; ';
@@ -336,3 +334,4 @@ if(data.groups.length>0) selectGroup(0);
 </script>
 </body>
 </html>
+
