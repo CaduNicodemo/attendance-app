@@ -83,7 +83,7 @@
 <hr>
 
 <!-- Students -->
-<h3>Students in Group</h3>
+<h3>Students</h3>
 <input id="studentName" placeholder="Student Name">
 <button onclick="addStudent()">Add Student</button>
 <table id="studentsTable">
@@ -110,7 +110,7 @@
 <div id="notificationSection" style="display:none;">
 <h3>Flagged Students</h3>
 <textarea id="flaggedMessage" rows="6" cols="80"></textarea><br>
-<button onclick="sendEmail()">Compose Email</button>
+<button onclick="sendWhatsApp()">Send to WhatsApp</button>
 </div>
 </div>
 
@@ -180,7 +180,7 @@ function removeStudent(index) {
 
 function renderStudents() {
     const table = document.getElementById('studentsTable');
-    table.innerHTML = `<tr><th colspan="2" style="background-color:${data.groups[currentGroupIndex].color}; color:white; font-size:16px;">Current Group: ${data.groups[currentGroupIndex].name}</th></tr><tr><th>Name</th><th>Remove</th></tr>`;
+    table.innerHTML = `<tr><th colspan="2" style="background-color:${data.groups[currentGroupIndex].color}; color:white; font-size:16px;">${data.groups[currentGroupIndex].name}</th></tr><tr><th>Name</th><th>Remove</th></tr>`;
     const group = data.groups[currentGroupIndex];
     group.students.forEach((s,i)=>{
         const row = table.insertRow();
@@ -219,7 +219,7 @@ function deleteClass(index) {
 
 function renderClasses() {
     const table = document.getElementById('classesTable');
-    table.innerHTML = `<tr><th colspan="2" style="background-color:${data.groups[currentGroupIndex].color}; color:white; font-size:16px;">Current Group: ${data.groups[currentGroupIndex].name}</th></tr><tr><th>Date</th><th>Actions</th></tr>`;
+    table.innerHTML = `<tr><th colspan="2" style="background-color:${data.groups[currentGroupIndex].color}; color:white; font-size:16px;">${data.groups[currentGroupIndex].name}</th></tr><tr><th>Date</th><th>Actions</th></tr>`;
     const group = data.groups[currentGroupIndex];
     group.classes.forEach((c,i)=>{
         const row = table.insertRow();
@@ -303,11 +303,12 @@ function checkFlags() {
     }
 }
 
-// ----- Email -----
-function sendEmail() {
+// ----- WhatsApp -----
+function sendWhatsApp() {
+    const phone = "+5511991463208"; // your target number with country code
     const text = encodeURIComponent(document.getElementById('flaggedMessage').value);
-    const subject = encodeURIComponent('Flagged Students Notification');
-    window.location.href = `mailto:?subject=${subject}&body=${text}`;
+    const url = `https://wa.me/${phone.replace(/\D/g,'')}?text=${text}`;
+    window.open(url, '_blank');
 }
 function deleteGroup() {
     if(!data.groups[currentGroupIndex]) return;
@@ -324,6 +325,7 @@ function deleteGroup() {
         }
     }
 }
+
 
 // ----- Init -----
 renderGroupButtons();
