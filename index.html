@@ -288,6 +288,8 @@ function checkFlags() {
         const lastTwo = classes.slice(-2);
         const absences = lastTwo.map(c=>c.records.find(r=>r.name===s.name).attendance);
         const homeworks = lastTwo.map(c=>c.records.find(r=>r.name===s.name).homework);
+        const group = data.groups[currentGroupIndex];
+        const classes = group.classes;
         let reason = '';
         if(absences[0]=='absent' && absences[1]=='absent') reason += 'Missed 2 classes; ';
         if(!homeworks[0] && !homeworks[1]) reason += 'Homework not delivered 2x; ';
@@ -295,7 +297,7 @@ function checkFlags() {
     });
     if(flagged.length>0){
         document.getElementById('notificationSection').style.display='block';
-        let msg = 'Flagged students:\n';
+        let msg = `${group.name} - Flagged Students:\n`;
         flagged.forEach(f=>{ msg+=f.name+' - '+f.reason+'Dates: '+f.dates.join(', ')+'\n'; });
         document.getElementById('flaggedMessage').value = msg;
     } else {
