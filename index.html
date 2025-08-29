@@ -102,6 +102,10 @@
 
 <hr>
 
+<button style="background-color:#d9534f;color:white;padding:10px 15px;border:none;border-radius:5px;cursor:pointer;" onclick="deleteGroup()">Delete Current Group</button>
+
+<hr>
+
 <!-- Flagged students -->
 <div id="notificationSection" style="display:none;">
 <h3>Flagged Students</h3>
@@ -304,6 +308,21 @@ function sendEmail() {
     const text = encodeURIComponent(document.getElementById('flaggedMessage').value);
     const subject = encodeURIComponent('Flagged Students Notification');
     window.location.href = `mailto:?subject=${subject}&body=${text}`;
+}
+function deleteGroup() {
+    if(!data.groups[currentGroupIndex]) return;
+    if(confirm(`Are you sure you want to delete the group "${data.groups[currentGroupIndex].name}"? This action cannot be undone.`)){
+        data.groups.splice(currentGroupIndex,1);
+        currentGroupIndex = 0;
+        saveData();
+        renderGroupButtons();
+        if(data.groups.length>0) selectGroup(0);
+        else {
+            document.getElementById('studentsTable').innerHTML = "<tr><th>Name</th><th>Remove</th></tr>";
+            document.getElementById('classesTable').innerHTML = "<tr><th>Date</th><th>Actions</th></tr>";
+            document.getElementById('notificationSection').style.display='none';
+        }
+    }
 }
 
 // ----- Init -----
