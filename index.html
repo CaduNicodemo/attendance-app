@@ -127,11 +127,14 @@ function renderGroupButtons() {
     data.groups.forEach((g,i)=>{
         const btn = document.createElement('div');
         const lightness = 40 + 40*(i/Math.max(total-1,1));
-        btn.style.backgroundColor = `hsl(${baseHue},60%,${lightness}%)`;
+        const color = `hsl(${baseHue},60%,${lightness}%)`;
+        btn.style.backgroundColor = color;
         btn.className = 'group-button';
         btn.innerText = g.name;
         btn.onclick = ()=>selectGroup(i);
         container.appendChild(btn);
+        // store the color in the group object for table use
+        g.color = color;
     });
 }
 
@@ -160,9 +163,10 @@ function removeStudent(index) {
     renderStudents();
 }
 
+
 function renderStudents() {
     const table = document.getElementById('studentsTable');
-    table.innerHTML = "<tr><th>Name</th><th>Remove</th></tr>";
+    table.innerHTML = `<tr><th colspan="2" style="background-color:${data.groups[currentGroupIndex].color}; color:white; font-size:16px;">Current Group: ${data.groups[currentGroupIndex].name}</th></tr><tr><th>Name</th><th>Remove</th></tr>`;
     const group = data.groups[currentGroupIndex];
     group.students.forEach((s,i)=>{
         const row = table.insertRow();
@@ -201,7 +205,7 @@ function deleteClass(index) {
 
 function renderClasses() {
     const table = document.getElementById('classesTable');
-    table.innerHTML = "<tr><th>Date</th><th>Actions</th></tr>";
+    table.innerHTML = `<tr><th colspan="2" style="background-color:${data.groups[currentGroupIndex].color}; color:white; font-size:16px;">Current Group: ${data.groups[currentGroupIndex].name}</th></tr><tr><th>Date</th><th>Actions</th></tr>`;
     const group = data.groups[currentGroupIndex];
     group.classes.forEach((c,i)=>{
         const row = table.insertRow();
