@@ -28,17 +28,27 @@
     th { background-color: #e6e6e6; }
     tr:nth-child(even) { background-color: #fafafa; }
     .flagged { background-color: #ffcccc; }
-    .group-buttons { margin: 10px 0; display: flex; flex-wrap: wrap; gap: 10px; }
-    .group-button {
-        padding: 8px 12px;
-        border-radius: 5px;
-        border: 1px solid #555;
-        cursor: pointer;
-        flex: 1 1 100px;
-        text-align: center;
-        font-weight: bold;
-        color: white;
-    }
+    .group-buttons {
+    margin: 10px 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: flex-start; /* align to left or center if you prefer */
+}
+
+.group-button {
+    flex: 1 1 calc(20% - 10px); /* five buttons per row minus gap */
+    min-width: 120px; /* ensures buttons are not too narrow on small screens */
+    max-width: 180px; /* optional, prevents extremely large buttons on wide screens */
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #555;
+    cursor: pointer;
+    text-align: center;
+    font-weight: bold;
+    color: white;
+    box-sizing: border-box;
+}
     .overlay {
         position: fixed; top: 0; left: 0;
         width: 100%; height: 100%;
