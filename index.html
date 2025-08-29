@@ -1,30 +1,244 @@
-!DOCTYPE html
-html lang=en
-head
-meta charset=UTF-8
-titleTeacher Attendance Apptitle
-style
-    body { font-family Arial, sans-serif; margin 20px; }
-    input, select, button { margin 5px; }
-    table { border-collapse collapse; margin-top 10px; }
-    table, th, td { border 1px solid black; padding 5px; }
-    .flagged { background-color #ffcccc; }
-style
-head
-body
-h1Teacher Attendance Apph1
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Teacher Attendance App</title>
+<style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    input, select, button { margin: 5px; }
+    table { border-collapse: collapse; margin-top: 10px; }
+    table, th, td { border: 1px solid black; padding: 5px; }
+    .flagged { background-color: #ffcccc; }
+</style>
+</head>
+<body>
+<h1>Teacher Attendance App</h1>
 
-!-- Section to create groups --
-h2Create Grouph2
-input id=groupName placeholder=Group Name
-button onclick=createGroup()Add Groupbutton
+<!-- Section to create groups -->
+<h2>Create Group</h2>
+<input id="groupName" placeholder="Group Name">
+<button onclick="createGroup()">Add Group</button>
 
-h2Groupsh2
-select id=groupsSelect onchange=loadGroup()select
-button onclick=deleteGroup()Delete Groupbutton
+<h2>Groups</h2>
+<select id="groupsSelect" onchange="loadGroup()"></select>
+<button onclick="deleteGroup()">Delete Group</button>
 
-hr
+<hr>
 
-!-- Section to add students --
-h3Students in Grouph3
-input id=studen
+<!-- Section to add students -->
+<h3>Students in Group</h3>
+<input id="studentName" placeholder="Student Name">
+<button onclick="addStudent()">Add Student</button>
+<table id="studentsTable">
+<tr><th>Name</th><th>Remove</th></tr>
+</table>
+
+<hr>
+
+<!-- Section for classes -->
+<h3>Classes</h3>
+<input type="date" id="classDate">
+<button onclick="addClass()">Add Class</button>
+<table id="classesTable">
+<tr><th>Date</th><th>Mark Attendance & Homework</th></tr>
+</table>
+
+<hr>
+
+<!-- Section for notifications -->
+<div id="notificationSection" style="display:none;">
+<h3>Flagged Students</h3>
+<textarea id="flaggedMessage" rows="6" cols="80"></textarea><br>
+<button onclick="sendEmail()">Compose Email</button>
+</div>
+
+<script>
+// ----- Data -----
+let data = JSON.parse(localStorage.getItem('teacherData')) || { groups: [] };
+let currentGroupIndex = 0;
+
+// ----- Utility Functions -----
+function saveData() { localStorage.setItem('teacherData', JSON.stringify(data)); }
+
+function updateGroupsSelect() {
+    const select = document.getElementById('groupsSelect');
+    select.innerHTML = '';
+    data.groups.forEach((g,i)=> {
+        const option = document.createElement('option');
+        option.value = i;
+        option.text = g.name;
+        select.add(option);
+    });
+}
+
+// ----- Group Functions -----
+function createGroup() {
+    const name = document.getElementById('groupName').value.trim();
+    if(!name) return alert("Enter group name");
+    data.groups.push({ name, students: [], classes: [] });
+    saveData();
+    updateGroupsSelect();
+    document.getElementById('groupName').value = '';
+}
+
+function loadGroup() {
+    currentGroupIndex = document.getElementById('groupsSelect').value;
+    renderStudents();
+    renderClasses();
+    checkFlags();
+}
+
+function deleteGroup() {
+    if(confirm("Delete this group?")) {
+        data.groups.splice(currentGroupIndex,1);
+        currentGroupIndex = 0;
+        saveData();
+        updateGroupsSelect();
+        renderStudents();
+        renderClasses();
+        checkFlags();
+    }
+}
+
+// ----- Student Functions -----
+function addStudent() {
+    const name = document.getElementById('studentName').value.trim();
+    if(!name) return alert("Enter student name");
+    const group = data.groups[currentGroupIndex];
+    group.students.push({ name });
+    saveData();
+    document.getElementById('studentName').value = '';
+    renderStudents();
+}
+
+function removeStudent(index) {
+    const group = data.groups[currentGroupIndex];
+    group.students.splice(index,1);
+    saveData();
+    renderStudents();
+}
+
+function renderStudents() {
+    const table = document.getElementById('studentsTable');
+    table.innerHTML = "<tr><th>Name</th><th>Remove</th></tr>";
+    const group = data.groups[currentGroupIndex];
+    group.students.forEach((s,i)=> {
+        const row = table.insertRow();
+        row.insertCell(0).innerText = s.name;
+        const btnCell = row.insertCell(1);
+        const btn = document.createElement('button');
+        btn.innerText = "Remove";
+        btn.onclick = ()=>{ removeStudent(i); };
+        btnCell.appendChild(btn);
+    });
+}
+
+// ----- Class Functions -----
+function addClass() {
+    const date = document.getElementById('classDate').value;
+    if(!date) return alert("Pick a date");
+    const group = data.groups[currentGroupIndex];
+    if(group.classes.find(c=>c.date===date)) return alert("Class for this date exists");
+    // initialize attendance/homework
+    const classObj = { date, records: group.students.map(s=>({ name: s.name, attendance:'present', homework:true })) };
+    group.classes.push(classObj);
+    saveData();
+    renderClasses();
+    checkFlags();
+}
+
+function renderClasses() {
+    const table = document.getElementById('classesTable');
+    table.innerHTML = "<tr><th>Date</th><th>Mark Attendance & Homework</th></tr>";
+    const group = data.groups[currentGroupIndex];
+    group.classes.forEach((c,i)=> {
+        const row = table.insertRow();
+        row.insertCell(0).innerText = c.date;
+        const btnCell = row.insertCell(1);
+        const btn = document.createElement('button');
+        btn.innerText = "Mark";
+        btn.onclick = ()=>{ markClass(i); };
+        btnCell.appendChild(btn);
+    });
+}
+
+// ----- Mark Attendance & Homework -----
+function markClass(classIndex) {
+    const group = data.groups[currentGroupIndex];
+    const cls = group.classes[classIndex];
+    let html = "<h3>Mark Attendance & Homework for "+cls.date+"</h3><table border='1'><tr><th>Student</th><th>Attendance</th><th>Homework</th></tr>";
+    cls.records.forEach((r,i)=>{
+        html += "<tr><td>"+r.name+"</td>";
+        html += "<td><select id='att_"+i+"'><option value='present' "+(r.attendance=='present'?'selected':'')+">Present</option><option value='absent' "+(r.attendance=='absent'?'selected':'')+">Absent</option></select></td>";
+        html += "<td><select id='hw_"+i+"'><option value='true' "+(r.homework?'selected':'')+">Delivered</option><option value='false' "+(!r.homework?'selected':'')+">Not Delivered</option></select></td></tr>";
+    });
+    html += "</table><button onclick='saveClass("+classIndex+")'>Save</button>";
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    const overlay = document.createElement('div');
+    overlay.style.position = 'fixed';
+    overlay.style.top='0'; overlay.style.left='0';
+    overlay.style.width='100%'; overlay.style.height='100%';
+    overlay.style.background='rgba(0,0,0,0.3)';
+    overlay.style.padding='20px';
+    overlay.appendChild(div);
+    document.body.appendChild(overlay);
+}
+
+function saveClass(classIndex) {
+    const group = data.groups[currentGroupIndex];
+    const cls = group.classes[classIndex];
+    cls.records.forEach((r,i)=>{
+        r.attendance = document.getElementById('att_'+i).value;
+        r.homework = document.getElementById('hw_'+i).value==='true';
+    });
+    saveData();
+    renderClasses();
+    checkFlags();
+    alert("Class saved!");
+    // remove overlay
+    document.body.removeChild(document.body.lastChild);
+}
+
+// ----- Check Flags -----
+function checkFlags() {
+    const group = data.groups[currentGroupIndex];
+    const classes = group.classes;
+    if(classes.length<2) {
+        document.getElementById('notificationSection').style.display='none';
+        return;
+    }
+    const flagged = [];
+    group.students.forEach(s=>{
+        // last two classes
+        const lastTwo = classes.slice(-2);
+        const absences = lastTwo.map(c=>c.records.find(r=>r.name===s.name).attendance);
+        const homeworks = lastTwo.map(c=>c.records.find(r=>r.name===s.name).homework);
+        let reason = '';
+        if(absences[0]=='absent' && absences[1]=='absent') reason += 'Missed 2 classes; ';
+        if(!homeworks[0] && !homeworks[1]) reason += 'Homework not delivered 2x; ';
+        if(reason) flagged.push({name:s.name, reason, dates:lastTwo.map(c=>c.date)});
+    });
+    if(flagged.length>0){
+        document.getElementById('notificationSection').style.display='block';
+        let msg = 'Flagged students:\n';
+        flagged.forEach(f=>{ msg+=f.name+' - '+f.reason+'Dates: '+f.dates.join(', ')+'\n'; });
+        document.getElementById('flaggedMessage').value = msg;
+    } else {
+        document.getElementById('notificationSection').style.display='none';
+    }
+}
+
+// ----- Send Email via mailto -----
+function sendEmail() {
+    const text = encodeURIComponent(document.getElementById('flaggedMessage').value);
+    const subject = encodeURIComponent('Flagged Students Notification');
+    window.location.href = `mailto:?subject=${subject}&body=${text}`;
+}
+
+// ----- Init -----
+updateGroupsSelect();
+if(data.groups.length>0) loadGroup();
+</script>
+</body>
+</html>
