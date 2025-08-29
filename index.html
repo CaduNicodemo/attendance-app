@@ -29,26 +29,25 @@
     tr:nth-child(even) { background-color: #fafafa; }
     .flagged { background-color: #ffcccc; }
     .group-buttons {
-    margin: 10px 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: flex-start; /* align to left or center if you prefer */
-}
-
-.group-button {
-    flex: 1 1 calc(20% - 10px); /* five buttons per row minus gap */
-    min-width: 120px; /* ensures buttons are not too narrow on small screens */
-    max-width: 180px; /* optional, prevents extremely large buttons on wide screens */
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #555;
-    cursor: pointer;
-    text-align: center;
-    font-weight: bold;
-    color: white;
-    box-sizing: border-box;
-}
+        margin: 10px 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: flex-start;
+    }
+    .group-button {
+        flex: 1 1 calc(20% - 10px);
+        min-width: 120px;
+        max-width: 180px;
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #555;
+        cursor: pointer;
+        text-align: center;
+        font-weight: bold;
+        color: white;
+        box-sizing: border-box;
+    }
     .overlay {
         position: fixed; top: 0; left: 0;
         width: 100%; height: 100%;
@@ -67,13 +66,15 @@
         width: 100%;
     }
     button:hover { opacity: 0.9; }
+    .delete-group-btn {
+        background-color:#d9534f;color:white;padding:10px 15px;border:none;border-radius:5px;cursor:pointer;margin-top:20px;
+    }
 </style>
 </head>
 <body>
 <div class="container">
 <h1>Attendance and Homework</h1>
 
-<!-- Create group -->
 <h2>Create Group</h2>
 <input id="groupName" placeholder="Group Name">
 <button onclick="createGroup()">Add Group</button>
@@ -82,31 +83,23 @@
 
 <hr>
 
-<!-- Students -->
 <h3>Students</h3>
 <input id="studentName" placeholder="Student Name">
 <button onclick="addStudent()">Add Student</button>
-<table id="studentsTable">
-<tr><th>Name</th><th>Remove</th></tr>
-</table>
+<table id="studentsTable"><tr><th>Name</th><th>Remove</th></tr></table>
 
 <hr>
 
-<!-- Classes -->
 <h3>Classes</h3>
 <input type="date" id="classDate">
 <button onclick="addClass()">Add Class</button>
-<table id="classesTable">
-<tr><th>Date</th><th>Actions</th></tr>
-</table>
+<table id="classesTable"><tr><th>Date</th><th>Actions</th></tr></table>
+
+<hr>
+<button class="delete-group-btn" onclick="deleteGroup()">Delete Current Group</button>
 
 <hr>
 
-<button style="background-color:#d9534f;color:white;padding:10px 15px;border:none;border-radius:5px;cursor:pointer;" onclick="deleteGroup()">Delete Current Group</button>
-
-<hr>
-
-<!-- Flagged students -->
 <div id="notificationSection" style="display:none;">
 <h3>Flagged Students</h3>
 <textarea id="flaggedMessage" rows="6" cols="80"></textarea><br>
@@ -147,7 +140,6 @@ function renderGroupButtons() {
         btn.innerText = g.name;
         btn.onclick = ()=>selectGroup(i);
         container.appendChild(btn);
-        // store the color in the group object for table use
         g.color = color;
     });
 }
@@ -177,11 +169,10 @@ function removeStudent(index) {
     renderStudents();
 }
 
-
 function renderStudents() {
-    const table = document.getElementById('studentsTable');
-    table.innerHTML = `<tr><th colspan="2" style="background-color:${data.groups[currentGroupIndex].color}; color:white; font-size:16px;">${data.groups[currentGroupIndex].name}</th></tr><tr><th>Name</th><th>Remove</th></tr>`;
     const group = data.groups[currentGroupIndex];
+    const table = document.getElementById('studentsTable');
+    table.innerHTML = `<tr><th colspan="2" style="background-color:${group.color}; color:white; font-size:16px;">${group.name}</th></tr><tr><th>Name</th><th>Remove</th></tr>`;
     group.students.forEach((s,i)=>{
         const row = table.insertRow();
         row.insertCell(0).innerText = s.name;
@@ -218,9 +209,9 @@ function deleteClass(index) {
 }
 
 function renderClasses() {
-    const table = document.getElementById('classesTable');
-    table.innerHTML = `<tr><th colspan="2" style="background-color:${data.groups[currentGroupIndex].color}; color:white; font-size:16px;">${data.groups[currentGroupIndex].name}</th></tr><tr><th>Date</th><th>Actions</th></tr>`;
     const group = data.groups[currentGroupIndex];
+    const table = document.getElementById('classesTable');
+    table.innerHTML = `<tr><th colspan="2" style="background-color:${group.color}; color:white; font-size:16px;">${group.name}</th></tr><tr><th>Date</th><th>Actions</th></tr>`;
     group.classes.forEach((c,i)=>{
         const row = table.insertRow();
         row.insertCell(0).innerText = c.date;
@@ -305,11 +296,13 @@ function checkFlags() {
 
 // ----- WhatsApp -----
 function sendWhatsApp() {
-    const phone = "+5511991463208"; // your target number with country code
+    const phone = "+5511991463208";
     const text = encodeURIComponent(document.getElementById('flaggedMessage').value);
     const url = `https://wa.me/${phone.replace(/\D/g,'')}?text=${text}`;
     window.open(url, '_blank');
 }
+
+// ----- Delete Group -----
 function deleteGroup() {
     if(!data.groups[currentGroupIndex]) return;
     if(confirm(`Are you sure you want to delete the group "${data.groups[currentGroupIndex].name}"? This action cannot be undone.`)){
@@ -326,7 +319,6 @@ function deleteGroup() {
     }
 }
 
-
 // ----- Init -----
 renderGroupButtons();
 if(data.groups.length>0) selectGroup(0);
@@ -334,4 +326,3 @@ if(data.groups.length>0) selectGroup(0);
 </script>
 </body>
 </html>
-
