@@ -1,0 +1,30 @@
+!DOCTYPE html
+html lang=en
+head
+meta charset=UTF-8
+titleTeacher Attendance Apptitle
+style
+    body { font-family Arial, sans-serif; margin 20px; }
+    input, select, button { margin 5px; }
+    table { border-collapse collapse; margin-top 10px; }
+    table, th, td { border 1px solid black; padding 5px; }
+    .flagged { background-color #ffcccc; }
+style
+head
+body
+h1Teacher Attendance Apph1
+
+!-- Section to create groups --
+h2Create Grouph2
+input id=groupName placeholder=Group Name
+button onclick=createGroup()Add Groupbutton
+
+h2Groupsh2
+select id=groupsSelect onchange=loadGroup()select
+button onclick=deleteGroup()Delete Groupbutton
+
+hr
+
+!-- Section to add students --
+h3Students in Grouph3
+input id=studen
