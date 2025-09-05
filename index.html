@@ -108,8 +108,8 @@
 </div>
 
 <script>
-// ----- Data -----
-let data = { groups: [] }; // inicia vazio, depois vamos buscar no Firestore
+// ----- Data (agora carregado do Firestore) -----
+let data = { groups: [] };
 let currentGroupIndex = 0;
 
 // ----- Groups -----
@@ -315,17 +315,13 @@ function deleteGroup() {
         }
     }
 }
-
-// ----- Init -----
-renderGroupButtons();
-if(data.groups.length>0) selectGroup(0);
-
 </script>
+
+<!-- 🔹 Firebase Firestore Integration -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
   import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-  // Configuração do Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyAm4kct4BJrVydJpcAXFZuHuEOAtnpUJfc",
     authDomain: "attendance-rb.firebaseapp.com",
@@ -335,11 +331,9 @@ if(data.groups.length>0) selectGroup(0);
     appId: "1:884478984062:web:e64f5dedafb34ac7d73d2f"
   };
 
-  // Inicializa Firebase e Firestore
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  // 🔹 Substituir funções de salvar/carregar
   async function saveData() {
     try {
       await setDoc(doc(db, "attendance", "teacherData"), data);
@@ -357,21 +351,20 @@ if(data.groups.length>0) selectGroup(0);
         data = docSnap.data();
         console.log("✅ Dados carregados do Firestore:", data);
       } else {
+        const local = localStorage.getItem('teacherData');
+        if(local) data = JSON.parse(local);
         console.log("ℹ️ Nenhum dado encontrado no Firestore, usando localStorage");
       }
     } catch (e) {
       console.error("❌ Erro ao carregar do Firestore:", e);
     }
 
-    // Renderiza interface após carregar
     renderGroupButtons();
     if (data.groups.length > 0) selectGroup(0);
   }
 
-  // 🔹 Substituir inicialização
+  // 🔹 Inicialização
   loadData();
 </script>
-
 </body>
 </html>
-
