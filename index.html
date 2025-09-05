@@ -334,7 +334,7 @@ function deleteGroup() {
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  async function saveData() {
+  window.saveData = async function () {
     try {
       await setDoc(doc(db, "attendance", "teacherData"), data);
       localStorage.setItem('teacherData', JSON.stringify(data)); // backup local
@@ -344,7 +344,7 @@ function deleteGroup() {
     }
   }
 
-  async function loadData() {
+  window.loadData = async function () {
     try {
       const docSnap = await getDoc(doc(db, "attendance", "teacherData"));
       if (docSnap.exists()) {
@@ -364,7 +364,8 @@ function deleteGroup() {
   }
 
   // 🔹 Inicialização
-  loadData();
+ window.loadData();
 </script>
 </body>
 </html>
+
