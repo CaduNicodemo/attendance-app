@@ -22,7 +22,6 @@
   table, th, td { border: 1px solid #aaa; padding: 5px; text-align: center; }
   th { background: #e6e6e6; }
   tr:nth-child(even) { background: #fafafa; }
-  .flagged { background: #ffcccc; }
   .group-buttons { margin: 10px 0; display: flex; flex-wrap: wrap; gap: 10px; }
   .group-button {
     flex: 1 1 calc(20% - 10px); min-width: 120px; max-width: 180px;
@@ -38,13 +37,14 @@
   .overlay-content {
     background: white; padding: 20px; border-radius: 8px;
     box-shadow: 0 0 10px rgba(0,0,0,0.5);
-    max-width: 600px; width: 100%;
+    max-width: 700px; width: 100%;
   }
   button:hover { opacity: 0.9; }
   .delete-group-btn {
     background:#d9534f; color:white; padding:10px 15px;
     border:none; border-radius:5px; cursor:pointer; margin-top:20px;
   }
+  input[type="text"] { width: 95%; box-sizing: border-box; }
 </style>
 </head>
 <body>
@@ -87,15 +87,22 @@
   </div>
 </div>
 
-<script type="module">
-/* ---------------- Dados ---------------- */
-let data = JSON.parse(localStorage.getItem('teacherData')) || { groups: [] };
+<script>
+/* ---------------- Dados e inicialização ---------------- */
+// tenta recuperar, ou cria estrutura padrão
+let data;
+try {
+  data = JSON.parse(localStorage.getItem('teacherData')) || { groups: [] };
+} catch(e) {
+  data = { groups: [] };
+}
 let currentGroupIndex = 0;
 
-/* ---------------- Helpers ---------------- */
 function saveData(){
   localStorage.setItem('teacherData', JSON.stringify(data));
 }
+
+/* ---------------- Helpers ---------------- */
 function todayISO(){
   return new Date().toISOString().slice(0,10);
 }
@@ -103,10 +110,31 @@ function isHoliday(dateStr){
   const holidays = [
     "2025-01-01","2025-02-25","2025-04-18","2025-04-21","2025-05-01",
     "2025-06-19","2025-09-07","2025-10-12","2025-11-02","2025-11-15",
-    "2025-12-25"
+    "2025-12-25", "2025-01-25" // SP municipal
   ];
   return holidays.includes(dateStr);
 }
+
+/* ---------------- Normalização (compatibilidade) ---------------- */
+function normalizeData(){
+  if(!data.groups) data.groups = [];
+  data.groups.forEach(g=>{
+    if(!Array.isArray(g.students)) g.students = [];
+    if(!Array.isArray(g.classes)) g.classes = [];
+    g.classes.forEach(c=>{
+      // ensure records is array
+      if(!Array.isArray(c.records)) c.records = [];
+      // ensure each record has attendance/homework fields
+      c.records.forEach(r=>{
+        if(typeof r.attendance === 'undefined') r.attendance = false;
+        if(typeof r.homework  === 'undefined') r.homework  = false;
+      });
+      // completed flag default false
+      if(typeof c.completed === 'undefined') c.completed = !!(c.records && c.records.some(r=>r.attendance===true || r.homework===true));
+    });
+  });
+}
+normalizeData();
 
 /* ---------------- Grupos ---------------- */
 function createGroup(){
@@ -158,11 +186,11 @@ function addStudent(){
   if(!name) return alert("Digite o nome do aluno");
   const g = data.groups[currentGroupIndex];
   g.students.push({name});
-  // adiciona aluno nas aulas futuras
-  const today = todayISO();
+  // adiciona aluno nas aulas futuras (a partir de hoje)
+  const hoje = todayISO();
   g.classes.forEach(c=>{
-    if(c.date>=today && !c.records.find(r=>r.name===name)){
-      c.records.push({name, attendance:true, homework:true});
+    if(c.date >= hoje && !c.records.find(r=>r.name===name)){
+      c.records.push({ name, attendance:false, homework:false });
     }
   });
   saveData();
@@ -172,14 +200,20 @@ function addStudent(){
 }
 function removeStudent(index){
   const g = data.groups[currentGroupIndex];
-  g.students.splice(index,1);
+  const removed = g.students.splice(index,1)[0];
+  // remove dos registros também (para manter consistência)
+  g.classes.forEach(c=>{
+    c.records = c.records.filter(r=>r.name !== removed.name);
+  });
   saveData();
   renderStudents();
+  renderClasses();
 }
 function renderStudents(){
   const g = data.groups[currentGroupIndex];
   const t = document.getElementById("studentsTable");
-  t.innerHTML=`<tr><th colspan="2">${g.name}</th></tr><tr><th>Nome</th><th>Remover</th></tr>`;
+  t.innerHTML=`<tr><th colspan="2">${g ? g.name : ""}</th></tr><tr><th>Nome</th><th>Remover</th></tr>`;
+  if(!g) return;
   g.students.forEach((s,i)=>{
     const row = t.insertRow();
     row.insertCell(0).innerText=s.name;
@@ -191,9 +225,10 @@ function renderStudents(){
   });
 }
 
-/* ---------------- Aulas ---------------- */
+/* ---------------- Gerar Aulas ---------------- */
 function generateClasses(){
   const g = data.groups[currentGroupIndex];
+  if(!g) return alert("Selecione/abra um grupo primeiro");
   g.days = [];
   if(document.getElementById("mon").checked) g.days.push(1);
   if(document.getElementById("tue").checked) g.days.push(2);
@@ -212,9 +247,18 @@ function generateClasses(){
     if(g.days.includes(day) && !isHoliday(dateStr)){
       if(!g.classes.find(c=>c.date===dateStr)){
         g.classes.push({
-          date:dateStr,
-          name:dateStr,
-          records: g.students.map(s=>({name:s.name,attendance:false,homework:false}))
+          date: dateStr,
+          name: dateStr,
+          completed: false, // só terá true quando alguém salvar essa aula
+          records: g.students.map(s=>({ name: s.name, attendance:false, homework:false }))
+        });
+      } else {
+        // se já existe, garantia compatibilidade (colocar alunos faltantes)
+        const c = g.classes.find(x=>x.date===dateStr);
+        g.students.forEach(s=>{
+          if(!c.records.some(r=>r.name===s.name)){
+            c.records.push({ name: s.name, attendance:false, homework:false });
+          }
         });
       }
     }
@@ -224,74 +268,128 @@ function generateClasses(){
   saveData();
   renderClasses();
 }
-function deleteClass(i){
-  const g = data.groups[currentGroupIndex];
-  if(confirm("Excluir aula?")){
-    g.classes.splice(i,1);
-    saveData();
-    renderClasses();
-  }
-}
+
+/* ---------------- Render Classes (com input editável no nome) ---------------- */
 function renderClasses(){
   const g = data.groups[currentGroupIndex];
   const t = document.getElementById("classesTable");
   t.innerHTML=`<tr><th>Data</th><th>Nome</th><th>Ações</th></tr>`;
+  if(!g) return;
   g.classes.forEach((c,i)=>{
     const row = t.insertRow();
-    row.insertCell(0).innerText=c.date;
-    row.insertCell(1).innerText=c.name||"";
-    const cell=row.insertCell(2);
-    const mark=document.createElement("button");
-    mark.innerText="Marcar";
+    row.insertCell(0).innerText = c.date;
+    // input editável direto na tabela
+    const nameCell = row.insertCell(1);
+    const inp = document.createElement("input");
+    inp.type = "text";
+    inp.value = c.name || c.date;
+    inp.addEventListener('change', (e)=>{
+      c.name = e.target.value.trim() || c.date;
+      saveData();
+      // atualiza valor formatado
+      e.target.value = c.name;
+    });
+    nameCell.appendChild(inp);
+
+    const cell = row.insertCell(2);
+    const mark = document.createElement("button");
+    mark.innerText = "Marcar";
     mark.addEventListener("click", ()=>openClass(i));
-    const del=document.createElement("button");
-    del.innerText="Excluir";
+    const del = document.createElement("button");
+    del.innerText = "Excluir";
     del.addEventListener("click", ()=>deleteClass(i));
     cell.appendChild(mark);
     cell.appendChild(del);
   });
 }
 
-/* ---------------- Overlay ---------------- */
+/* ---------------- Overlay (abrir aula e pegar dados) ---------------- */
 function openClass(classIndex){
   const g = data.groups[currentGroupIndex];
   const cls = g.classes[classIndex];
-  if(!cls.name) cls.name=cls.date;
+  if(!cls) return;
 
-  let html=`<h3>Marcar Aula: ${cls.date}</h3>
-    <label>Nome da Aula: <input type="text" id="className" value="${cls.name}"></label>
-    <table border="1"><tr><th>Aluno</th><th>Presença</th><th>Lição</th></tr>`;
-  cls.records.forEach((r,i)=>{
-    html+=`
-      <tr>
-        <td>${r.name}</td>
-        <td><input type="checkbox" id="att_${i}" ${r.attendance?"checked":""}></td>
-        <td><input type="checkbox" id="hw_${i}" ${r.homework?"checked":""}></td>
-      </tr>`;
+  // normaliza records: garante que todos os alunos existam no registro dessa aula
+  if(!Array.isArray(cls.records)) cls.records = [];
+  // adicionar alunos faltantes (apenas para aulas >= hoje)
+  const hoje = todayISO();
+  g.students.forEach(s=>{
+    if(!cls.records.some(r=>r.name===s.name)){
+      // adiciona apenas para aulas que não são do passado (se quiser outro comportamento, me fala)
+      if(cls.date >= hoje){
+        cls.records.push({ name: s.name, attendance:false, homework:false });
+      } else {
+        // para aulas do passado, adiciona também, mas sem marcar nada
+        cls.records.push({ name: s.name, attendance:false, homework:false });
+      }
+    }
   });
-  html+=`</table>
-    <button id="saveBtn">Salvar</button>
-    <button id="cancelBtn">Cancelar</button>`;
+  // garantir campos
+  cls.records.forEach(r=>{
+    if(typeof r.attendance === 'undefined') r.attendance = false;
+    if(typeof r.homework === 'undefined') r.homework = false;
+  });
 
-  const div=document.createElement("div");
-  div.innerHTML=html;
-  div.className="overlay-content";
-  const overlay=document.createElement("div");
-  overlay.className="overlay";
+  // monta overlay HTML (ids únicos por classIndex para evitar colisão)
+  let html = `<h3>Marcar Aula: ${cls.date}</h3>
+    <label style="display:block; margin-bottom:8px;">Nome da Aula:
+      <input type="text" id="classNameInput" value="${escapeHtml(cls.name || cls.date)}" autocomplete="off" autofocus>
+    </label>
+    <table border="1" style="width:100%; margin-top:10px;">
+      <tr><th>Aluno</th><th>Presença</th><th>Lição</th></tr>`;
+
+  cls.records.forEach((r,i)=>{
+    // ids incluem classIndex para ficar únicos
+    const attId = `att_${classIndex}_${i}`;
+    const hwId  = `hw_${classIndex}_${i}`;
+    html += `<tr>
+      <td>${escapeHtml(r.name)}</td>
+      <td><input type="checkbox" id="${attId}" ${r.attendance ? "checked":""}></td>
+      <td><input type="checkbox" id="${hwId}" ${r.homework ? "checked":""}></td>
+    </tr>`;
+  });
+
+  html += `</table>
+    <div style="margin-top:10px;">
+      <button id="saveBtn">Salvar</button>
+      <button id="cancelBtn">Cancelar</button>
+    </div>`;
+
+  const div = document.createElement('div');
+  div.className = "overlay-content";
+  div.innerHTML = html;
+  const overlay = document.createElement('div');
+  overlay.className = "overlay";
   overlay.appendChild(div);
   document.body.appendChild(overlay);
 
-  document.getElementById("saveBtn").addEventListener("click", ()=>saveClass(classIndex));
-  document.getElementById("cancelBtn").addEventListener("click", cancelOverlay);
+  // listeners sem usar window
+  document.getElementById('saveBtn').addEventListener('click', ()=>saveClass(classIndex));
+  document.getElementById('cancelBtn').addEventListener('click', cancelOverlay);
+  // foco no input do nome
+  const nameInput = document.getElementById('classNameInput');
+  if(nameInput) nameInput.focus();
 }
+
+/* ---------------- Salvar aula (marca completed) ---------------- */
 function saveClass(classIndex){
   const g = data.groups[currentGroupIndex];
   const cls = g.classes[classIndex];
-  cls.name=document.getElementById("className").value.trim()||cls.date;
+  if(!cls) return;
+
+  const nameInput = document.getElementById('classNameInput');
+  if(nameInput) cls.name = nameInput.value.trim() || cls.date;
+
   cls.records.forEach((r,i)=>{
-    r.attendance=document.getElementById(`att_${i}`).checked;
-    r.homework=document.getElementById(`hw_${i}`).checked;
+    const att = document.getElementById(`att_${classIndex}_${i}`);
+    const hw  = document.getElementById(`hw_${classIndex}_${i}`);
+    if(att) r.attendance = att.checked;
+    if(hw)  r.homework   = hw.checked;
   });
+
+  // marca aula como preenchida
+  cls.completed = true;
+
   saveData();
   renderClasses();
   checkFlags();
@@ -299,54 +397,70 @@ function saveClass(classIndex){
   alert("Aula salva!");
 }
 function cancelOverlay(){
-  const overlay=document.querySelector(".overlay");
+  const overlay = document.querySelector('.overlay');
   if(overlay) overlay.remove();
 }
 
-/* ---------------- Flags ---------------- */
+/* ---------------- Flags (usar apenas aulas completed até hoje) ---------------- */
 function checkFlags(){
   const g = data.groups[currentGroupIndex];
+  if(!g) return;
   const today = todayISO();
-  const pastClasses = g.classes.filter(c=>c.date<=today);
-  if(pastClasses.length<2){ document.getElementById("notificationSection").style.display="none"; return; }
-  const lastTwo = pastClasses.slice(-2);
-  const flagged=[];
+  const filledClasses = g.classes.filter(c => c.date <= today && c.completed);
+  if(filledClasses.length < 2){
+    document.getElementById("notificationSection").style.display = "none";
+    return;
+  }
+  const lastTwo = filledClasses.slice(-2);
+  const flagged = [];
   g.students.forEach(s=>{
-    const abs=lastTwo.map(c=>c.records.find(r=>r.name===s.name)?.attendance);
-    const hw=lastTwo.map(c=>c.records.find(r=>r.name===s.name)?.homework);
-    let reason="";
-    if(abs[0]===false && abs[1]===false) reason+="Faltou 2 aulas; ";
-    if(hw[0]===false && hw[1]===false) reason+="Não entregou lição 2x; ";
-    if(reason) flagged.push({name:s.name,reason,dates:lastTwo.map(c=>c.date)});
+    const recs = lastTwo.map(c => c.records.find(r => r.name === s.name) || {attendance:false, homework:false});
+    const abs = recs.map(r => !!(r.attendance === true)); // true if present
+    const hw  = recs.map(r => !!(r.homework === true));
+    let reason = "";
+    if(!abs[0] && !abs[1]) reason += "Faltou 2 aulas; ";
+    if(!hw[0] && !hw[1]) reason += "Não entregou lição 2x; ";
+    if(reason) flagged.push({ name: s.name, reason, dates: lastTwo.map(c=>c.date) });
   });
+
   if(flagged.length>0){
-    document.getElementById("notificationSection").style.display="block";
-    let msg=`${g.name} - Alunos Sinalizados:\n`;
-    flagged.forEach(f=>{msg+=`${f.name} - ${f.reason}Datas: ${f.dates.join(", ")}\n`;});
-    document.getElementById("flaggedMessage").value=msg;
+    document.getElementById("notificationSection").style.display = "block";
+    let msg = `${g.name} - Alunos Sinalizados:\n`;
+    flagged.forEach(f => { msg += `${f.name} - ${f.reason}Datas: ${f.dates.join(", ")}\n`; });
+    document.getElementById("flaggedMessage").value = msg;
   } else {
-    document.getElementById("notificationSection").style.display="none";
+    document.getElementById("notificationSection").style.display = "none";
   }
 }
 
 /* ---------------- WhatsApp ---------------- */
 function sendWhatsApp(){
-  const phone="+5511991463208";
-  const text=encodeURIComponent(document.getElementById("flaggedMessage").value);
-  const url=`https://wa.me/${phone.replace(/\D/g,'')}?text=${text}`;
-  window.open(url,"_blank");
+  const phone = "+5511991463208";
+  const text = encodeURIComponent(document.getElementById("flaggedMessage").value);
+  const url = `https://wa.me/${phone.replace(/\D/g,'')}?text=${text}`;
+  window.open(url, "_blank");
 }
 
-/* ---------------- Init ---------------- */
+/* ---------------- Util ---------------- */
+function escapeHtml(str){
+  return String(str ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
+/* ---------------- Init listeners ---------------- */
 document.getElementById("addGroupBtn").addEventListener("click", createGroup);
 document.getElementById("addStudentBtn").addEventListener("click", addStudent);
 document.getElementById("deleteGroupBtn").addEventListener("click", deleteGroup);
 document.getElementById("generateClassesBtn").addEventListener("click", generateClasses);
 document.getElementById("sendWhatsAppBtn").addEventListener("click", sendWhatsApp);
 
+/* ---------------- Render inicial ---------------- */
 renderGroupButtons();
 if(data.groups.length>0) selectGroup(0);
-
 </script>
 </body>
 </html>
