@@ -109,11 +109,8 @@
 
 <script>
 // ----- Data -----
-let data = JSON.parse(localStorage.getItem('teacherData')) || { groups: [] };
+let data = { groups: [] }; // inicia vazio, depois vamos buscar no Firestore
 let currentGroupIndex = 0;
-
-// ----- Save -----
-function saveData() { localStorage.setItem('teacherData', JSON.stringify(data)); }
 
 // ----- Groups -----
 function createGroup() {
@@ -324,5 +321,57 @@ renderGroupButtons();
 if(data.groups.length>0) selectGroup(0);
 
 </script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+  import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+  // Configuração do Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyAm4kct4BJrVydJpcAXFZuHuEOAtnpUJfc",
+    authDomain: "attendance-rb.firebaseapp.com",
+    projectId: "attendance-rb",
+    storageBucket: "attendance-rb.firebasestorage.app",
+    messagingSenderId: "884478984062",
+    appId: "1:884478984062:web:e64f5dedafb34ac7d73d2f"
+  };
+
+  // Inicializa Firebase e Firestore
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // 🔹 Substituir funções de salvar/carregar
+  async function saveData() {
+    try {
+      await setDoc(doc(db, "attendance", "teacherData"), data);
+      localStorage.setItem('teacherData', JSON.stringify(data)); // backup local
+      console.log("✅ Dados salvos no Firestore!");
+    } catch (e) {
+      console.error("❌ Erro ao salvar no Firestore:", e);
+    }
+  }
+
+  async function loadData() {
+    try {
+      const docSnap = await getDoc(doc(db, "attendance", "teacherData"));
+      if (docSnap.exists()) {
+        data = docSnap.data();
+        console.log("✅ Dados carregados do Firestore:", data);
+      } else {
+        console.log("ℹ️ Nenhum dado encontrado no Firestore, usando localStorage");
+      }
+    } catch (e) {
+      console.error("❌ Erro ao carregar do Firestore:", e);
+    }
+
+    // Renderiza interface após carregar
+    renderGroupButtons();
+    if (data.groups.length > 0) selectGroup(0);
+  }
+
+  // 🔹 Substituir inicialização
+  loadData();
+</script>
+
 </body>
 </html>
+
