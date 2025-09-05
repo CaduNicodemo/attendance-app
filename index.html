@@ -193,8 +193,7 @@ function criarAulasFuturas(group, weeks=4){
     if(group.schedule.includes(diaSemana) && !feriados.includes(dia.toISOString().slice(0,10))){
       const dataAula = dia.toISOString().slice(0,10);
       if(!group.classes.some(c=>c.date===dataAula)){
-        const nomeAula = prompt(`Nome da aula para ${dataAula} do grupo ${group.name}:`, `Aula de ${dataAula}`);
-        const classObj={ date: dataAula, name: nomeAula||`Aula de ${dataAula}`, records: group.students.map(s=>({ name:s.name, attendance:true, homework:true }))};
+        const classObj={ date: dataAula, name: dataAula, records: group.students.map(s=>({ name:s.name, attendance:false, homework:false }))};
         group.classes.push(classObj);
         aulasCriadas.push(dataAula);
       }
@@ -205,6 +204,7 @@ function criarAulasFuturas(group, weeks=4){
   if(aulasCriadas.length>0) alert(`Aulas criadas: ${aulasCriadas.join(', ')}`);
 }
 
+// ----- Classes Table & Overlay -----
 function renderClasses(){
   const group = data.groups[currentGroupIndex];
   const table = document.getElementById('classesTable');
@@ -224,45 +224,56 @@ function renderClasses(){
 function markClass(classIndex){
   const group = data.groups[currentGroupIndex];
   const cls = group.classes[classIndex];
-  let html=`<h3>Mark Attendance & Homework for ${cls.name} (${cls.date})</h3><table border='1'><tr><th>Student</th><th>Attendance</th><th>Homework</th></tr>`;
+  let html=`<h3>Edit Class Name & Mark Attendance/Homework</h3>
+            <label>Name: <input type="text" id="classNameInput" value="${cls.name}"></label>
+            <table border='1'><tr><th>Student</th><th>Attendance</th><th>Homework</th></tr>`;
   cls.records.forEach((r,i)=>{
-    html+=`<tr><td>${r.name}</td><td><input type="checkbox" id="att_${i}" ${r.attendance?'checked':''}></td>`;
-    html+=`<td><input type="checkbox" id="hw_${i}" ${r.homework?'checked':''}></td></tr>`;
+    html+=`<tr><td>${r.name}</td>
+           <td><input type="checkbox" id="att_${i}" ${r.attendance?'checked':''}></td>
+           <td><input type="checkbox" id="hw_${i}" ${r.homework?'checked':''}></td></tr>`;
   });
   html+=`</table><button id="saveClassBtn">Save</button> <button id="cancelOverlayBtn">Cancel</button>`;
   const div=document.createElement('div'); div.innerHTML=html; div.className='overlay-content';
   const overlay=document.createElement('div'); overlay.className='overlay'; overlay.appendChild(div);
   document.body.appendChild(overlay);
 
-  document.getElementById('saveClassBtn').addEventListener('click',()=>saveClass(classIndex));
+  document.getElementById('saveClassBtn').addEventListener('click',()=>{
+    cls.name = document.getElementById('classNameInput').value.trim() || cls.name;
+    cls.records.forEach((r,i)=>{
+      r.attendance = document.getElementById('att_'+i).checked;
+      r.homework = document.getElementById('hw_'+i).checked;
+    });
+    saveData();
+    renderClasses();
+    checkFlags();
+    alert("Class saved!");
+    cancelOverlay();
+  });
   document.getElementById('cancelOverlayBtn').addEventListener('click',cancelOverlay);
 }
 
 function cancelOverlay(){ document.body.removeChild(document.body.lastChild); }
 
-function saveClass(classIndex){
-  const group = data.groups[currentGroupIndex];
-  const cls = group.classes[classIndex];
-  cls.records.forEach((r,i)=>{
-    r.attendance = document.getElementById('att_'+i).checked;
-    r.homework = document.getElementById('hw_'+i).checked;
-  });
-  saveData();
-  renderClasses();
-  checkFlags();
-  alert("Class saved!");
-  cancelOverlay();
+function deleteClass(index){
+  if(confirm("Delete this class?")){
+    const group = data.groups[currentGroupIndex];
+    group.classes.splice(index,1);
+    saveData();
+    renderClasses();
+    checkFlags();
+  }
 }
 
 // ----- Flags -----
 function checkFlags(){
   const group = data.groups[currentGroupIndex];
-  const classes = group.classes;
-  if(classes.length<2){ document.getElementById('notificationSection').style.display='none'; return;}
+  const todayStr = new Date().toISOString().slice(0,10);
+  const validClasses = group.classes.filter(c=>c.date<=todayStr && c.records.length>0);
+  if(validClasses.length<2){ document.getElementById('notificationSection').style.display='none'; return;}
+  const lastTwo = validClasses.slice(-2);
   const flagged=[];
   group.students.forEach(s=>{
-    const lastTwo=classes.slice(-2);
-    const absences=lastTwo.map(c=>c.records.find(r=>r.name===s.name).attendance);
+    const absences=lastTwo.map(c=>!c.records.find(r=>r.name===s.name).attendance?false:true);
     const homeworks=lastTwo.map(c=>c.records.find(r=>r.name===s.name).homework);
     let reason='';
     if(!absences[0] && !absences[1]) reason+='Missed 2 classes; ';
@@ -277,7 +288,7 @@ function checkFlags(){
   } else { document.getElementById('notificationSection').style.display='none'; }
 }
 
-// ----- Delete Group -----
+// ----- Delete Group & WhatsApp -----
 function deleteGroup(){
   if(!data.groups[currentGroupIndex]) return;
   if(confirm(`Are you sure you want to delete the group "${data.groups[currentGroupIndex].name}"? This action cannot be undone.`)){
@@ -292,7 +303,6 @@ function deleteGroup(){
   }
 }
 
-// ----- WhatsApp -----
 function sendWhatsApp(){
   const phone = "+5511991463208";
   const text = encodeURIComponent(document.getElementById('flaggedMessage').value);
@@ -305,7 +315,6 @@ document.getElementById('createGroupBtn').addEventListener('click',createGroup);
 document.getElementById('addStudentBtn').addEventListener('click',addStudent);
 document.getElementById('deleteGroupBtn').addEventListener('click',deleteGroup);
 document.getElementById('sendWhatsAppBtn').addEventListener('click',sendWhatsApp);
-
 </script>
 </body>
 </html>
