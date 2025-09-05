@@ -4,71 +4,20 @@
 <meta charset="UTF-8">
 <title>Attendance and Homework</title>
 <style>
-    body {
-        font-family: Arial, sans-serif;
-        background-color: #f2f2f2;
-        margin: 0;
-        padding: 0;
-        display: flex;
-        justify-content: center;
-    }
-    .container {
-        max-width: 900px;
-        width: 100%;
-        padding: 20px;
-        background-color: #ffffff;
-        margin: 20px;
-        border-radius: 8px;
-        box-shadow: 0 0 10px rgba(0,0,0,0.2);
-    }
-    h1, h2, h3 { color: #333333; }
-    input, select, button { margin: 5px; padding: 5px 10px; }
-    table { border-collapse: collapse; margin-top: 10px; width: 100%; }
-    table, th, td { border: 1px solid #aaa; padding: 5px; text-align: center; }
-    th { background-color: #e6e6e6; }
-    tr:nth-child(even) { background-color: #fafafa; }
-    .flagged { background-color: #ffcccc; }
-    .group-buttons {
-        margin: 10px 0;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        justify-content: flex-start;
-    }
-    .group-button {
-        flex: 1 1 calc(20% - 10px);
-        min-width: 120px;
-        max-width: 180px;
-        padding: 10px;
-        border-radius: 5px;
-        border: 1px solid #555;
-        cursor: pointer;
-        text-align: center;
-        font-weight: bold;
-        color: white;
-        box-sizing: border-box;
-    }
-    .overlay {
-        position: fixed; top: 0; left: 0;
-        width: 100%; height: 100%;
-        background: rgba(0,0,0,0.3);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 20px;
-    }
-    .overlay-content {
-        background: white;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 0 10px rgba(0,0,0,0.5);
-        max-width: 600px;
-        width: 100%;
-    }
-    button:hover { opacity: 0.9; }
-    .delete-group-btn {
-        background-color:#d9534f;color:white;padding:10px 15px;border:none;border-radius:5px;cursor:pointer;margin-top:20px;
-    }
+body { font-family: Arial, sans-serif; background-color: #f2f2f2; margin:0; padding:0; display:flex; justify-content:center;}
+.container { max-width: 900px; width: 100%; padding: 20px; background-color: #fff; margin: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.2);}
+h1,h2,h3 { color:#333;}
+input, select, button { margin:5px; padding:5px 10px;}
+table { border-collapse: collapse; margin-top:10px; width:100%;}
+table, th, td { border:1px solid #aaa; padding:5px; text-align:center;}
+th { background-color:#e6e6e6;}
+tr:nth-child(even) { background-color:#fafafa;}
+.group-buttons { margin:10px 0; display:flex; flex-wrap:wrap; gap:10px; justify-content:flex-start;}
+.group-button { flex: 1 1 calc(20% - 10px); min-width:120px; max-width:180px; padding:10px; border-radius:5px; border:1px solid #555; cursor:pointer; text-align:center; font-weight:bold; color:white; box-sizing:border-box;}
+.overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.3); display:flex; justify-content:center; align-items:center; padding:20px;}
+.overlay-content { background:white; padding:20px; border-radius:8px; box-shadow:0 0 10px rgba(0,0,0,0.5); max-width:600px; width:100%;}
+button:hover { opacity:0.9;}
+.delete-group-btn { background-color:#d9534f; color:white; padding:10px 15px; border:none; border-radius:5px; cursor:pointer; margin-top:20px;}
 </style>
 </head>
 <body>
@@ -77,6 +26,12 @@
 
 <h2>Create Group</h2>
 <input id="groupName" placeholder="Group Name">
+<label>Dias da semana:</label>
+<label><input type="checkbox" class="weekday" value="1">Segunda</label>
+<label><input type="checkbox" class="weekday" value="2">Terça</label>
+<label><input type="checkbox" class="weekday" value="3">Quarta</label>
+<label><input type="checkbox" class="weekday" value="4">Quinta</label>
+<label><input type="checkbox" class="weekday" value="5">Sexta</label>
 <button onclick="createGroup()">Add Group</button>
 
 <div class="group-buttons" id="groupsButtons"></div>
@@ -91,9 +46,7 @@
 <hr>
 
 <h3>Classes</h3>
-<input type="date" id="classDate">
-<button onclick="addClass()">Add Class</button>
-<table id="classesTable"><tr><th>Date</th><th>Actions</th></tr></table>
+<table id="classesTable"><tr><th>Date</th><th>Class Name</th><th>Actions</th></tr></table>
 
 <hr>
 <button class="delete-group-btn" onclick="deleteGroup()">Delete Current Group</button>
@@ -107,265 +60,244 @@
 </div>
 </div>
 
-<script>
-// ----- Data (agora carregado do Firestore) -----
+<script type="module">
+// ----- Firebase Setup -----
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAm4kct4BJrVydJpcAXFZuHuEOAtnpUJfc",
+  authDomain: "attendance-rb.firebaseapp.com",
+  projectId: "attendance-rb",
+  storageBucket: "attendance-rb.firebasestorage.app",
+  messagingSenderId: "884478984062",
+  appId: "1:884478984062:web:e64f5dedafb34ac7d73d2f"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// ----- Dados globais -----
 let data = { groups: [] };
 let currentGroupIndex = 0;
 
+// ----- Feriados -----
+const feriados = [
+  '2025-01-01','2025-03-03','2025-03-04','2025-04-18','2025-04-21',
+  '2025-05-01','2025-06-19','2025-07-09','2025-09-07','2025-10-12',
+  '2025-11-02','2025-11-15','2025-11-20','2025-12-25','2025-01-25'
+];
+
+// ----- Save/Load -----
+window.saveData = async function() {
+  try {
+    await setDoc(doc(db, "attendance", "teacherData"), data);
+    localStorage.setItem('teacherData', JSON.stringify(data));
+    console.log("✅ Dados salvos!");
+  } catch(e) { console.error(e); }
+};
+
+window.loadData = async function() {
+  try {
+    const docSnap = await getDoc(doc(db, "attendance", "teacherData"));
+    if(docSnap.exists()) data = docSnap.data();
+    else { const local = localStorage.getItem('teacherData'); if(local) data = JSON.parse(local); }
+  } catch(e){ console.error(e); }
+  renderGroupButtons();
+  if(data.groups.length>0) selectGroup(0);
+};
+window.loadData();
+
 // ----- Groups -----
-function createGroup() {
-    const name = document.getElementById('groupName').value.trim();
-    if(!name) return alert("Enter group name");
-    data.groups.push({ name, students: [], classes: [] });
-    saveData();
-    document.getElementById('groupName').value = '';
-    renderGroupButtons();
-    selectGroup(data.groups.length-1);
+function createGroup(){
+  const name = document.getElementById('groupName').value.trim();
+  if(!name) return alert("Enter group name");
+  const diasCheckbox = document.querySelectorAll(".weekday:checked");
+  if(diasCheckbox.length===0) return alert("Selecione pelo menos um dia da semana");
+  const schedule = Array.from(diasCheckbox).map(c=>parseInt(c.value));
+  const group = { name, students: [], classes: [], schedule };
+  data.groups.push(group);
+  saveData();
+  document.getElementById('groupName').value='';
+  diasCheckbox.forEach(c=>c.checked=false);
+  renderGroupButtons();
+  selectGroup(data.groups.length-1);
+  criarAulasFuturas(group);
 }
 
-function renderGroupButtons() {
-    const container = document.getElementById('groupsButtons');
-    container.innerHTML = '';
-    const baseHue = 200; // blue shades
-    const total = data.groups.length;
-    data.groups.forEach((g,i)=>{
-        const btn = document.createElement('div');
-        const lightness = 40 + 40*(i/Math.max(total-1,1));
-        const color = `hsl(${baseHue},60%,${lightness}%)`;
-        btn.style.backgroundColor = color;
-        btn.className = 'group-button';
-        btn.innerText = g.name;
-        btn.onclick = ()=>selectGroup(i);
-        container.appendChild(btn);
-        g.color = color;
-    });
+function renderGroupButtons(){
+  const container = document.getElementById('groupsButtons');
+  container.innerHTML='';
+  const baseHue=200;
+  const total=data.groups.length;
+  data.groups.forEach((g,i)=>{
+    const btn = document.createElement('div');
+    const lightness = 40+40*(i/Math.max(total-1,1));
+    const color=`hsl(${baseHue},60%,${lightness}%)`;
+    btn.style.backgroundColor=color;
+    btn.className='group-button';
+    btn.innerText=g.name;
+    btn.onclick=()=>selectGroup(i);
+    container.appendChild(btn);
+    g.color=color;
+  });
 }
 
-function selectGroup(index) {
-    currentGroupIndex = index;
-    renderStudents();
-    renderClasses();
-    checkFlags();
+function selectGroup(index){
+  currentGroupIndex=index;
+  renderStudents();
+  renderClasses();
+  checkFlags();
 }
 
 // ----- Students -----
-function addStudent() {
-    const name = document.getElementById('studentName').value.trim();
-    if(!name) return alert("Enter student name");
-    const group = data.groups[currentGroupIndex];
-    group.students.push({ name });
-    saveData();
-    document.getElementById('studentName').value = '';
-    renderStudents();
+function addStudent(){
+  const name = document.getElementById('studentName').value.trim();
+  if(!name) return alert("Enter student name");
+  const group = data.groups[currentGroupIndex];
+  group.students.push({ name });
+  saveData();
+  document.getElementById('studentName').value='';
+  renderStudents();
 }
 
-function removeStudent(index) {
-    const group = data.groups[currentGroupIndex];
-    group.students.splice(index,1);
-    saveData();
-    renderStudents();
+function removeStudent(index){
+  const group = data.groups[currentGroupIndex];
+  group.students.splice(index,1);
+  saveData();
+  renderStudents();
 }
 
-function renderStudents() {
-    const group = data.groups[currentGroupIndex];
-    const table = document.getElementById('studentsTable');
-    table.innerHTML = `<tr><th colspan="2" style="background-color:${group.color}; color:white; font-size:16px;">${group.name}</th></tr><tr><th>Name</th><th>Remove</th></tr>`;
-    group.students.forEach((s,i)=>{
-        const row = table.insertRow();
-        row.insertCell(0).innerText = s.name;
-        const btnCell = row.insertCell(1);
-        const btn = document.createElement('button');
-        btn.innerText = "Remove";
-        btn.onclick = ()=>removeStudent(i);
-        btnCell.appendChild(btn);
-    });
+function renderStudents(){
+  const group = data.groups[currentGroupIndex];
+  const table = document.getElementById('studentsTable');
+  table.innerHTML=`<tr><th colspan="2" style="background-color:${group.color}; color:white; font-size:16px;">${group.name}</th></tr><tr><th>Name</th><th>Remove</th></tr>`;
+  group.students.forEach((s,i)=>{
+    const row = table.insertRow();
+    row.insertCell(0).innerText=s.name;
+    const btnCell=row.insertCell(1);
+    const btn=document.createElement('button');
+    btn.innerText="Remove";
+    btn.onclick=()=>removeStudent(i);
+    btnCell.appendChild(btn);
+  });
 }
 
 // ----- Classes -----
-function addClass() {
-    const date = document.getElementById('classDate').value;
-    if(!date) return alert("Pick a date");
-    const group = data.groups[currentGroupIndex];
-    if(group.classes.find(c=>c.date===date)) return alert("Class exists");
-    const classObj = { date, records: group.students.map(s=>({ name: s.name, attendance:'present', homework:true })) };
-    group.classes.push(classObj);
-    saveData();
-    renderClasses();
-    checkFlags();
-    document.getElementById('classDate').value='';
-}
-
-function deleteClass(index) {
-    if(confirm("Delete this class?")) {
-        const group = data.groups[currentGroupIndex];
-        group.classes.splice(index,1);
-        saveData();
-        renderClasses();
-        checkFlags();
+function criarAulasFuturas(group, weeks=4){
+  const today=new Date();
+  const aulasCriadas=[];
+  for(let i=0;i<weeks*7;i++){
+    const dia=new Date(today);
+    dia.setDate(today.getDate()+i);
+    const diaSemana=dia.getDay(); // 0=domingo
+    if(group.schedule.includes(diaSemana) && !feriados.includes(dia.toISOString().slice(0,10))){
+      const dataAula = dia.toISOString().slice(0,10);
+      if(!group.classes.some(c=>c.date===dataAula)){
+        const nomeAula = prompt(`Nome da aula para ${dataAula} do grupo ${group.name}:`, `Aula de ${dataAula}`);
+        const classObj={ date: dataAula, name: nomeAula||`Aula de ${dataAula}`, records: group.students.map(s=>({ name:s.name, attendance:true, homework:true }))};
+        group.classes.push(classObj);
+        aulasCriadas.push(dataAula);
+      }
     }
+  }
+  saveData();
+  renderClasses();
+  if(aulasCriadas.length>0) alert(`Aulas criadas: ${aulasCriadas.join(', ')}`);
 }
 
-function renderClasses() {
-    const group = data.groups[currentGroupIndex];
-    const table = document.getElementById('classesTable');
-    table.innerHTML = `<tr><th colspan="2" style="background-color:${group.color}; color:white; font-size:16px;">${group.name}</th></tr><tr><th>Date</th><th>Actions</th></tr>`;
-    group.classes.forEach((c,i)=>{
-        const row = table.insertRow();
-        row.insertCell(0).innerText = c.date;
-        const cell = row.insertCell(1);
-        const markBtn = document.createElement('button');
-        markBtn.innerText = "Mark";
-        markBtn.onclick = ()=>markClass(i);
-        const delBtn = document.createElement('button');
-        delBtn.innerText = "Delete";
-        delBtn.onclick = ()=>deleteClass(i);
-        cell.appendChild(markBtn);
-        cell.appendChild(delBtn);
-    });
+function renderClasses(){
+  const group = data.groups[currentGroupIndex];
+  const table = document.getElementById('classesTable');
+  table.innerHTML=`<tr><th>Date</th><th>Class Name</th><th>Actions</th></tr>`;
+  group.classes.forEach((c,i)=>{
+    const row=table.insertRow();
+    row.insertCell(0).innerText=c.date;
+    row.insertCell(1).innerText=c.name;
+    const cell=row.insertCell(2);
+    const markBtn=document.createElement('button'); markBtn.innerText="Mark"; markBtn.onclick=()=>markClass(i);
+    const delBtn=document.createElement('button'); delBtn.innerText="Delete"; delBtn.onclick=()=>deleteClass(i);
+    cell.appendChild(markBtn); cell.appendChild(delBtn);
+  });
 }
 
-// ----- Overlay Marking -----
-function markClass(classIndex) {
-    const group = data.groups[currentGroupIndex];
-    const cls = group.classes[classIndex];
-    let html = "<h3>Mark Attendance & Homework for "+cls.date+"</h3><table border='1'><tr><th>Student</th><th>Attendance</th><th>Homework</th></tr>";
-    cls.records.forEach((r,i)=>{
-        html += "<tr><td>"+r.name+"</td>";
-        html += "<td><select id='att_"+i+"'><option value='present' "+(r.attendance=='present'?'selected':'')+">Present</option><option value='absent' "+(r.attendance=='absent'?'selected':'')+">Absent</option></select></td>";
-        html += "<td><select id='hw_"+i+"'><option value='true' "+(r.homework?'selected':'')+">Delivered</option><option value='false' "+(!r.homework?'selected':'')+">Not Delivered</option></select></td></tr>";
-    });
-    html += "</table><button onclick='saveClass("+classIndex+")'>Save</button> <button onclick='cancelOverlay()'>Cancel</button>";
-    const div = document.createElement('div');
-    div.innerHTML = html;
-    div.className = 'overlay-content';
-
-    const overlay = document.createElement('div');
-    overlay.className = 'overlay';
-    overlay.appendChild(div);
-    document.body.appendChild(overlay);
+// ----- Overlay -----
+function markClass(classIndex){
+  const group = data.groups[currentGroupIndex];
+  const cls = group.classes[classIndex];
+  let html=`<h3>Mark Attendance & Homework for ${cls.name} (${cls.date})</h3><table border='1'><tr><th>Student</th><th>Attendance</th><th>Homework</th></tr>`;
+  cls.records.forEach((r,i)=>{
+    html+=`<tr><td>${r.name}</td><td><input type="checkbox" id="att_${i}" ${r.attendance?'checked':''}></td><td><input type="checkbox" id="hw_${i}" ${r.homework?'checked':''}></td></tr>`;
+  });
+  html+=`</table><button onclick='saveClass(${classIndex})'>Save</button> <button onclick='cancelOverlay()'>Cancel</button>`;
+  const div=document.createElement('div'); div.innerHTML=html; div.className='overlay-content';
+  const overlay=document.createElement('div'); overlay.className='overlay'; overlay.appendChild(div);
+  document.body.appendChild(overlay);
 }
 
-function cancelOverlay() {
-    document.body.removeChild(document.body.lastChild);
-}
-
-function saveClass(classIndex) {
-    const group = data.groups[currentGroupIndex];
-    const cls = group.classes[classIndex];
-    cls.records.forEach((r,i)=>{
-        r.attendance = document.getElementById('att_'+i).value;
-        r.homework = document.getElementById('hw_'+i).value==='true';
-    });
-    saveData();
-    renderClasses();
-    checkFlags();
-    alert("Class saved!");
-    cancelOverlay();
+function cancelOverlay(){ document.body.removeChild(document.body.lastChild); }
+function saveClass(classIndex){
+  const group = data.groups[currentGroupIndex];
+  const cls = group.classes[classIndex];
+  cls.records.forEach((r,i)=>{
+    r.attendance=document.getElementById('att_'+i).checked;
+    r.homework=document.getElementById('hw_'+i).checked;
+  });
+  saveData();
+  renderClasses();
+  checkFlags();
+  alert("Class saved!");
+  cancelOverlay();
 }
 
 // ----- Flags -----
-function checkFlags() {
-    const group = data.groups[currentGroupIndex];
-    const classes = group.classes;
-    if(classes.length<2){
-        document.getElementById('notificationSection').style.display='none';
-        return;
-    }
-    const flagged = [];
-    group.students.forEach(s=>{
-        const lastTwo = classes.slice(-2);
-        const absences = lastTwo.map(c=>c.records.find(r=>r.name===s.name).attendance);
-        const homeworks = lastTwo.map(c=>c.records.find(r=>r.name===s.name).homework);
-        let reason = '';
-        if(absences[0]=='absent' && absences[1]=='absent') reason += 'Missed 2 classes; ';
-        if(!homeworks[0] && !homeworks[1]) reason += 'Homework not delivered 2x; ';
-        if(reason) flagged.push({name:s.name, reason, dates:lastTwo.map(c=>c.date)});
-    });
-    if(flagged.length>0){
-        document.getElementById('notificationSection').style.display='block';
-        let msg = `${group.name} - Flagged Students:\n`;
-        flagged.forEach(f=>{ msg+=f.name+' - '+f.reason+'Dates: '+f.dates.join(', ')+'\n'; });
-        document.getElementById('flaggedMessage').value = msg;
-    } else {
-        document.getElementById('notificationSection').style.display='none';
-    }
+function checkFlags(){
+  const group = data.groups[currentGroupIndex];
+  const classes = group.classes;
+  if(classes.length<2){ document.getElementById('notificationSection').style.display='none'; return;}
+  const flagged=[];
+  group.students.forEach(s=>{
+    const lastTwo=classes.slice(-2);
+    const absences=lastTwo.map(c=>c.records.find(r=>r.name===s.name).attendance);
+    const homeworks=lastTwo.map(c=>c.records.find(r=>r.name===s.name).homework);
+    let reason='';
+    if(!absences[0] && !absences[1]) reason+='Missed 2 classes; ';
+    if(!homeworks[0] && !homeworks[1]) reason+='Homework not delivered 2x; ';
+    if(reason) flagged.push({name:s.name, reason, dates:lastTwo.map(c=>c.date)});
+  });
+  if(flagged.length>0){
+    document.getElementById('notificationSection').style.display='block';
+    let msg=`${group.name} - Flagged Students:\n`;
+    flagged.forEach(f=>{ msg+=f.name+' - '+f.reason+'Dates: '+f.dates.join(', ')+'\n';});
+    document.getElementById('flaggedMessage').value=msg;
+  }else{ document.getElementById('notificationSection').style.display='none'; }
 }
 
 // ----- WhatsApp -----
-function sendWhatsApp() {
-    const phone = "+5511991463208";
-    const text = encodeURIComponent(document.getElementById('flaggedMessage').value);
-    const url = `https://wa.me/${phone.replace(/\D/g,'')}?text=${text}`;
-    window.open(url, '_blank');
+function sendWhatsApp(){
+  const phone="+5511991463208";
+  const text=encodeURIComponent(document.getElementById('flaggedMessage').value);
+  const url=`https://wa.me/${phone.replace(/\D/g,'')}?text=${text}`;
+  window.open(url,'_blank');
 }
 
 // ----- Delete Group -----
-function deleteGroup() {
-    if(!data.groups[currentGroupIndex]) return;
-    if(confirm(`Are you sure you want to delete the group "${data.groups[currentGroupIndex].name}"? This action cannot be undone.`)){
-        data.groups.splice(currentGroupIndex,1);
-        currentGroupIndex = 0;
-        saveData();
-        renderGroupButtons();
-        if(data.groups.length>0) selectGroup(0);
-        else {
-            document.getElementById('studentsTable').innerHTML = "<tr><th>Name</th><th>Remove</th></tr>";
-            document.getElementById('classesTable').innerHTML = "<tr><th>Date</th><th>Actions</th></tr>";
-            document.getElementById('notificationSection').style.display='none';
-        }
-    }
-}
-</script>
-
-<!-- 🔹 Firebase Firestore Integration -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-  import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyAm4kct4BJrVydJpcAXFZuHuEOAtnpUJfc",
-    authDomain: "attendance-rb.firebaseapp.com",
-    projectId: "attendance-rb",
-    storageBucket: "attendance-rb.firebasestorage.app",
-    messagingSenderId: "884478984062",
-    appId: "1:884478984062:web:e64f5dedafb34ac7d73d2f"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-
-  window.saveData = async function () {
-    try {
-      await setDoc(doc(db, "attendance", "teacherData"), data);
-      localStorage.setItem('teacherData', JSON.stringify(data)); // backup local
-      console.log("✅ Dados salvos no Firestore!");
-    } catch (e) {
-      console.error("❌ Erro ao salvar no Firestore:", e);
-    }
-  }
-
-  window.loadData = async function () {
-    try {
-      const docSnap = await getDoc(doc(db, "attendance", "teacherData"));
-      if (docSnap.exists()) {
-        data = docSnap.data();
-        console.log("✅ Dados carregados do Firestore:", data);
-      } else {
-        const local = localStorage.getItem('teacherData');
-        if(local) data = JSON.parse(local);
-        console.log("ℹ️ Nenhum dado encontrado no Firestore, usando localStorage");
-      }
-    } catch (e) {
-      console.error("❌ Erro ao carregar do Firestore:", e);
-    }
-
+function deleteGroup(){
+  if(!data.groups[currentGroupIndex]) return;
+  if(confirm(`Are you sure you want to delete the group "${data.groups[currentGroupIndex].name}"? This action cannot be undone.`)){
+    data.groups.splice(currentGroupIndex,1);
+    currentGroupIndex=0;
+    saveData();
     renderGroupButtons();
-    if (data.groups.length > 0) selectGroup(0);
+    if(data.groups.length>0) selectGroup(0);
+    else { document.getElementById('studentsTable').innerHTML="<tr><th>Name</th><th>Remove</th></tr>"; document.getElementById('classesTable').innerHTML="<tr><th>Date</th><th>Class Name</th><th>Actions</th></tr>"; document.getElementById('notificationSection').style.display='none';}
   }
+}
 
-  // 🔹 Inicialização
- window.loadData();
+// ----- Init -----
+renderGroupButtons();
+if(data.groups.length>0) selectGroup(0);
+
 </script>
 </body>
 </html>
-
