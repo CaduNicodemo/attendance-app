@@ -260,22 +260,31 @@ function markClass(classIndex){
   overlay.appendChild(div);
   document.body.appendChild(overlay);
 }
-
 function saveClass(classIndex){
   const group = data.groups[currentGroupIndex];
   const cls = group.classes[classIndex];
+  
   cls.records.forEach((r,i)=>{
-    r.attendance=document.getElementById(`att_${i}`).checked;
-    r.homework=document.getElementById(`hw_${i}`).checked;
+    const att = document.getElementById(`att_${i}`);
+    const hw  = document.getElementById(`hw_${i}`);
+    if(att && hw){
+      r.attendance = att.checked;
+      r.homework   = hw.checked;
+    }
   });
-  saveData();
+
+  saveData();        // Salva no Firebase e localStorage
   renderClasses();
   checkFlags();
+  cancelOverlay();    // Fecha o overlay
   alert("Class saved!");
-  cancelOverlay();
 }
 
-function cancelOverlay(){document.body.removeChild(document.body.lastChild);}
+function cancelOverlay(){
+  const overlay = document.querySelector('.overlay');
+  if(overlay) overlay.remove();
+}
+
 function deleteClass(index){
   if(confirm("Delete this class?")){
     data.groups[currentGroupIndex].classes.splice(index,1);
