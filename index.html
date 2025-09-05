@@ -214,7 +214,7 @@ function generateClasses(){
         g.classes.push({
           date:dateStr,
           name:dateStr,
-          records: g.students.map(s=>({name:s.name,attendance:true,homework:true}))
+          records: g.students.map(s=>({name:s.name,attendance:false,homework:false}))
         });
       }
     }
@@ -259,7 +259,7 @@ function openClass(classIndex){
   if(!cls.name) cls.name=cls.date;
 
   let html=`<h3>Marcar Aula: ${cls.date}</h3>
-    <label>Nome da Aula: <input id="className" value="${cls.name}"></label>
+    <label>Nome da Aula: <input type="text" id="className" value="${cls.name}"></label>
     <table border="1"><tr><th>Aluno</th><th>Presença</th><th>Lição</th></tr>`;
   cls.records.forEach((r,i)=>{
     html+=`
