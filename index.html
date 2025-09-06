@@ -126,7 +126,7 @@ async function loadGroups(){
   const snap = await getDocs(collection(db,"groups"));
   groups = [];
   snap.forEach(docSnap=>{
-    groups.push(docSnap.data());
+    groups.push({ id: docSnap.id, ...docSnap.data()});
   });
   groups.sort((a,b)=>a.order-b.order);
   renderGroupButtons();
@@ -139,7 +139,7 @@ async function createGroup(){
   if(!name) return alert("Name your group");
   const newGroup = { name, students:[], classes:[], days:[], order: groups.length };
   await setDoc(doc(db,"groups",name), newGroup);
-  groups.push(newGroup);
+  groups.push({ id: name, ...newGroup});
   document.getElementById("groupName").value="";
   renderGroupButtons();
   selectGroup(groups.length-1);
@@ -183,8 +183,9 @@ function selectGroup(i){
 }
 async function deleteGroup(){
   if(!groups[currentGroupIndex]) return;
-  if(confirm(`Delete group "${groups[currentGroupIndex].name}"?`)){
-    await deleteDoc(doc(db,"groups",groups[currentGroupIndex].name));
+  const g = groups[currentGroupIndex];
+  if(confirm(`Delete group "${g.name}"?`)){
+    await deleteDoc(doc(db,"groups",g.id));
     groups.splice(currentGroupIndex,1);
     currentGroupIndex=0;
     renderGroupButtons();
