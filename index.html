@@ -52,39 +52,39 @@
 <div class="container">
   <h1>Attendance and Homework</h1>
 
-  <h2>Criar Grupo</h2>
-  <input id="groupName" placeholder="Nome do Grupo">
-  <button id="addGroupBtn">Adicionar Grupo</button>
+  <h2>Groups</h2>
+  <input id="groupName" placeholder="Groups">
+  <button id="addGroupBtn">Add Group</button>
   <div class="group-buttons" id="groupsButtons"></div>
 
   <hr>
 
-  <h3>Alunos</h3>
-  <input id="studentName" placeholder="Nome do Aluno">
-  <button id="addStudentBtn">Adicionar Aluno</button>
-  <table id="studentsTable"><tr><th>Nome</th><th>Remover</th></tr></table>
+  <h3>Students</h3>
+  <input id="studentName" placeholder="Student's name">
+  <button id="addStudentBtn">Add Student</button>
+  <table id="studentsTable"><tr><th>Name</th><th>Delete</th></tr></table>
 
   <hr>
 
-  <h3>Aulas</h3>
+  <h3>Classes</h3>
   <div>
-    <label><input type="checkbox" id="mon"> Segunda</label>
-    <label><input type="checkbox" id="tue"> Terça</label>
-    <label><input type="checkbox" id="wed"> Quarta</label>
-    <label><input type="checkbox" id="thu"> Quinta</label>
-    <label><input type="checkbox" id="fri"> Sexta</label>
+    <label><input type="checkbox" id="mon"> Monday</label>
+    <label><input type="checkbox" id="tue"> Tuesday</label>
+    <label><input type="checkbox" id="wed"> Wednesday</label>
+    <label><input type="checkbox" id="thu"> Thursday</label>
+    <label><input type="checkbox" id="fri"> Friday</label>
   </div>
-  <button id="generateClassesBtn">Gerar Aulas Futuras</button>
-  <table id="classesTable"><tr><th>Data</th><th>Nome</th><th>Ações</th></tr></table>
+  <button id="generateClassesBtn">Generate Classes</button>
+  <table id="classesTable"><tr><th>Date</th><th>Class</th><th>Register</th></tr></table>
 
   <hr>
-  <button class="delete-group-btn" id="deleteGroupBtn">Excluir Grupo Atual</button>
+  <button class="delete-group-btn" id="deleteGroupBtn">Delete current group</button>
 
   <hr>
   <div id="notificationSection" style="display:none;">
-    <h3>Alunos Sinalizados</h3>
+    <h3>Flagged Students</h3>
     <textarea id="flaggedMessage" rows="6" cols="80"></textarea><br>
-    <button id="sendWhatsAppBtn">Enviar para WhatsApp</button>
+    <button id="sendWhatsAppBtn">Send via WhatsApp</button>
   </div>
 </div>
 
@@ -136,7 +136,7 @@ async function loadGroups(){
 /* ---------------- Grupos ---------------- */
 async function createGroup(){
   const name = document.getElementById("groupName").value.trim();
-  if(!name) return alert("Digite o nome do grupo");
+  if(!name) return alert("Name your group");
   const newGroup = { name, students:[], classes:[], days:[], order: groups.length };
   await setDoc(doc(db,"groups",name), newGroup);
   groups.push(newGroup);
@@ -183,15 +183,15 @@ function selectGroup(i){
 }
 async function deleteGroup(){
   if(!groups[currentGroupIndex]) return;
-  if(confirm(`Excluir grupo "${groups[currentGroupIndex].name}"?`)){
+  if(confirm(`Delete group "${groups[currentGroupIndex].name}"?`)){
     await deleteDoc(doc(db,"groups",groups[currentGroupIndex].name));
     groups.splice(currentGroupIndex,1);
     currentGroupIndex=0;
     renderGroupButtons();
     if(groups.length>0) selectGroup(0);
     else {
-      document.getElementById("studentsTable").innerHTML="<tr><th>Nome</th><th>Remover</th></tr>";
-      document.getElementById("classesTable").innerHTML="<tr><th>Data</th><th>Nome</th><th>Ações</th></tr>";
+      document.getElementById("studentsTable").innerHTML="<tr><th>Students</th><th>Remove Student</th></tr>";
+      document.getElementById("classesTable").innerHTML="<tr><th>Date</th><th>Name</th><th>Register</th></tr>";
       document.getElementById("notificationSection").style.display="none";
     }
   }
@@ -200,7 +200,7 @@ async function deleteGroup(){
 /* ---------------- Alunos ---------------- */
 async function addStudent(){
   const name = document.getElementById("studentName").value.trim();
-  if(!name) return alert("Digite o nome do aluno");
+  if(!name) return alert("Insert student's name");
   const g = groups[currentGroupIndex];
   g.students.push({name});
   const hoje = todayISO();
@@ -227,7 +227,7 @@ async function removeStudent(index){
 function renderStudents(){
   const g = groups[currentGroupIndex];
   const t = document.getElementById("studentsTable");
-  t.innerHTML=`<tr><th colspan="2">${g ? g.name : ""}</th></tr><tr><th>Nome</th><th>Remover</th></tr>`;
+  t.innerHTML=`<tr><th colspan="2">${g ? g.name : ""}</th></tr><tr><th>Name</th><th>Remove</th></tr>`;
   if(!g) return;
   g.students.forEach((s,i)=>{
     const row = t.insertRow();
@@ -243,14 +243,14 @@ function renderStudents(){
 /* ---------------- Aulas ---------------- */
 async function generateClasses(){
   const g = groups[currentGroupIndex];
-  if(!g) return alert("Selecione um grupo");
+  if(!g) return alert("Select a group");
   g.days = [];
   if(document.getElementById("mon").checked) g.days.push(1);
   if(document.getElementById("tue").checked) g.days.push(2);
   if(document.getElementById("wed").checked) g.days.push(3);
   if(document.getElementById("thu").checked) g.days.push(4);
   if(document.getElementById("fri").checked) g.days.push(5);
-  if(g.days.length===0) return alert("Selecione os dias da semana");
+  if(g.days.length===0) return alert("Select class days");
 
   let d = new Date();
   let end = new Date(new Date().getFullYear(),11,31);
@@ -276,7 +276,7 @@ async function generateClasses(){
 function renderClasses(){
   const g = groups[currentGroupIndex];
   const t = document.getElementById("classesTable");
-  t.innerHTML=`<tr><th>Data</th><th>Nome</th><th>Ações</th></tr>`;
+  t.innerHTML=`<tr><th>Date</th><th>Name</th><th>Register</th></tr>`;
   if(!g) return;
   g.classes.forEach((c,i)=>{
     const row = t.insertRow();
@@ -292,10 +292,10 @@ function renderClasses(){
 
     const cell=row.insertCell(2);
     const mark=document.createElement("button");
-    mark.innerText="Marcar";
+    mark.innerText="Register";
     mark.addEventListener("click", ()=>openClass(i));
     const del=document.createElement("button");
-    del.innerText="Excluir";
+    del.innerText="Delete Class";
     del.addEventListener("click", async ()=>{
       g.classes.splice(i,1);
       await updateDoc(doc(db,"groups",g.name),{classes:g.classes});
@@ -310,9 +310,9 @@ function openClass(classIndex){
   const g = groups[currentGroupIndex];
   const cls = g.classes[classIndex];
   if(!cls.name) cls.name=cls.date;
-  let html=`<h3>Marcar Aula: ${cls.date}</h3>
-    <label>Nome da Aula: <input type="text" id="className" value="${cls.name}"></label>
-    <table border="1"><tr><th>Aluno</th><th>Presença</th><th>Lição</th></tr>`;
+  let html=`<h3>Register Class: ${cls.date}</h3>
+    <label>Class name: <input type="text" id="className" value="${cls.name}"></label>
+    <table border="1"><tr><th>Student</th><th>Attendance</th><th>Homework</th></tr>`;
   cls.records.forEach((r,i)=>{
     html+=`
       <tr>
@@ -322,8 +322,8 @@ function openClass(classIndex){
       </tr>`;
   });
   html+=`</table>
-    <button id="saveBtn">Salvar</button>
-    <button id="cancelBtn">Cancelar</button>`;
+    <button id="saveBtn">Save</button>
+    <button id="cancelBtn">Close</button>`;
 
   const div=document.createElement("div");
   div.innerHTML=html;
@@ -372,13 +372,13 @@ function checkFlags(){
     const abs=recs.map(r=>r.attendance);
     const hw=recs.map(r=>r.homework);
     let reason="";
-    if(!abs[0]&&!abs[1]) reason+="Faltou 2 aulas; ";
-    if(!hw[0]&&!hw[1]) reason+="Não entregou lição 2x; ";
+    if(!abs[0]&&!abs[1]) reason+="Missed 2 aulas; ";
+    if(!hw[0]&&!hw[1]) reason+="Didn't deliver homework 2x; ";
     if(reason) flagged.push({name:s.name,reason,dates:lastTwo.map(c=>c.date)});
   });
   if(flagged.length>0){
     document.getElementById("notificationSection").style.display="block";
-    let msg=`${g.name} - Alunos Sinalizados:\n`;
+    let msg=`${g.name} - Flagged Students:\n`;
     flagged.forEach(f=>{ msg+=`${f.name} - ${f.reason}Datas: ${f.dates.join(", ")}\n`; });
     document.getElementById("flaggedMessage").value=msg;
   } else {
