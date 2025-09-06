@@ -2,24 +2,51 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-  <link rel="icon" type="image/png" href="favicon.png">
 <title>Attendance and Homework</title>
 <style>
-  body { font-family: Arial, sans-serif; background-color: #f2f2f2; margin:0; padding:0; display:flex; justify-content:center; }
-  .container { max-width: 900px; width:100%; padding:20px; margin:20px; background:#fff; border-radius:8px; box-shadow:0 0 10px rgba(0,0,0,0.2);}
-  h1,h2,h3 { color:#333; }
-  input, select, button { margin:5px; padding:5px 10px; }
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f2f2f2;
+    margin: 0; padding: 0;
+    display: flex; justify-content: center;
+  }
+  .container {
+    max-width: 900px; width: 100%;
+    padding: 20px; margin: 20px;
+    background: #fff; border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  }
+  h1, h2, h3 { color: #333; }
+  input, select, button { margin: 5px; padding: 5px 10px; }
   table { border-collapse: collapse; margin-top: 10px; width: 100%; }
   table, th, td { border: 1px solid #aaa; padding: 5px; text-align: center; }
   th { background: #e6e6e6; }
   tr:nth-child(even) { background: #fafafa; }
   .group-buttons { margin: 10px 0; display: flex; flex-wrap: wrap; gap: 10px; }
-  .group-button { flex:1 1 calc(20% - 10px); min-width:120px; max-width:180px; padding:10px; border-radius:5px; border:1px solid #555; cursor:pointer; text-align:center; font-weight:bold; color:white; }
-  .overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.3); display:flex; justify-content:center; align-items:center; padding:20px; }
-  .overlay-content { background:white; padding:20px; border-radius:8px; box-shadow:0 0 10px rgba(0,0,0,0.5); max-width:700px; width:100%; }
-  button:hover { opacity:0.9; }
-  .delete-group-btn { background:#d9534f; color:white; padding:10px 15px; border:none; border-radius:5px; cursor:pointer; margin-top:20px; }
-  input[type="text"] { width: 95%; box-sizing: border-box; }
+  .group-button {
+    flex: 1 1 calc(20% - 10px); min-width: 120px; max-width: 180px;
+    padding: 10px; border-radius: 5px; border: 1px solid #555;
+    cursor: pointer; text-align: center; font-weight: bold; color: white;
+  }
+  .group-button.dragging {
+    opacity: 0.5;
+  }
+  .overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.3);
+    display: flex; justify-content: center; align-items: center;
+    padding: 20px;
+  }
+  .overlay-content {
+    background: white; padding: 20px; border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    max-width: 700px; width: 100%;
+  }
+  button:hover { opacity: 0.9; }
+  .delete-group-btn {
+    background:#d9534f; color:white; padding:10px 15px;
+    border:none; border-radius:5px; cursor:pointer; margin-top:20px;
+  }
 </style>
 </head>
 <body>
@@ -32,12 +59,14 @@
   <div class="group-buttons" id="groupsButtons"></div>
 
   <hr>
+
   <h3>Alunos</h3>
   <input id="studentName" placeholder="Nome do Aluno">
   <button id="addStudentBtn">Adicionar Aluno</button>
   <table id="studentsTable"><tr><th>Nome</th><th>Remover</th></tr></table>
 
   <hr>
+
   <h3>Aulas</h3>
   <div>
     <label><input type="checkbox" id="mon"> Segunda</label>
@@ -61,281 +90,141 @@
 </div>
 
 <script type="module">
-// ---------------- Firebase ----------------
+/* ---------------- Firebase ---------------- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-import { getFirestore, collection, doc, getDocs, setDoc, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+import { getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-// Config da sua app Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyAm4kct4BJrVydJpcAXFZuHuEOAtnpUJfc",
-  authDomain: "attendance-rb.firebaseapp.com",
-  projectId: "attendance-rb",
-  storageBucket: "attendance-rb.firebasestorage.app",
-  messagingSenderId: "884478984062",
-  appId: "1:884478984062:web:e64f5dedafb34ac7d73d2f"
+  apiKey: "SUA_API_KEY",
+  authDomain: "SEU_AUTH_DOMAIN",
+  projectId: "SEU_PROJECT_ID",
+  storageBucket: "SEU_STORAGE_BUCKET",
+  messagingSenderId: "SEU_SENDER_ID",
+  appId: "SEU_APP_ID"
 };
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// ---------------- Variáveis globais ----------------
-let groups = []; // vai ser carregado do Firestore
+let data = { groups: [] };
 let currentGroupIndex = 0;
 
-// ---------------- Funções de banco ----------------
-async function loadGroups(){
-  groups = [];
-  const snap = await getDocs(collection(db, "groups"));
-  snap.forEach(docSnap=>{
-    groups.push({ id: docSnap.id, ...docSnap.data() });
-  });
-  renderGroupButtons();
-  if(groups.length>0) selectGroup(0);
-}
-
-async function saveGroup(g){
-  if(!g.id){
-    const docRef = await addDoc(collection(db,"groups"), g);
-    g.id = docRef.id;
-  } else {
-    const docRef = doc(db,"groups",g.id);
-    await setDoc(docRef,g);
-  }
-}
-
-async function deleteGroup(){
-  if(!groups[currentGroupIndex]) return;
-  if(confirm(`Excluir grupo "${groups[currentGroupIndex].name}"?`)){
-    await deleteDoc(doc(db,"groups",groups[currentGroupIndex].id));
-    groups.splice(currentGroupIndex,1);
-    currentGroupIndex=0;
-    renderGroupButtons();
-    if(groups.length>0) selectGroup(0);
-    else {
-      document.getElementById("studentsTable").innerHTML="<tr><th>Nome</th><th>Remover</th></tr>";
-      document.getElementById("classesTable").innerHTML="<tr><th>Data</th><th>Nome</th><th>Ações</th></tr>";
-      document.getElementById("notificationSection").style.display="none";
-    }
-  }
-}
-
-// ---------------- Helpers ----------------
-function todayISO(){ return new Date().toISOString().slice(0,10); }
-function isHoliday(dateStr){
-  const holidays=["2025-01-01","2025-02-25","2025-04-18","2025-04-21","2025-05-01",
-    "2025-06-19","2025-09-07","2025-10-12","2025-11-02","2025-11-15","2025-12-25","2025-01-25"];
-  return holidays.includes(dateStr);
+/* ---------------- Helpers ---------------- */
+function todayISO(){
+  return new Date().toISOString().slice(0,10);
 }
 function escapeHtml(str){
-  return String(str ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  return String(str ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
 }
 
-// ---------------- Grupos ----------------
+/* ---------------- Grupos ---------------- */
 async function createGroup(){
   const name = document.getElementById("groupName").value.trim();
   if(!name) return alert("Digite o nome do grupo");
-  let g={ name, students:[], classes:[], days:[] };
-  await saveGroup(g);
-  groups.push(g);
+  await addDoc(collection(db, "groups"), {
+    name,
+    students: [],
+    classes: [],
+    days: [],
+    order: data.groups.length
+  });
   document.getElementById("groupName").value="";
   renderGroupButtons();
-  selectGroup(groups.length-1);
 }
-function renderGroupButtons(){
-  const container=document.getElementById("groupsButtons");
-  container.innerHTML="";
-  groups.forEach((g,i)=>{
-    const btn=document.createElement("div");
-    btn.className="group-button";
-    btn.style.backgroundColor=`hsl(200,60%,${40+40*(i/Math.max(groups.length-1,1))}%)`;
-    btn.innerText=g.name;
-    btn.addEventListener("click",()=>selectGroup(i));
+
+async function deleteGroup(){
+  if(!data.groups[currentGroupIndex]) return;
+  if(confirm(`Excluir grupo "${data.groups[currentGroupIndex].name}"?`)){
+    const g = data.groups[currentGroupIndex];
+    await deleteDoc(doc(db, "groups", g.id));
+    currentGroupIndex=0;
+    renderGroupButtons();
+  }
+}
+
+/* ---------------- Drag & Drop ---------------- */
+async function renderGroupButtons() {
+  const container = document.getElementById("groupsButtons");
+  container.innerHTML = "";
+
+  const q = query(collection(db, "groups"), orderBy("order"));
+  const querySnapshot = await getDocs(q);
+
+  data.groups = [];
+  querySnapshot.forEach((docSnap, i) => {
+    const g = { id: docSnap.id, ...docSnap.data() };
+    data.groups.push(g);
+
+    const btn = document.createElement("div");
+    btn.className = "group-button";
+    btn.style.backgroundColor = `hsl(200,60%,${40 + 40 * (i / Math.max(querySnapshot.size - 1, 1))}%)`;
+    btn.innerText = g.name;
+    btn.dataset.index = i;
+    btn.draggable = true;
+
+    btn.addEventListener("click", () => selectGroup(i));
+
+    btn.addEventListener("dragstart", (e) => {
+      e.dataTransfer.setData("text/plain", i);
+      btn.classList.add("dragging");
+    });
+
+    btn.addEventListener("dragend", () => {
+      btn.classList.remove("dragging");
+    });
+
+    btn.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      btn.style.border = "2px dashed #000";
+    });
+
+    btn.addEventListener("dragleave", () => {
+      btn.style.border = "";
+    });
+
+    btn.addEventListener("drop", async (e) => {
+      e.preventDefault();
+      btn.style.border = "";
+
+      const fromIndex = parseInt(e.dataTransfer.getData("text/plain"));
+      const toIndex = parseInt(btn.dataset.index);
+      if (fromIndex === toIndex) return;
+
+      const moved = data.groups.splice(fromIndex, 1)[0];
+      data.groups.splice(toIndex, 0, moved);
+
+      // atualizar ordem no Firestore
+      for (let j = 0; j < data.groups.length; j++) {
+        const g = data.groups[j];
+        const ref = doc(db, "groups", g.id);
+        await updateDoc(ref, { order: j });
+      }
+
+      renderGroupButtons();
+    });
+
     container.appendChild(btn);
   });
+
+  if(data.groups.length > 0) selectGroup(currentGroupIndex);
 }
+
+/* ---------------- Seleção ---------------- */
 function selectGroup(i){
-  currentGroupIndex=i;
-  renderStudents();
-  renderClasses();
-  checkFlags();
+  currentGroupIndex = i;
+  // aqui você chama renderStudents() e renderClasses() se já implementou
 }
 
-// ---------------- Alunos ----------------
-async function addStudent(){
-  const name=document.getElementById("studentName").value.trim();
-  if(!name) return alert("Digite o nome do aluno");
-  const g=groups[currentGroupIndex];
-  g.students.push({name});
-  const hoje=todayISO();
-  g.classes.forEach(c=>{
-    if(c.date>=hoje && !c.records.find(r=>r.name===name)){
-      c.records.push({name,attendance:false,homework:false});
-    }
-  });
-  await saveGroup(g);
-  document.getElementById("studentName").value="";
-  renderStudents(); renderClasses();
-}
-function removeStudent(index){
-  const g=groups[currentGroupIndex];
-  const removed=g.students.splice(index,1)[0];
-  g.classes.forEach(c=>{ c.records=c.records.filter(r=>r.name!==removed.name); });
-  saveGroup(g);
-  renderStudents(); renderClasses();
-}
-function renderStudents(){
-  const g=groups[currentGroupIndex];
-  const t=document.getElementById("studentsTable");
-  t.innerHTML=`<tr><th colspan="2">${g?g.name:""}</th></tr><tr><th>Nome</th><th>Remover</th></tr>`;
-  if(!g) return;
-  g.students.forEach((s,i)=>{
-    const row=t.insertRow();
-    row.insertCell(0).innerText=s.name;
-    const btnCell=row.insertCell(1);
-    const btn=document.createElement("button");
-    btn.innerText="Remover";
-    btn.addEventListener("click",()=>removeStudent(i));
-    btnCell.appendChild(btn);
-  });
-}
+/* ---------------- Init ---------------- */
+document.getElementById("addGroupBtn").addEventListener("click", createGroup);
+document.getElementById("deleteGroupBtn").addEventListener("click", deleteGroup);
 
-// ---------------- Aulas ----------------
-async function generateClasses(){
-  const g=groups[currentGroupIndex];
-  g.days=[];
-  if(document.getElementById("mon").checked) g.days.push(1);
-  if(document.getElementById("tue").checked) g.days.push(2);
-  if(document.getElementById("wed").checked) g.days.push(3);
-  if(document.getElementById("thu").checked) g.days.push(4);
-  if(document.getElementById("fri").checked) g.days.push(5);
-  if(g.days.length===0) return alert("Selecione os dias da semana");
-
-  let d=new Date(); let end=new Date(new Date().getFullYear(),11,31);
-  while(d<=end){
-    const day=d.getDay(); const dateStr=d.toISOString().slice(0,10);
-    if(g.days.includes(day)&&!isHoliday(dateStr)){
-      if(!g.classes.find(c=>c.date===dateStr)){
-        g.classes.push({date:dateStr,name:dateStr,completed:false,
-          records:g.students.map(s=>({name:s.name,attendance:false,homework:false}))});
-      }
-    }
-    d.setDate(d.getDate()+1);
-  }
-  g.classes.sort((a,b)=>a.date.localeCompare(b.date));
-  await saveGroup(g);
-  renderClasses();
-}
-function renderClasses(){
-  const g=groups[currentGroupIndex];
-  const t=document.getElementById("classesTable");
-  t.innerHTML=`<tr><th>Data</th><th>Nome</th><th>Ações</th></tr>`;
-  if(!g) return;
-  g.classes.forEach((c,i)=>{
-    const row=t.insertRow();
-    row.insertCell(0).innerText=c.date;
-    const nameCell=row.insertCell(1);
-    const inp=document.createElement("input");
-    inp.type="text"; inp.value=c.name||c.date;
-    inp.addEventListener("change",async(e)=>{
-      c.name=e.target.value.trim()||c.date;
-      await saveGroup(g);
-      e.target.value=c.name;
-    });
-    nameCell.appendChild(inp);
-    const cell=row.insertCell(2);
-    const mark=document.createElement("button");
-    mark.innerText="Marcar";
-    mark.addEventListener("click",()=>openClass(i));
-    const del=document.createElement("button");
-    del.innerText="Excluir";
-    del.addEventListener("click",()=>deleteClass(i));
-    cell.appendChild(mark); cell.appendChild(del);
-  });
-}
-function deleteClass(idx){
-  const g=groups[currentGroupIndex];
-  g.classes.splice(idx,1);
-  saveGroup(g);
-  renderClasses();
-}
-
-function openClass(classIndex){
-  const g=groups[currentGroupIndex]; const cls=g.classes[classIndex]; if(!cls) return;
-  cls.records.forEach(r=>{
-    if(typeof r.attendance==='undefined') r.attendance=false;
-    if(typeof r.homework==='undefined') r.homework=false;
-  });
-  let html=`<h3>Marcar Aula: ${cls.date}</h3>
-    <label style="display:block; margin-bottom:8px;">Nome da Aula:
-      <input type="text" id="classNameInput" value="${escapeHtml(cls.name||cls.date)}">
-    </label>
-    <table border="1" style="width:100%; margin-top:10px;">
-      <tr><th>Aluno</th><th>Presença</th><th>Lição</th></tr>`;
-  cls.records.forEach((r,i)=>{
-    const attId=`att_${classIndex}_${i}`; const hwId=`hw_${classIndex}_${i}`;
-    html+=`<tr><td>${escapeHtml(r.name)}</td>
-      <td><input type="checkbox" id="${attId}" ${r.attendance?"checked":""}></td>
-      <td><input type="checkbox" id="${hwId}" ${r.homework?"checked":""}></td></tr>`;
-  });
-  html+=`</table><div style="margin-top:10px;">
-      <button id="saveBtn">Salvar</button>
-      <button id="cancelBtn">Cancelar</button></div>`;
-  const div=document.createElement('div'); div.className="overlay-content"; div.innerHTML=html;
-  const overlay=document.createElement('div'); overlay.className="overlay"; overlay.appendChild(div);
-  document.body.appendChild(overlay);
-  document.getElementById('saveBtn').addEventListener('click',()=>saveClass(classIndex));
-  document.getElementById('cancelBtn').addEventListener('click',cancelOverlay);
-}
-async function saveClass(classIndex){
-  const g=groups[currentGroupIndex]; const cls=g.classes[classIndex];
-  cls.name=document.getElementById('classNameInput').value.trim()||cls.date;
-  cls.records.forEach((r,i)=>{
-    const att=document.getElementById(`att_${classIndex}_${i}`);
-    const hw=document.getElementById(`hw_${classIndex}_${i}`);
-    if(att) r.attendance=att.checked;
-    if(hw) r.homework=hw.checked;
-  });
-  cls.completed=true;
-  await saveGroup(g);
-  renderClasses(); checkFlags(); cancelOverlay();
-}
-
-// ---------------- Flags ----------------
-function checkFlags(){
-  const g=groups[currentGroupIndex]; if(!g) return;
-  const today=todayISO();
-  const filled=g.classes.filter(c=>c.date<=today&&c.completed);
-  if(filled.length<2){ document.getElementById("notificationSection").style.display="none"; return;}
-  const lastTwo=filled.slice(-2); const flagged=[];
-  g.students.forEach(s=>{
-    const recs=lastTwo.map(c=>c.records.find(r=>r.name===s.name)||{attendance:false,homework:false});
-    const abs=recs.map(r=>!!(r.attendance===true)); const hw=recs.map(r=>!!(r.homework===true));
-    let reason=""; if(!abs[0]&&!abs[1]) reason+="Faltou 2 aulas; "; if(!hw[0]&&!hw[1]) reason+="Não entregou lição 2x; ";
-    if(reason) flagged.push({name:s.name,reason,dates:lastTwo.map(c=>c.date)});
-  });
-  if(flagged.length>0){
-    document.getElementById("notificationSection").style.display="block";
-    let msg=`${g.name} - Alunos Sinalizados:\n`;
-    flagged.forEach(f=>{ msg+=`${f.name} - ${f.reason}Datas: ${f.dates.join(", ")}\n`; });
-    document.getElementById("flaggedMessage").value=msg;
-  } else document.getElementById("notificationSection").style.display="none";
-}
-
-// ---------------- WhatsApp ----------------
-function sendWhatsApp(){
-  const phone="+5511991463208";
-  const text=encodeURIComponent(document.getElementById("flaggedMessage").value);
-  const url=`https://wa.me/${phone.replace(/\D/g,'')}?text=${text}`;
-  window.open(url,"_blank");
-}
-
-// ---------------- Init ----------------
-document.getElementById("addGroupBtn").addEventListener("click",createGroup);
-document.getElementById("addStudentBtn").addEventListener("click",addStudent);
-document.getElementById("deleteGroupBtn").addEventListener("click",deleteGroup);
-document.getElementById("generateClassesBtn").addEventListener("click",generateClasses);
-document.getElementById("sendWhatsAppBtn").addEventListener("click",sendWhatsApp);
-
-loadGroups();
+renderGroupButtons();
 </script>
 </body>
 </html>
