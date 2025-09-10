@@ -294,6 +294,11 @@ async function generateClasses(){
   await updateDoc(doc(db,"groups",g.name),{days:g.days, classes:g.classes});
   renderClasses();
 }
+ function formatDateBR(dateStr) {
+  const [year, month, day] = dateStr.split("-");
+  return `${day}/${month}/${year}`;
+}
+ 
 function renderClasses(){
   const g = groups[currentGroupIndex];
   const t = document.getElementById("classesTable");
@@ -303,7 +308,7 @@ function renderClasses(){
   g.classes.forEach((c,i)=>{
     const row = t.insertRow();
     if(c.date===hoje) row.classList.add("today-class");
-    row.insertCell(0).innerText = c.date;
+    row.insertCell(0).innerText = formatDateBR(c.date);
     const nameCell=row.insertCell(1);
     const inp=document.createElement("input");
     inp.type="text"; inp.value=c.name||c.date;
@@ -382,7 +387,10 @@ function cancelOverlay(){
 function checkFlags(){
   const g = groups[currentGroupIndex];
   if(!g) return;
-  const today=todayISO();
+// Forçar fuso horário de São Paulo (UTC-3)
+const today = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }))
+  .toISOString()
+  .split("T")[0];
   const filled=g.classes.filter(c=>c.date<=today&&c.completed);
   if(filled.length<2){
     document.getElementById("notificationSection").style.display="none";
