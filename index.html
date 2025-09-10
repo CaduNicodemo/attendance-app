@@ -46,6 +46,11 @@
       background:#d9534f; color:white; padding:10px 15px;
       border:none; border-radius:5px; cursor:pointer; margin-top:20px;
     }
+    /* Destaque da aula de hoje */
+    .today-class {
+      background-color: #026fff !important;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -91,7 +96,7 @@
 <script type="module">
 /* ---------------- Firestore Setup ---------------- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, doc, setDoc, getDocs, getDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, collection, doc, setDoc, getDocs, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAm4kct4BJrVydJpcAXFZuHuEOAtnpUJfc",
@@ -111,6 +116,9 @@ let currentGroupIndex = 0;
 /* ---------------- Helpers ---------------- */
 function todayISO(){
   return new Date().toISOString().slice(0,10);
+}
+function daysDiff(d1,d2){
+  return Math.floor((new Date(d1)-new Date(d2))/(1000*60*60*24));
 }
 function isHoliday(dateStr){
   const holidays = [
@@ -177,6 +185,7 @@ function renderGroupButtons(){
 }
 function selectGroup(i){
   currentGroupIndex = i;
+  cleanupOldClasses(groups[i]); // <- remover aulas antigas
   renderStudents();
   renderClasses();
   checkFlags();
@@ -195,6 +204,17 @@ async function deleteGroup(){
       document.getElementById("classesTable").innerHTML="<tr><th>Date</th><th>Name</th><th>Register</th></tr>";
       document.getElementById("notificationSection").style.display="none";
     }
+  }
+}
+
+/* ---------------- Aulas antigas ---------------- */
+async function cleanupOldClasses(g){
+  const hoje = todayISO();
+  const limite = -10; // mais de 10 dias atrás
+  const novas = g.classes.filter(c => daysDiff(c.date,hoje) >= limite);
+  if(novas.length !== g.classes.length){
+    g.classes = novas;
+    await updateDoc(doc(db,"groups",g.name),{classes:g.classes});
   }
 }
 
@@ -279,8 +299,10 @@ function renderClasses(){
   const t = document.getElementById("classesTable");
   t.innerHTML=`<tr><th>Date</th><th>Name</th><th>Register</th></tr>`;
   if(!g) return;
+  const hoje = todayISO();
   g.classes.forEach((c,i)=>{
     const row = t.insertRow();
+    if(c.date===hoje) row.classList.add("today-class");
     row.insertCell(0).innerText = c.date;
     const nameCell=row.insertCell(1);
     const inp=document.createElement("input");
@@ -391,18 +413,13 @@ function checkFlags(){
 function sendWhatsApp(){
   const phone = "+5511991463208";
   const text = encodeURIComponent(document.getElementById("flaggedMessage").value);
-  const url = `https://wa.me/${phone.replace(/\D/g,'')}?text=${text}`;
-  window.open(url, "_blank");
+  const url = `https://wa.me/${phone}?text=${text}`;
+  window.open(url,"_blank");
 }
 
 /* ---------------- Init ---------------- */
-document.getElementById("addGroupBtn").addEventListener("click", createGroup);
-document.getElementById("addStudentBtn").addEventListener("click", addStudent);
-document.getElementById("deleteGroupBtn").addEventListener("click", deleteGroup);
-document.getElementById("generateClassesBtn").addEventListener("click", generateClasses);
-document.getElementById("sendWhatsAppBtn").addEventListener("click", sendWhatsApp);
-
-loadGroups();
-</script>
-</body>
-</html>
+document.getElementById("addGroupBtn").addEventListener("click",createGroup);
+document.getElementById("addStudentBtn").addEventListener("click",addStudent);
+document.getElementById("generateClassesBtn").addEventListener("click",generateClasses);
+document.getElementById("deleteGroupBtn").addEventListener("click",deleteGroup);
+document.getElementById("sendWhatsAppBtn").addEventListener("click",sendWhatsApp);
