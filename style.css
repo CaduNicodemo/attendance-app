@@ -9,6 +9,8 @@ body {
 }
 .classes {
   display: flex;
+  justify-self: center;
+  text-align: center;
 }
 
 .container {
