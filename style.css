@@ -16,6 +16,23 @@ table { border-collapse: collapse; margin-top: 10px; width: 100%; }
 table, th, td { border: 1px solid #aaa; padding: 5px; text-align: center; }
 th { background: #e6e6e6; }
 tr:nth-child(even) { background: #fafafa; }
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #333;
+  color: white;
+  padding: 10px 20px;
+}
+.topbar button {
+  background: #d9534f;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
 .group-buttons { margin: 10px 0; display: flex; flex-wrap: wrap; gap: 10px; }
 .group-button {
   flex: 1 1 calc(20% - 10px); min-width: 120px; max-width: 180px;
