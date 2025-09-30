@@ -26,12 +26,16 @@ onAuthStateChanged(auth, (user) => {
   if (user) {
     document.getElementById("loginSection").style.display = "none";
     document.getElementById("mainApp").style.display = "block";
+    document.getElementById("topbar").style.display = "flex";
+    document.getElementById("userInfo").innerText = `Logado como: ${user.email}`;
     loadGroups();
   } else {
     document.getElementById("loginSection").style.display = "flex";
     document.getElementById("mainApp").style.display = "none";
+    document.getElementById("topbar").style.display = "none";
   }
 });
+
 
 document.getElementById("loginBtn").addEventListener("click", async () => {
   const email = document.getElementById("loginEmail").value.trim();
