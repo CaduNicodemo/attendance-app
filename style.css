@@ -7,7 +7,7 @@ body {
   display: flex;
   justify-content: center;
 }
-div {
+.classes {
   display: flex;
 }
 
