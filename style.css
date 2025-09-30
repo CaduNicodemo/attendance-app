@@ -5,12 +5,13 @@ body {
   display: flex; justify-content: center;
 }
 .container {
-  max-width: 900px; width: 100%;
+  width: 90%;
   padding: 20px; margin: 20px;
+  margin: 0 auto;
   background: #fff; border-radius: 8px;
   box-shadow: 0 0 10px rgba(0,0,0,0.2);
 }
-h1, h2, h3 { color: #333; }
+h1, h2, h3 { color: #333; font-size: 2rem;}
 input, select, button { margin: 5px; padding: 5px 10px; }
 table { border-collapse: collapse; margin-top: 10px; width: 100%; }
 table, th, td { border: 1px solid #aaa; padding: 5px; text-align: center; }
