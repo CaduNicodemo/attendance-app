@@ -118,6 +118,13 @@ tr:nth-child(even) {
   width: 100%;
 }
 
+textarea, input {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+}
+
 /* ===== Botões gerais ===== */
 button:hover {
   opacity: 0.9;
@@ -159,6 +166,7 @@ button:hover {
 
   .group-buttons {
     flex-direction: column;
+    width: 100%;
   }
 
   .group-button {
