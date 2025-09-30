@@ -3,53 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <title>Attendance and Homework</title>
-  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="icon" type="image/png" href="BC89276E-5621-4B42-8A58-72CF3D6013CC.png">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <!-- Barra superior com usuário logado -->
   <div id="topbar" class="topbar" style="display:none;">
-  <span id="userInfo"></span>
-  <button id="logoutBtn">Sair</button>
-</div>
-<div class="container">
-    <h1>Attendance and Homework</h1>
-
-    <h2>Groups</h2>
-    <input id="groupName" placeholder="Groups">
-    <button id="addGroupBtn">Add Group</button>
-    <div class="group-buttons" id="groupsButtons"></div>
-
-    <hr>
-
-    <h3>Students</h3>
-    <input id="studentName" placeholder="Student's name">
-    <button id="addStudentBtn">Add Student</button>
-    <table id="studentsTable"><tr><th>Name</th><th>Delete</th></tr></table>
-
-    <hr>
-
-    <h3>Classes</h3>
-    <div>
-      <label><input type="checkbox" id="mon"> Monday</label>
-      <label><input type="checkbox" id="tue"> Tuesday</label>
-      <label><input type="checkbox" id="wed"> Wednesday</label>
-      <label><input type="checkbox" id="thu"> Thursday</label>
-      <label><input type="checkbox" id="fri"> Friday</label>
-    </div>
-    <button id="generateClassesBtn">Generate Classes</button>
-    <table id="classesTable"><tr><th>Date</th><th>Class</th><th>Register</th></tr></table>
-
-    <hr>
-    <button class="delete-group-btn" id="deleteGroupBtn">Delete current group</button>
-
-    <hr>
-    <div id="notificationSection" style="display:none;">
-      <h3>Flagged Students</h3>
-      <textarea id="flaggedMessage" rows="6" cols="80"></textarea><br>
-      <button id="sendWhatsAppBtn">Send via WhatsApp</button>
-    </div>
+    <span id="userInfo"></span>
+    <button id="logoutBtn">Sair</button>
   </div>
 
+  <!-- Área de login -->
   <div id="loginSection" style="display:flex; flex-direction:column; gap:10px; max-width:300px; margin:auto;">
     <h2>Login</h2>
     <input id="loginEmail" type="email" placeholder="Email">
@@ -58,12 +22,48 @@
     <p id="loginMsg" style="color:red;"></p>
   </div>
 
-  <!-- App principal (fica oculto até login) -->
-  <div class="container" id="mainApp" style="display:none;">
-    <button id="logoutBtn">Sair</button>
+  <!-- Área principal do app (inicialmente escondida) -->
+  <div id="mainApp" style="display:none;">
+    <div class="container">
+      <h1>Attendance and Homework</h1>
+
+      <h2>Groups</h2>
+      <input id="groupName" placeholder="Groups">
+      <button id="addGroupBtn">Add Group</button>
+      <div class="group-buttons" id="groupsButtons"></div>
+
+      <hr>
+
+      <h3>Students</h3>
+      <input id="studentName" placeholder="Student's name">
+      <button id="addStudentBtn">Add Student</button>
+      <table id="studentsTable"><tr><th>Name</th><th>Delete</th></tr></table>
+
+      <hr>
+
+      <h3>Classes</h3>
+      <div>
+        <label><input type="checkbox" id="mon"> Monday</label>
+        <label><input type="checkbox" id="tue"> Tuesday</label>
+        <label><input type="checkbox" id="wed"> Wednesday</label>
+        <label><input type="checkbox" id="thu"> Thursday</label>
+        <label><input type="checkbox" id="fri"> Friday</label>
+      </div>
+      <button id="generateClassesBtn">Generate Classes</button>
+      <table id="classesTable"><tr><th>Date</th><th>Class</th><th>Register</th></tr></table>
+
+      <hr>
+      <button class="delete-group-btn" id="deleteGroupBtn">Delete current group</button>
+
+      <hr>
+      <div id="notificationSection" style="display:none;">
+        <h3>Flagged Students</h3>
+        <textarea id="flaggedMessage" rows="6" cols="80"></textarea><br>
+        <button id="sendWhatsAppBtn">Send via WhatsApp</button>
+      </div>
+    </div>
   </div>
 
-  <!-- Script externo -->
   <script type="module" src="script.js"></script>
 </body>
 </html>
