@@ -1,22 +1,53 @@
+/* ===== Estilo geral ===== */
 body {
   font-family: Arial, sans-serif;
   background-color: #f2f2f2;
-  margin: 0; padding: 0;
-  display: flex; justify-content: center;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
 }
+
 .container {
   width: 90%;
-  padding: 20px; margin: 20px;
-  margin: 0 auto;
-  background: #fff; border-radius: 8px;
+  padding: 20px;
+  margin: 20px auto;
+  background: #fff;
+  border-radius: 8px;
   box-shadow: 0 0 10px rgba(0,0,0,0.2);
 }
-h1, h2, h3 { color: #333; font-size: 2rem;}
-input, select, button { margin: 5px; padding: 5px 10px; }
-table { border-collapse: collapse; margin-top: 10px; width: 100%; }
-table, th, td { border: 1px solid #aaa; padding: 5px; text-align: center; }
-th { background: #e6e6e6; }
-tr:nth-child(even) { background: #fafafa; }
+
+h1, h2, h3 {
+  color: #333;
+  font-size: 2rem;
+}
+
+input, select, button {
+  margin: 5px;
+  padding: 5px 10px;
+}
+
+table {
+  border-collapse: collapse;
+  margin-top: 10px;
+  width: 100%;
+}
+
+table, th, td {
+  border: 1px solid #aaa;
+  padding: 5px;
+  text-align: center;
+}
+
+th {
+  background: #e6e6e6;
+}
+
+tr:nth-child(even) {
+  background: #fafafa;
+}
+
+/* ===== Topbar ===== */
 .topbar {
   display: none; /* começa escondido */
   flex-direction: row;
@@ -25,12 +56,14 @@ tr:nth-child(even) { background: #fafafa; }
   background: #333;
   color: #fff;
   padding: 10px 20px;
-  margin-bottom: 15px; /* dá espaço abaixo do título */
+  margin-bottom: 15px;
   box-sizing: border-box;
 }
+
 .topbar span {
   font-size: 14px;
 }
+
 .topbar button {
   background: #d9534f;
   border: none;
@@ -39,31 +72,138 @@ tr:nth-child(even) { background: #fafafa; }
   padding: 6px 12px;
   cursor: pointer;
 }
-.group-buttons { margin: 10px 0; display: flex; flex-wrap: wrap; gap: 10px; }
-.group-button {
-  flex: 1 1 calc(20% - 10px); min-width: 120px; max-width: 180px;
-  padding: 10px; border-radius: 5px; border: 1px solid #555;
-  cursor: pointer; text-align: center; font-weight: bold; color: white;
+
+/* ===== Botões de grupo ===== */
+.group-buttons {
+  margin: 10px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
+
+.group-button {
+  flex: 1 1 calc(20% - 10px);
+  min-width: 120px;
+  max-width: 180px;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #555;
+  cursor: pointer;
+  text-align: center;
+  font-weight: bold;
+  color: white;
+}
+
+/* ===== Overlay / pop-ups ===== */
 .overlay {
-  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background: rgba(0,0,0,0.3);
-  display: flex; justify-content: center; align-items: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   padding: 20px;
   z-index: 1000;
 }
+
 .overlay-content {
-  background: white; padding: 20px; border-radius: 8px;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
   box-shadow: 0 0 10px rgba(0,0,0,0.5);
-  max-width: 600px; width: 100%;
+  max-width: 600px;
+  width: 100%;
 }
-button:hover { opacity: 0.9; }
+
+/* ===== Botões gerais ===== */
+button:hover {
+  opacity: 0.9;
+}
+
 .delete-group-btn {
-  background:#d9534f; color:white; padding:10px 15px;
-  border:none; border-radius:5px; cursor:pointer; margin-top:20px;
+  background: #d9534f;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 20px;
 }
-/* Destaque da aula de hoje */
+
+/* ===== Destaque da aula de hoje ===== */
 .today-class {
   background-color: #87ceeb !important;
   font-weight: bold;
+}
+
+/* ===== Media Queries: Responsividade ===== */
+
+/* Tablets e celulares grandes */
+@media (max-width: 768px) {
+  body {
+    display: block;
+  }
+
+  .container {
+    width: 95%;
+    padding: 15px;
+    margin: 10px auto;
+  }
+
+  h1, h2, h3 {
+    font-size: 1.5rem;
+  }
+
+  .group-buttons {
+    flex-direction: column;
+  }
+
+  .group-button {
+    flex: 1 1 100%;
+    min-width: auto;
+    max-width: none;
+  }
+
+  .topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 10px;
+  }
+
+  .topbar span {
+    font-size: 12px;
+  }
+
+  table {
+    font-size: 12px;
+  }
+
+  input, select, button {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .overlay-content {
+    max-width: 90%;
+    padding: 15px;
+  }
+}
+
+/* Celulares pequenos */
+@media (max-width: 480px) {
+  h1, h2, h3 {
+    font-size: 1.2rem;
+  }
+
+  .group-button {
+    font-size: 0.9rem;
+    padding: 8px;
+  }
+
+  .delete-group-btn {
+    width: 100%;
+  }
 }
