@@ -24,6 +24,8 @@ tr:nth-child(even) { background: #fafafa; }
   background: #333;
   color: #fff;
   padding: 10px 20px;
+  margin-bottom: 15px; /* dá espaço abaixo do título */
+  box-sizing: border-box;
 }
 .topbar span {
   font-size: 14px;
