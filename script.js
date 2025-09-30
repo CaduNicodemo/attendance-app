@@ -47,7 +47,9 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
   }
 });
 
-document.getElementById("logoutBtn").addEventListener("click", () => signOut(auth));
+document.getElementById("logoutBtn").addEventListener("click", () => {
+  signOut(auth).catch((err) => console.error("Erro ao sair:", err));
+});
 
 /* ---------------- Variáveis globais ---------------- */
 let groups = [];
