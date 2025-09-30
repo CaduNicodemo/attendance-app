@@ -79,6 +79,7 @@ tr:nth-child(even) {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+  justify-content: space-around;
 }
 
 .group-button {
@@ -165,14 +166,13 @@ button:hover {
   }
 
   .group-buttons {
-    flex-direction: column;
-    width: 100%;
+      width: 100%;
   }
 
   .group-button {
     flex: 1 1 100%;
-    min-width: auto;
-    max-width: none;
+    min-width: none;
+    max-width: 20%;
   }
 
   .topbar {
