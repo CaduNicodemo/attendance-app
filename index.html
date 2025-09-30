@@ -51,7 +51,10 @@
       background-color: #87ceeb !important;
       font-weight: bold;
     }
+    document.getElementById("logoutBtn").addEventListener("click", () => signOut(auth));
+
   </style>
+<button id="logoutBtn">Sair</button>
 </head>
 <body>
 <div class="container">
@@ -93,7 +96,27 @@
   </div>
 </div>
 
-<script type="module">
+<div id="loginSection" style="display:flex; flex-direction:column; gap:10px; max-width:300px; margin:auto;">
+  <h2>Login</h2>
+  <input id="loginEmail" type="email" placeholder="Email">
+  <input id="loginPassword" type="password" placeholder="Senha">
+  <button id="loginBtn">Entrar</button>
+  <p id="loginMsg" style="color:red;"></p>
+</div>
+
+<!-- O resto da página (container com grupos etc) começa com display:none -->
+<div class="container" id="mainApp" style="display:none;">
+  <script type="module">
+
+  import {
+  getAuth,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+const auth = getAuth(app);
+
 /* ---------------- Firestore Setup ---------------- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, doc, setDoc, getDocs, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -130,7 +153,32 @@ function isHoliday(dateStr){
 }
 
 /* ---------------- Load Data ---------------- */
-async function loadGroups(){
+// Monitora se usuário já está logado
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    // Usuário logado → mostra app
+    document.getElementById("loginSection").style.display = "none";
+    document.getElementById("mainApp").style.display = "block";
+    loadGroups();
+  } else {
+    // Ninguém logado → mostra login
+    document.getElementById("loginSection").style.display = "flex";
+    document.getElementById("mainApp").style.display = "none";
+  }
+});
+
+// Botão de login
+document.getElementById("loginBtn").addEventListener("click", async () => {
+  const email = document.getElementById("loginEmail").value.trim();
+  const pass  = document.getElementById("loginPassword").value.trim();
+  try {
+    await signInWithEmailAndPassword(auth, email, pass);
+  } catch (err) {
+    document.getElementById("loginMsg").innerText = "Erro: " + err.message;
+  }
+});
+
+    async function loadGroups(){
   const snap = await getDocs(collection(db,"groups"));
   groups = [];
   snap.forEach(docSnap=>{
@@ -433,5 +481,6 @@ document.getElementById("deleteGroupBtn").addEventListener("click",deleteGroup);
 document.getElementById("sendWhatsAppBtn").addEventListener("click",sendWhatsApp);
 loadGroups();
 </script>
+</div>
 </body>
 </html>
