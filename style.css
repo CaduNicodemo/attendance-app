@@ -11,6 +11,7 @@ body {
   display: flex;
   justify-self: center;
   text-align: center;
+  padding-bottom: 1rem;
 }
 
 .container {
