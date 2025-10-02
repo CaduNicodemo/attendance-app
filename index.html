@@ -59,6 +59,33 @@
         <textarea id="flaggedMessage" rows="6" cols="80"></textarea><br>
         <button id="sendWhatsAppBtn">Send via WhatsApp</button>
       </div>
+      <hr>
+<!-- Botão para abrir página de notas -->
+<button id="openGradesPage">Gerenciar Notas</button>
+
+<!-- Página de notas (inicialmente escondida) -->
+<div id="gradesPage" style="display:none;" class="container">
+  <h2>Notas da Turma</h2>
+  <button id="backToMain">Voltar</button>
+  <table id="gradesTable">
+    <tr><th>Aluno</th><th>Ações</th></tr>
+  </table>
+  <button id="exportGradesBtn">Exportar para Excel</button>
+</div>
+
+<!-- Página individual de notas do aluno -->
+<div id="studentGradesPage" style="display:none;" class="container">
+  <h2 id="studentNameTitle"></h2>
+  <button id="backToGrades">Voltar às notas</button>
+  
+  <div id="studentGradesDetails">
+    <!-- futuras notas vão aqui -->
+  </div>
+  
+  <h3>Comentário privado</h3>
+  <textarea id="studentComment" rows="5"></textarea><br>
+  <button id="saveCommentBtn">Salvar comentário</button>
+</div>
     </div>
   </div>
 
