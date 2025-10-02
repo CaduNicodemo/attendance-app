@@ -52,7 +52,15 @@ th {
 tr:nth-child(even) {
   background: #fafafa;
 }
+#gradesPage table, #gradesPage th, #gradesPage td {
+  border: 1px solid #aaa;
+  border-collapse: collapse;
+  padding: 5px;
+}
 
+#gradesPage th {
+  background: #e6e6e6;
+}
 /* ===== Topbar ===== */
 .topbar {
   display: none; /* começa escondido */
