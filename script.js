@@ -79,13 +79,21 @@ async function loadGroups(){
 
 /* ---------------- Grupos ---------------- */
 async function createGroup(){
-  const levelSelect = document.getElementById("groupLevel"); // futuro select de nível
-  const level = levelSelect ? levelSelect.value : "Kids";
+  const levelSelect = document.getElementById("groupType"); // usa o select correto
+  const level = levelSelect ? levelSelect.value : "Kids";   // pega o valor selecionado
   const name = document.getElementById("groupName").value.trim();
   if(!name) return alert("Name your group");
 
-  const fullName = `${level} - ${name}`; // Nome padrão com nível
-  const newGroup = { name: fullName, students:[], classes:[], days:[], order: groups.length, level };
+  const fullName = `${level} ${name}`; // Ex: "T6 Morning"
+  const newGroup = { 
+    name: fullName, 
+    students:[], 
+    classes:[], 
+    days:[], 
+    order: groups.length, 
+    level 
+  };
+
   await setDoc(doc(db,"groups",fullName), newGroup);
   groups.push({ id: fullName, ...newGroup});
   document.getElementById("groupName").value="";
@@ -379,7 +387,7 @@ document.getElementById("deleteGroupBtn").addEventListener("click",deleteGroup);
 function openGradesPage(group){
   localStorage.setItem("currentGroup", group.name);
   const groupsData = JSON.parse(localStorage.getItem("groupsData") || "{}");
-  groupsData[group.name] = { students: group.students.map(s=>s.name) };
+  groupsData[group.name] = { students: group.students.map(s=>s.name), level: group.level };
   localStorage.setItem("groupsData", JSON.stringify(groupsData));
   window.location.href = "grades.html";
 }
