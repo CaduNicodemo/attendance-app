@@ -134,7 +134,8 @@ th, td {
   }
 
   button {
-    font-size: 14px;
-    padding: 5px 10px;
+     margin:.2rem;
+     font-size: 14px;
+     padding: 5px 10px;
   }
 }
