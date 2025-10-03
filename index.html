@@ -21,24 +21,37 @@
   <div id="mainApp" style="display:none;">
     <div class="container">
       <h1>Attendance and Homework</h1>
-<div id="topbar" class="topbar" style="display:none;">
-    <span id="userInfo"></span>
-    <button id="logoutBtn">Sair</button>
-  </div>
+
+      <!-- Barra superior com usuário logado -->
+      <div id="topbar" class="topbar" style="display:none;">
+        <span id="userInfo"></span>
+        <button id="logoutBtn">Sair</button>
+      </div>
+
+      <!-- Grupos -->
       <h2>Groups</h2>
-      <input id="groupName" placeholder="Groups">
+      <select id="groupType">
+        <option value="Kids">Kids</option>
+        <option value="Teens">Teens</option>
+        <option value="Adults">Adults</option>
+      </select>
+      <input id="groupName" placeholder="Group name">
       <button id="addGroupBtn">Add Group</button>
       <div class="group-buttons" id="groupsButtons"></div>
 
       <hr>
 
+      <!-- Alunos -->
       <h3>Students</h3>
       <input id="studentName" placeholder="Student's name">
       <button id="addStudentBtn">Add Student</button>
-      <table id="studentsTable"><tr><th>Name</th><th>Delete</th></tr></table>
+      <table id="studentsTable">
+        <tr><th>Name</th><th>Delete</th></tr>
+      </table>
 
       <hr>
 
+      <!-- Dias de aula -->
       <h3>Classes</h3>
       <div class="classes">
         <label><input type="checkbox" id="mon"> Monday</label>
@@ -48,44 +61,20 @@
         <label><input type="checkbox" id="fri"> Friday</label>
       </div>
       <button id="generateClassesBtn">Generate Classes</button>
-      <table id="classesTable"><tr><th>Date</th><th>Class</th><th>Register</th></tr></table>
+      <table id="classesTable">
+        <tr><th>Date</th><th>Class</th><th>Register</th></tr>
+      </table>
 
       <hr>
       <button class="delete-group-btn" id="deleteGroupBtn">Delete current group</button>
 
       <hr>
+      <!-- Notificações -->
       <div id="notificationSection" style="display:none;">
         <h3>Flagged Students</h3>
         <textarea id="flaggedMessage" rows="6" cols="80"></textarea><br>
         <button id="sendWhatsAppBtn">Send via WhatsApp</button>
       </div>
-      <hr>
-<!-- Botão para abrir página de notas -->
-<button id="openGradesPage">Gerenciar Notas</button>
-
-<!-- Página de notas (inicialmente escondida) -->
-<div id="gradesPage" style="display:none;" class="container">
-  <h2>Notas da Turma</h2>
-  <button id="backToMain">Voltar</button>
-  <table id="gradesTable">
-    <tr><th>Aluno</th><th>Ações</th></tr>
-  </table>
-  <button id="exportGradesBtn">Exportar para Excel</button>
-</div>
-
-<!-- Página individual de notas do aluno -->
-<div id="studentGradesPage" style="display:none;" class="container">
-  <h2 id="studentNameTitle"></h2>
-  <button id="backToGrades">Voltar às notas</button>
-  
-  <div id="studentGradesDetails">
-    <!-- futuras notas vão aqui -->
-  </div>
-  
-  <h3>Comentário privado</h3>
-  <textarea id="studentComment" rows="5"></textarea><br>
-  <button id="saveCommentBtn">Salvar comentário</button>
-</div>
     </div>
   </div>
 
