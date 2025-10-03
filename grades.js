@@ -69,7 +69,7 @@ onAuthStateChanged(auth, user => {
     window.location.href = "index.html";
   }
 });
-document.getElementById("backBtn").addEventListener("click", () => {
+document.getElementById("homeBtn").addEventListener("click", () => {
   window.location.href = "index.html";
 });
 
