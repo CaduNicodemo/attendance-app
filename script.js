@@ -357,7 +357,7 @@ function renderClasses(){
     mark.innerText = "Register";
     mark.addEventListener("click", ()=> openClass(i));
     const del = document.createElement("button");
-    del.innerText = "Delete Class";
+    del.innerText = "Delete";
     del.addEventListener("click", async ()=> {
       g.classes.splice(i,1);
       try { await updateDoc(doc(db,"groups",g.name), { classes: g.classes }); }
