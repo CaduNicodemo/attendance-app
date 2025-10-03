@@ -1,3 +1,5 @@
+import { auth, db } from "./config.js";
+
 /* ---------------- Estado de autenticação ---------------- */
 onAuthStateChanged(auth, (user) => {
   // Alguns elementos podem não existir se o HTML mudar; guardamos com checks
