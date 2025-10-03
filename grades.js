@@ -16,143 +16,155 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+/* ---------------- Variáveis globais ---------------- */
 let currentGroupName = localStorage.getItem("currentGroup");
 let currentGroupData = null;
 
-function getCategoriesForLevel(level) {
-  switch (level) {
-    case "Kids1":
-    case "Kids2":
-      return [
-        "Participation in Class",
-        "Language Comprehension",
-        "Language Production",
-        "Respects Rules",
-        "Teamwork",
-        "Homework",
-        "Absences"
-      ];
-    case "Juniors":
-    case "Juniors1":
-    case "Juniors2":
-      return [
-        "Oral Test",
-        "Writing",
-        "Listening",
-        "Final Project"
-      ];
-    case "TeensA":
-    case "Teens1":
-    case "Teens2":
-    case "Teens3":
-    case "Teens4":
-    case "Teens5":
-    case "Teens6":
-      return [
-        "Oral Test",
-        "Writing",
-        "Listening",
-        "Reading",
-        "Final Project"
-      ];
-    default:
-      return ["Oral Test", "Final Project"];
-  }
-}
+const categories = [
+  "Participation in Class",
+  "Language Comprehension",
+  "Language Production",
+  "Respects Rules",
+  "Teamwork",
+  "Homework",
+  "Absences"
+];
 
-const concepts = ["AA","MT","ST","R"];
+const concepts = ["AA", "MT", "ST", "R"];
 
 /* ---------------- Auth ---------------- */
-onAuthStateChanged(auth, user => {
-  if(!user) {
+onAuthStateChanged(auth, (user) => {
+  if (!user) {
     alert("You must be logged in to access grades");
     window.location.href = "index.html";
   }
 });
-document.getElementById("homeBtn").addEventListener("click", () => {
-  window.location.href = "index.html";
-});
 
+/* ---------------- Botão Home ---------------- */
+const backBtn = document.getElementById("backBtn");
+if (backBtn) {
+  backBtn.addEventListener("click", () => {
+    window.location.href = "index.html";
+  });
+}
 
 /* ---------------- Load Group Data ---------------- */
 async function loadGroupGrades() {
-  if(!currentGroupName) return alert("No group selected");
+  if (!currentGroupName) {
+    alert("No group selected");
+    return;
+  }
 
-  const docRef = doc(db, "groups", currentGroupName);
-  const docSnap = await getDoc(docRef);
-  if (docSnap.exists()) {
-  currentGroupData = docSnap.data();
-  document.getElementById("groupTitle").innerText = `Grades - ${currentGroupName}`;
-  
-  // 🔹 Define categories dinamicamente com base no level salvo no Firestore
-  window.categories = getCategoriesForLevel(currentGroupData.level || "default");
-  
-  renderGradesTable();
+  try {
+    const docRef = doc(db, "groups", currentGroupName);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      currentGroupData = docSnap.data();
+      document.getElementById("groupTitle").innerText = `Grades - ${currentGroupName}`;
+      renderGradesTable();
+    } else {
+      alert("Group not found in Firestore");
+    }
+  } catch (err) {
+    console.error("Error loading group:", err);
+  }
+}
 
 /* ---------------- Render Table ---------------- */
 function renderGradesTable() {
+  if (!currentGroupData || !currentGroupData.students) return;
+
   const tbody = document.querySelector("#gradesTable tbody");
   tbody.innerHTML = "";
-  currentGroupData.students.forEach((s,i) => {
+
+  currentGroupData.students.forEach((s) => {
     const row = tbody.insertRow();
+
+    // Nome do aluno
     const nameCell = row.insertCell(0);
     nameCell.innerText = s.name;
     nameCell.style.cursor = "pointer";
-    nameCell.addEventListener("click", ()=>openStudentPage(s.name));
+    nameCell.addEventListener("click", () => openStudentPage(s.name));
 
-    categories.forEach(cat => {
+    // Categorias
+    categories.forEach((cat) => {
       const cell = row.insertCell();
       const select = document.createElement("select");
-      concepts.forEach(c => {
+
+      concepts.forEach((c) => {
         const opt = document.createElement("option");
         opt.value = c;
         opt.innerText = c;
         select.appendChild(opt);
       });
-      // Pre-fill existing grade if present
-      if(s.grades && s.grades[cat]) select.value = s.grades[cat];
+
+      // Preencher se já existir nota
+      if (s.grades && s.grades[cat]) {
+        select.value = s.grades[cat];
+      }
+
       cell.appendChild(select);
     });
   });
 }
 
 /* ---------------- Save Grades ---------------- */
-document.getElementById("saveGradesBtn").addEventListener("click", async () => {
-  const tbody = document.querySelector("#gradesTable tbody");
-  tbody.querySelectorAll("tr").forEach((row,i)=>{
-    const student = currentGroupData.students[i];
-    if(!student.grades) student.grades = {};
-    categories.forEach((cat,j)=>{
-      const sel = row.cells[j+1].querySelector("select");
-      student.grades[cat] = sel.value;
+const saveBtn = document.getElementById("saveGradesBtn");
+if (saveBtn) {
+  saveBtn.addEventListener("click", async () => {
+    if (!currentGroupData) return;
+
+    const tbody = document.querySelector("#gradesTable tbody");
+    tbody.querySelectorAll("tr").forEach((row, i) => {
+      const student = currentGroupData.students[i];
+      if (!student.grades) student.grades = {};
+
+      categories.forEach((cat, j) => {
+        const sel = row.cells[j + 1].querySelector("select");
+        student.grades[cat] = sel.value;
+      });
     });
-  });
-  const docRef = doc(db, "groups", currentGroupName);
-  await updateDoc(docRef, { students: currentGroupData.students });
-  alert("Grades saved!");
-});
 
-/* ---------------- Export to Excel ---------------- */
-document.getElementById("exportExcelBtn").addEventListener("click", () => {
-  let csv = "Student," + categories.join(",") + "\n";
-  currentGroupData.students.forEach(s => {
-    const line = [s.name];
-    categories.forEach(cat => line.push(s.grades && s.grades[cat] ? s.grades[cat] : ""));
-    csv += line.join(",") + "\n";
+    try {
+      const docRef = doc(db, "groups", currentGroupName);
+      await updateDoc(docRef, { students: currentGroupData.students });
+      alert("Grades saved!");
+    } catch (err) {
+      console.error("Error saving grades:", err);
+    }
   });
-  const blob = new Blob([csv], {type: "text/csv"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `${currentGroupName}_grades.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
-});
+}
 
-/* ---------------- Open individual student page ---------------- */
-function openStudentPage(studentName){
+/* ---------------- Export CSV ---------------- */
+const exportBtn = document.getElementById("exportExcelBtn");
+if (exportBtn) {
+  exportBtn.addEventListener("click", () => {
+    if (!currentGroupData) return;
+
+    let csv = "Student," + categories.join(",") + "\n";
+    currentGroupData.students.forEach((s) => {
+      const line = [s.name];
+      categories.forEach((cat) =>
+        line.push(s.grades && s.grades[cat] ? s.grades[cat] : "")
+      );
+      csv += line.join(",") + "\n";
+    });
+
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${currentGroupName}_grades.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+}
+
+/* ---------------- Student Page ---------------- */
+function openStudentPage(studentName) {
   localStorage.setItem("currentStudent", studentName);
-  window.location.href = "student.html"; // futura página para comentários individuais
+  window.location.href = "student.html"; // futura página
 }
 
 /* ---------------- Init ---------------- */
