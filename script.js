@@ -36,7 +36,6 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
-
 document.getElementById("loginBtn").addEventListener("click", async () => {
   const email = document.getElementById("loginEmail").value.trim();
   const pass  = document.getElementById("loginPassword").value.trim();
@@ -80,11 +79,15 @@ async function loadGroups(){
 
 /* ---------------- Grupos ---------------- */
 async function createGroup(){
+  const levelSelect = document.getElementById("groupLevel"); // futuro select de nível
+  const level = levelSelect ? levelSelect.value : "Kids";
   const name = document.getElementById("groupName").value.trim();
   if(!name) return alert("Name your group");
-  const newGroup = { name, students:[], classes:[], days:[], order: groups.length };
-  await setDoc(doc(db,"groups",name), newGroup);
-  groups.push({ id: name, ...newGroup});
+
+  const fullName = `${level} - ${name}`; // Nome padrão com nível
+  const newGroup = { name: fullName, students:[], classes:[], days:[], order: groups.length, level };
+  await setDoc(doc(db,"groups",fullName), newGroup);
+  groups.push({ id: fullName, ...newGroup});
   document.getElementById("groupName").value="";
   renderGroupButtons();
   selectGroup(groups.length-1);
@@ -102,6 +105,12 @@ function renderGroupButtons(){
     btn.innerText = g.name;
     btn.addEventListener("click", ()=>selectGroup(i));
 
+    // Clique duplo abre a página de notas
+    btn.addEventListener("dblclick", () => {
+      openGradesPage(g);
+    });
+
+    // Drag & Drop
     btn.addEventListener("dragstart", e=>{
       e.dataTransfer.setData("index", i);
     });
@@ -130,6 +139,7 @@ function selectGroup(i){
   checkFlags();
 }
 
+/* ---------------- Delete Group ---------------- */
 async function deleteGroup(){
   if(!groups[currentGroupIndex]) return;
   const g = groups[currentGroupIndex];
@@ -147,7 +157,7 @@ async function deleteGroup(){
   }
 }
 
-/* ---------------- Aulas antigas ---------------- */
+/* ---------------- Classes e alunos ---------------- */
 async function cleanupOldClasses(g){
   const hoje = todayISO();
   const limite = -10;
@@ -158,7 +168,6 @@ async function cleanupOldClasses(g){
   }
 }
 
-/* ---------------- Alunos ---------------- */
 async function addStudent(){
   const name = document.getElementById("studentName").value.trim();
   if(!name) return alert("Insert student's name");
@@ -187,6 +196,7 @@ async function removeStudent(index){
   renderClasses();
 }
 
+/* ---------------- Render Alunos ---------------- */
 function renderStudents(){
   const g = groups[currentGroupIndex];
   const t = document.getElementById("studentsTable");
@@ -203,7 +213,7 @@ function renderStudents(){
   });
 }
 
-/* ---------------- Aulas ---------------- */
+/* ---------------- Classes ---------------- */
 async function generateClasses(){
   const g = groups[currentGroupIndex];
   if(!g) return alert("Select a group");
@@ -365,83 +375,11 @@ document.getElementById("addStudentBtn").addEventListener("click",addStudent);
 document.getElementById("generateClassesBtn").addEventListener("click",generateClasses);
 document.getElementById("deleteGroupBtn").addEventListener("click",deleteGroup);
 
-// Estrutura de dados para armazenar notas e comentários
-let gradesData = {};
-
-// Botões de navegação
-const openGradesBtn = document.getElementById("openGradesPage");
-const gradesPage = document.getElementById("gradesPage");
-const studentGradesPage = document.getElementById("studentGradesPage");
-const mainApp = document.getElementById("mainApp");
-const backToMainBtn = document.getElementById("backToMain");
-const backToGradesBtn = document.getElementById("backToGrades");
-const gradesTable = document.getElementById("gradesTable");
-const studentNameTitle = document.getElementById("studentNameTitle");
-const studentComment = document.getElementById("studentComment");
-const saveCommentBtn = document.getElementById("saveCommentBtn");
-
-let currentStudent = null;
-let currentGroup = null; // vamos linkar depois com o grupo selecionado
-
-// Abrir página de notas
-openGradesBtn.addEventListener("click", () => {
-  mainApp.style.display = "none";
-  gradesPage.style.display = "block";
-  renderGradesTable();
-});
-
-// Voltar para página principal
-backToMainBtn.addEventListener("click", () => {
-  gradesPage.style.display = "none";
-  mainApp.style.display = "block";
-});
-
-// Voltar da página individual para tabela de notas
-backToGradesBtn.addEventListener("click", () => {
-  studentGradesPage.style.display = "none";
-  gradesPage.style.display = "block";
-});
-
-// Renderizar tabela de alunos com link para notas individuais
-function renderGradesTable() {
-  gradesTable.innerHTML = "<tr><th>Aluno</th><th>Ações</th></tr>";
-  
-  // Se já existir grupo selecionado, usa os alunos dele
-  if (currentGroup && students[currentGroup]) {
-    students[currentGroup].forEach(student => {
-      if (!gradesData[currentGroup]) gradesData[currentGroup] = {};
-      if (!gradesData[currentGroup][student]) {
-        gradesData[currentGroup][student] = { grades: {}, comment: "" };
-      }
-      
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td><a href="#" class="studentLink">${student}</a></td>
-        <td><button class="openStudentBtn">Ver Notas</button></td>
-      `;
-      
-      tr.querySelector(".studentLink").addEventListener("click", () => openStudentPage(student));
-      tr.querySelector(".openStudentBtn").addEventListener("click", () => openStudentPage(student));
-      
-      gradesTable.appendChild(tr);
-    });
-  }
+/* ---------------- Abrir página de Grades ---------------- */
+function openGradesPage(group){
+  localStorage.setItem("currentGroup", group.name);
+  const groupsData = JSON.parse(localStorage.getItem("groupsData") || "{}");
+  groupsData[group.name] = { students: group.students.map(s=>s.name) };
+  localStorage.setItem("groupsData", JSON.stringify(groupsData));
+  window.location.href = "grades.html";
 }
-
-// Abrir página individual do aluno
-function openStudentPage(student) {
-  currentStudent = student;
-  studentNameTitle.textContent = "Notas de " + student;
-  studentComment.value = gradesData[currentGroup][student].comment || "";
-  
-  gradesPage.style.display = "none";
-  studentGradesPage.style.display = "block";
-}
-
-// Salvar comentário do aluno
-saveCommentBtn.addEventListener("click", () => {
-  if (currentStudent && currentGroup) {
-    gradesData[currentGroup][currentStudent].comment = studentComment.value;
-    alert("Comentário salvo!");
-  }
-});
