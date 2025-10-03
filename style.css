@@ -161,6 +161,25 @@ button:hover {
   background-color: #87ceeb !important;
   font-weight: bold;
 }
+/* Responsividade da tabela */
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto; /* permite scroll horizontal em telas pequenas */
+  margin-bottom: 20px; /* espaçamento abaixo da tabela */
+}
+
+table {
+  width: 100%;
+  table-layout: fixed; /* ajusta as colunas à largura disponível */
+  border-collapse: collapse;
+}
+
+table th, table td {
+  padding: 8px;
+  text-align: center; /* ou left, conforme sua preferência */
+  word-wrap: break-word; /* quebra textos longos */
+  overflow-wrap: break-word;
+}
 
 /* ===== Media Queries: Responsividade ===== */
 
@@ -212,6 +231,13 @@ button:hover {
   .overlay-content {
     max-width: 90%;
     padding: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  table th, table td {
+    font-size: 14px; /* ajusta o texto em telas pequenas */
+    padding: 6px;
   }
 }
 
