@@ -1,6 +1,6 @@
 /* ---------------- Firestore Setup ---------------- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const firebaseConfig = {
@@ -16,251 +16,185 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-/* ---------------- Variáveis globais ---------------- */
 let currentGroupName = localStorage.getItem("currentGroup");
 let currentGroupData = null;
 
-const groupCategories = {
-  Kids: {
+/* ---------------- Levels Config ---------------- */
+const levelsConfig = {
+  "Kids": {
     categories: [
-      "PARTICIPATION IN CLASS",
-      "LANGUAGE COMPREHENSION",
-      "LANGUAGE PRODUCTION",
-      "RESPECTS RULES",
-      "TEAMWORK",
-      "HOMEWORK",
-      "ABSENCES"
+      "Participation in Class",
+      "Language Comprehension",
+      "Language Production",
+      "Respects Rules",
+      "Teamwork",
+      "Homework",
+      "Absences"
     ],
-    concepts: conceptsKids
+    concepts: ["AA","MT","ST","R"],
+    conceptLegend: "AA=Almost Always, MT=Most of Time, ST=Some of Time, R=Rarely"
   },
-
-  Juniors: {
+  "Juniors": {
     categories: [
-      "PARTICIPATION IN CLASS",
-      "ENGAGE IN CONVERSATIONS AND RESPOND PROPERLY",
-      "ENGAGEMENT IN STORYTELLING ACTIVITIES",
-      "BE KIND, RESPECTFUL, AND HELPFUL",
-      "AUTONOMY TO DO TASKS AND USE MATERIALS",
-      "REGULAR COMPLETION OF HOMEWORK",
-      "USE KEYWORDS AND SHORT SENTENCES IN WRITING",
-      "ORAL SPELLING",
-      "ABSENCES"
+      "Participation in Class",
+      "Engage in Conversations and Respond Properly",
+      "Engagement in Storytelling Activities",
+      "Be Kind, Respectful, and Helpful",
+      "Autonomy to do Tasks and Use Materials",
+      "Regular Completion of Homework",
+      "Use Keywords and Short Sentences in Writing",
+      "Oral Spelling",
+      "Absences"
     ],
-    concepts: conceptsJuniors
+    concepts: ["AA","MT","ST","R"],
+    conceptLegend: "AA=Almost Always, MT=Most of Time, ST=Some of Time, R=Rarely"
   },
-
-  Juniors1_2: {
+  "Juniors1-2": {
     categories: [
-      "PARTICIPATION IN CLASS",
-      "LISTENING",
-      "SPEAKING",
-      "READING",
-      "WRITING",
-      "RESPECTS RULES",
-      "COOPERATION WITH PEERS",
-      "WORKS INDEPENDENTLY OF THE TEACHER",
-      "CARE WITH MATERIAL",
-      "HOMEWORK",
-      "ABSENCES"
+      "Participation in Class","Listening","Speaking","Reading","Writing",
+      "Respects Rules","Cooperation with Peers","Works Independently",
+      "Care with Material","Homework","Absences"
     ],
-    concepts: conceptsJuniors12,
-    tests: ["LISTENING TEST", "READING & UoE TEST", "WRITING TEST", "SPEAKING TEST"]
+    concepts: ["E","VG","G","S","NI"],
+    conceptLegend: "E=Excellent, VG=Very Good, G=Good, S=Satisfactory, NI=Needs Improvement"
   },
-
-  TeensA1_2: {
+  "TeensA1-2": {
     categories: [
-      "PARTICIPATION IN CLASS",
-      "LISTENING",
-      "SPEAKING",
-      "READING",
-      "WRITING",
-      "RESPECTS RULES",
-      "COOPERATION WITH PEERS",
-      "WORKS INDEPENDENTLY OF THE TEACHER",
-      "CARE WITH MATERIAL",
-      "HOMEWORK",
-      "ABSENCES",
-      "PORTFOLIO 1"
-      "PORTFOLIO 2"
-      "PORTFOLIO 3"
-      "PORTFOLIO 4"
-      "PORTFOLIO 5"
-      "PORTFOLIO 6"
-      "PORTFOLIO 7"
+      "Participation in Class","Listening","Speaking","Reading","Writing",
+      "Respects Rules","Cooperation with Peers","Works Independently",
+      "Care with Material","Homework","Absences","Portfolio"
     ],
-    concepts: conceptsTeens,
-    tests: ["LISTENING TEST", "READING & UoE TEST", "WRITING TEST", "SPEAKING TEST"]
+    concepts: ["E","VG","G","S","NI"],
+    conceptLegend: "E=Excellent, VG=Very Good, G=Good, S=Satisfactory, NI=Needs Improvement"
   },
-
-  Teens3_6: {
+  "Teens3-6": {
     categories: [
-      "PARTICIPATION IN CLASS",
-      "LISTENING",
-      "SPEAKING",
-      "READING",
-      "WRITING",
-      "RESPECTS RULES",
-      "COOPERATION WITH PEERS",
-      "WORKS INDEPENDENTLY OF THE TEACHER",
-      "CARE WITH MATERIAL",
-      "HOMEWORK",
-      "ABSENCES",
-      "PORTFOLIO 1"
-      "PORTFOLIO 2"
-      "PORTFOLIO 3"
-      "PORTFOLIO 4"
-      "PORTFOLIO 5"
-      "PORTFOLIO 6"
-      "PORTFOLIO 7"
-      "PORTFOLIO 8"
-      "PORTFOLIO 9"
-      "PORTFOLIO 10"
-      "PROJECT 1",
-      "PROJECT 2"
+      "Participation in Class","Listening","Speaking","Reading","Writing",
+      "Respects Rules","Cooperation with Peers","Works Independently",
+      "Care with Material","Homework","Absences","Portfolio","Project1","Project2"
     ],
-    concepts: conceptsTeens,
-    tests: ["LISTENING TEST", "READING & UoE TEST", "WRITING TEST", "SPEAKING TEST"]
+    concepts: ["E","VG","G","S","NI"],
+    conceptLegend: "E=Excellent, VG=Very Good, G=Good, S=Satisfactory, NI=Needs Improvement"
   }
 };
 
-const conceptsKids = ["AA", "MT", "ST", "R"];
-const conceptsJuniors = ["AA", "MT", "ST", "R"];
-const conceptsJuniors12 = ["E", "VG", "G", "S", "NI"];
-const conceptsTeens = ["E", "VG", "G", "S", "NI"];
 /* ---------------- Auth ---------------- */
-onAuthStateChanged(auth, (user) => {
-  if (!user) {
+onAuthStateChanged(auth, user=>{
+  if(!user){
     alert("You must be logged in to access grades");
-    window.location.href = "index.html";
+    window.location.href="index.html";
   }
 });
 
-/* ---------------- Botão Home ---------------- */
-const backBtn = document.getElementById("backBtn");
-if (backBtn) {
-  backBtn.addEventListener("click", () => {
-    window.location.href = "index.html";
-  });
-}
+/* ---------------- Navigation ---------------- */
+document.getElementById("backBtn").addEventListener("click", ()=>{
+  window.location.href="index.html";
+});
 
-/* ---------------- Load Group Data ---------------- */
+/* ---------------- Load Group ---------------- */
 async function loadGroupGrades() {
-  if (!currentGroupName) {
-    alert("No group selected");
-    return;
-  }
+  if(!currentGroupName) return alert("No group selected");
 
-  try {
-    const docRef = doc(db, "groups", currentGroupName);
-    const docSnap = await getDoc(docRef);
+  const docRef = doc(db,"groups",currentGroupName);
+  const docSnap = await getDoc(docRef);
 
-    if (docSnap.exists()) {
-      currentGroupData = docSnap.data();
-      document.getElementById("groupTitle").innerText = `Grades - ${currentGroupName}`;
-      renderGradesTable();
-    } else {
-      alert("Group not found in Firestore");
-    }
-  } catch (err) {
-    console.error("Error loading group:", err);
+  if(docSnap.exists()){
+    currentGroupData = docSnap.data();
+    document.getElementById("groupTitle").innerText = `Grades - ${currentGroupName}`;
+    renderGradesTable();
+  } else {
+    alert("Group not found");
   }
 }
 
 /* ---------------- Render Table ---------------- */
 function renderGradesTable() {
-  if (!currentGroupData || !currentGroupData.students) return;
-
   const tbody = document.querySelector("#gradesTable tbody");
-  tbody.innerHTML = "";
+  tbody.innerHTML="";
 
-  currentGroupData.students.forEach((s) => {
+  // Determine level configuration
+  let level = currentGroupData.level || "Kids";
+  if(level === "Kids1" || level === "Kids2") level = "Kids";
+  if(level === "Juniors1" || level==="Juniors2") level = "Juniors1-2";
+  const cfg = levelsConfig[level] || levelsConfig["Kids"];
+
+  // Render header dynamically
+  const theadRow = document.querySelector("#gradesTable thead tr");
+  theadRow.innerHTML="<th>Student</th>";
+  cfg.categories.forEach(c => {
+    const th = document.createElement("th");
+    th.innerText = c;
+    theadRow.appendChild(th);
+  });
+
+  document.getElementById("conceptLegend").innerText = cfg.conceptLegend;
+
+  currentGroupData.students.forEach((s,i)=>{
     const row = tbody.insertRow();
-
-    // Nome do aluno
     const nameCell = row.insertCell(0);
     nameCell.innerText = s.name;
-    nameCell.style.cursor = "pointer";
-    nameCell.addEventListener("click", () => openStudentPage(s.name));
 
-    // Categorias
-    categories.forEach((cat) => {
+    cfg.categories.forEach(cat=>{
       const cell = row.insertCell();
       const select = document.createElement("select");
-
-      concepts.forEach((c) => {
+      cfg.concepts.forEach(c=>{
         const opt = document.createElement("option");
         opt.value = c;
         opt.innerText = c;
         select.appendChild(opt);
       });
-
-      // Preencher se já existir nota
-      if (s.grades && s.grades[cat]) {
-        select.value = s.grades[cat];
-      }
-
+      if(s.grades && s.grades[cat]) select.value = s.grades[cat];
       cell.appendChild(select);
     });
   });
 }
 
 /* ---------------- Save Grades ---------------- */
-const saveBtn = document.getElementById("saveGradesBtn");
-if (saveBtn) {
-  saveBtn.addEventListener("click", async () => {
-    if (!currentGroupData) return;
+document.getElementById("saveGradesBtn").addEventListener("click", async ()=>{
+  let level = currentGroupData.level || "Kids";
+  if(level === "Kids1" || level === "Kids2") level = "Kids";
+  if(level === "Juniors1" || level==="Juniors2") level = "Juniors1-2";
+  const cfg = levelsConfig[level] || levelsConfig["Kids"];
 
-    const tbody = document.querySelector("#gradesTable tbody");
-    tbody.querySelectorAll("tr").forEach((row, i) => {
-      const student = currentGroupData.students[i];
-      if (!student.grades) student.grades = {};
-
-      categories.forEach((cat, j) => {
-        const sel = row.cells[j + 1].querySelector("select");
-        student.grades[cat] = sel.value;
-      });
+  const tbody = document.querySelector("#gradesTable tbody");
+  tbody.querySelectorAll("tr").forEach((row,i)=>{
+    const student = currentGroupData.students[i];
+    if(!student.grades) student.grades = {};
+    cfg.categories.forEach((cat,j)=>{
+      const sel = row.cells[j+1].querySelector("select");
+      student.grades[cat] = sel.value;
     });
-
-    try {
-      const docRef = doc(db, "groups", currentGroupName);
-      await updateDoc(docRef, { students: currentGroupData.students });
-      alert("Grades saved!");
-    } catch (err) {
-      console.error("Error saving grades:", err);
-    }
   });
-}
+
+  const docRef = doc(db,"groups",currentGroupName);
+  await updateDoc(docRef, {students: currentGroupData.students});
+  alert("Grades saved!");
+});
 
 /* ---------------- Export CSV ---------------- */
-const exportBtn = document.getElementById("exportExcelBtn");
-if (exportBtn) {
-  exportBtn.addEventListener("click", () => {
-    if (!currentGroupData) return;
+document.getElementById("exportExcelBtn").addEventListener("click", ()=>{
+  let level = currentGroupData.level || "Kids";
+  if(level === "Kids1" || level === "Kids2") level = "Kids";
+  if(level === "Juniors1" || level==="Juniors2") level = "Juniors1-2";
+  const cfg = levelsConfig[level] || levelsConfig["Kids"];
 
-    let csv = "Student," + categories.join(",") + "\n";
-    currentGroupData.students.forEach((s) => {
-      const line = [s.name];
-      categories.forEach((cat) =>
-        line.push(s.grades && s.grades[cat] ? s.grades[cat] : "")
-      );
-      csv += line.join(",") + "\n";
+  let csv = "Student," + cfg.categories.join(",") + "\n";
+  currentGroupData.students.forEach(s=>{
+    const line = [s.name];
+    cfg.categories.forEach(cat=>{
+      line.push(s.grades && s.grades[cat] ? s.grades[cat] : "");
     });
-
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${currentGroupName}_grades.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    csv += line.join(",") + "\n";
   });
-}
 
-/* ---------------- Student Page ---------------- */
-function openStudentPage(studentName) {
-  localStorage.setItem("currentStudent", studentName);
-  window.location.href = "student.html"; // futura página
-}
+  const blob = new Blob([csv],{type:"text/csv"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${currentGroupName}_grades.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+});
 
 /* ---------------- Init ---------------- */
 loadGroupGrades();
