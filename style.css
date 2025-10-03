@@ -127,7 +127,7 @@ th, td {
 /* ===========================
    AJUSTES PARA TELAS MUITO PEQUENAS
 =========================== */
-@media (max-width: 400px) {
+@media (max-width: 480px) {
   .table-wrapper td {
     font-size: 14px;
     padding: 6px 8px;
