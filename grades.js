@@ -88,12 +88,6 @@ async function loadGroupGrades() {
   window.categories = getCategoriesForLevel(currentGroupData.level || "default");
   
   renderGradesTable();
-}
-
-  } else {
-    alert("Group not found");
-  }
-}
 
 /* ---------------- Render Table ---------------- */
 function renderGradesTable() {
