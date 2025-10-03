@@ -38,6 +38,10 @@ onAuthStateChanged(auth, user => {
     window.location.href = "index.html";
   }
 });
+document.getElementById("backBtn").addEventListener("click", () => {
+  window.location.href = "index.html";
+});
+
 
 /* ---------------- Load Group Data ---------------- */
 async function loadGroupGrades() {
