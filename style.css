@@ -34,33 +34,73 @@ input, select, button {
   padding: 5px 10px;
 }
 
-table {
-  border-collapse: collapse;
-  margin-top: 10px;
+
+/* Tabela para desktop */
+.table-wrapper {
   width: 100%;
+  overflow-x: auto; /* scroll horizontal só em desktop se necessário */
+  margin-top: 20px;
 }
 
-table, th, td {
-  border: 1px solid #aaa;
-  padding: 5px;
-  text-align: center;
-}
-
-th {
-  background: #e6e6e6;
-}
-
-tr:nth-child(even) {
-  background: #fafafa;
-}
-#gradesPage table, #gradesPage th, #gradesPage td {
-  border: 1px solid #aaa;
+table {
+  width: 100%;
   border-collapse: collapse;
-  padding: 5px;
+  table-layout: auto;
 }
 
-#gradesPage th {
-  background: #e6e6e6;
+th, td {
+  padding: 10px;
+  text-align: left;
+  border: 1px solid #ccc;
+}
+
+/* Cards responsivos para telas pequenas */
+@media (max-width: 768px) {
+  .table-wrapper table,
+  .table-wrapper thead,
+  .table-wrapper tbody,
+  .table-wrapper th,
+  .table-wrapper td,
+  .table-wrapper tr {
+    display: block;
+  }
+
+  .table-wrapper thead tr {
+    display: none; /* esconde cabeçalho em mobile */
+  }
+
+  .table-wrapper tbody tr {
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 10px;
+    background-color: #fafafa;
+  }
+
+  .table-wrapper td {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 10px;
+    border-bottom: 1px solid #eee;
+  }
+
+  .table-wrapper td::before {
+    content: attr(data-label);
+    font-weight: bold;
+    flex: 1;
+  }
+
+  .table-wrapper td:last-child {
+    border-bottom: 0;
+  }
+}
+
+/* Ajustes de texto em telas muito pequenas */
+@media (max-width: 400px) {
+  .table-wrapper td {
+    font-size: 14px;
+    padding: 6px 8px;
+  }
 }
 /* ===== Topbar ===== */
 .topbar {
@@ -161,25 +201,6 @@ button:hover {
   background-color: #87ceeb !important;
   font-weight: bold;
 }
-/* Responsividade da tabela */
-.table-wrapper {
-  width: 100%;
-  overflow-x: auto; /* permite scroll horizontal em telas pequenas */
-  margin-bottom: 20px; /* espaçamento abaixo da tabela */
-}
-
-table {
-  width: 100%;
-  table-layout: fixed; /* ajusta as colunas à largura disponível */
-  border-collapse: collapse;
-}
-
-table th, table td {
-  padding: 8px;
-  text-align: center; /* ou left, conforme sua preferência */
-  word-wrap: break-word; /* quebra textos longos */
-  overflow-wrap: break-word;
-}
 
 /* ===== Media Queries: Responsividade ===== */
 
@@ -219,10 +240,6 @@ table th, table td {
     font-size: 12px;
   }
 
-  table {
-    font-size: 12px;
-  }
-
   input, select, button {
     width: 100%;
     box-sizing: border-box;
@@ -231,13 +248,6 @@ table th, table td {
   .overlay-content {
     max-width: 90%;
     padding: 15px;
-  }
-}
-
-@media (max-width: 768px) {
-  table th, table td {
-    font-size: 14px; /* ajusta o texto em telas pequenas */
-    padding: 6px;
   }
 }
 
@@ -254,5 +264,9 @@ table th, table td {
 
   .delete-group-btn {
     width: 100%;
+  }
+  .table-wrapper td {
+    font-size: 14px;
+    padding: 6px 8px;
   }
 }
