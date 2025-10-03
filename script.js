@@ -134,28 +134,54 @@ function renderGroupButtons(){
       openGradesPage(g);
     });
 
-    // Drag & Drop - rearrange order
-    btn.addEventListener("dragstart", e=>{
-      e.dataTransfer.setData("index", i);
-    });
-    btn.addEventListener("dragover", e=>e.preventDefault());
-    btn.addEventListener("drop", async e=>{
-      const from = +e.dataTransfer.getData("index");
-      const to = i;
-      if (Number.isNaN(from)) return;
-      const moved = groups.splice(from,1)[0];
-      groups.splice(to,0,moved);
-      groups.forEach((gg, idx) => gg.order = idx);
-      // persist orders
-      for(const gg of groups){
-        try {
-          await updateDoc(doc(db,"groups",gg.name), { order: gg.order });
-        } catch(err){
-          console.warn("Não foi possível atualizar ordem no Firestore (pode ser inexistente):", err);
-        }
+  async function sortGroupsByTypeAndName() {
+  if (!Array.isArray(groups)) return;
+  // cria array de objetos para ordenar
+  const annotated = groups.map(g => {
+    const typeKey = g.type || inferTypeFromName(g.name || "");
+    // encontra índice na priorityOrder, se não encontrado retorna grande (coloca no final)
+    const idx = priorityOrder.indexOf(typeKey) !== -1 ? priorityOrder.indexOf(typeKey) : Number.MAX_SAFE_INTEGER;
+    return { g, typeKey, priorityIndex: idx };
+  });
+
+  // ordenar por priorityIndex, depois por nome (alfabético)
+  annotated.sort((a,b) => {
+    if (a.priorityIndex !== b.priorityIndex) return a.priorityIndex - b.priorityIndex;
+    const an = (a.g.name || "").toLowerCase();
+    const bn = (b.g.name || "").toLowerCase();
+    if (an < bn) return -1;
+    if (an > bn) return 1;
+    return 0;
+  });
+
+  // aplicar nova ordem e persistir se necessário
+  const updates = [];
+  annotated.forEach((item, index) => {
+    const g = item.g;
+    if (g.order !== index) {
+      g.order = index;
+      // persiste alteração
+      updates.push({ name: g.name, order: index });
+    }
+  });
+
+  // reorder groups array to reflect sorted order
+  groups = annotated.map(a => a.g);
+
+  // persiste no Firestore (somente os que mudaram)
+  for (const up of updates) {
+    try {
+      await updateDoc(doc(db, "groups", up.name), { order: up.order });
+    } catch (err) {
+      // se usar doc id diferente, tente por id e por name
+      try {
+        await updateDoc(doc(db, "groups", up.name), { order: up.order });
+      } catch (e) {
+        console.warn("Não foi possível salvar order para", up.name, e);
       }
-      renderGroupButtons();
-    });
+    }
+  }
+}
 
     container.appendChild(btn);
   });
