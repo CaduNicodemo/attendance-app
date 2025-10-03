@@ -3,44 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Grades - Kids</title>
+  <title>Grades</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
     <h1 id="groupTitle">Grades</h1>
-<button id="backBtn">🏠</button>
-    <div id="legend">  
-
-      <strong>Legend:</strong>
-      <ul>
-        <li>AA: Almost Always</li>
-        <li>MT: Most of Time</li>
-        <li>ST: Some of the Time</li>
-        <li>R: Rarely</li>
-      </ul>
-    </div>
-
-    <table id="gradesTable">
+    <button id="backBtn">🏠 Home</button>
+    <table id="gradesTable" border="1">
       <thead>
         <tr>
           <th>Student</th>
-          <th>Participation</th>
-          <th>Language Comprehension</th>
-          <th>Language Production</th>
-          <th>Respects Rules</th>
-          <th>Teamwork</th>
-          <th>Homework</th>
-          <th>Absences</th>
+          <!-- Categories serão inseridas dinamicamente -->
         </tr>
       </thead>
       <tbody></tbody>
     </table>
-
     <button id="saveGradesBtn">Save Grades</button>
-    <button id="exportExcelBtn">Export to Excel</button>
+    <button id="exportExcelBtn">Export CSV</button>
+    <div id="conceptLegend"></div>
   </div>
-
   <script type="module" src="grades.js"></script>
 </body>
 </html>
