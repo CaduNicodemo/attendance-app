@@ -9,7 +9,6 @@ import { getFirestore, collection, doc, setDoc, getDoc, getDocs, updateDoc, dele
 // Importa auth e db do config.js (já inicializados)
 import { auth, db } from "./config.js";
 
-
 let currentGroupName = localStorage.getItem("currentGroup");
 let currentGroupData = null;
 
