@@ -1,110 +1,45 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Grades - Kids</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <h1>Kids - Grades</h1>
-    <button id="logoutBtn">Logout</button>
-  </header>
+  <div class="container">
+    <h1 id="groupTitle">Grades</h1>
 
-  <main>
-    <section id="classInfo">
-      <h2>Class: Kids 1A</h2>
-      <p>Student list will be shown here</p>
-    </section>
-
-    <section id="gradesSection">
-      <h2>Student Grades</h2>
-      
-      <!-- Tabela exemplo para teste -->
-      <table border="1">
-        <thead>
-          <tr>
-            <th>Student</th>
-            <th>PARTICIPATION</th>
-            <th>COMPREHENSION</th>
-            <th>PRODUCTION</th>
-            <th>RESPECTS RULES</th>
-            <th>TEAMWORK</th>
-            <th>HOMEWORK</th>
-            <th>ABSENCES</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Student 1</td>
-            <td>
-              <select>
-                <option>AA</option>
-                <option>MT</option>
-                <option>ST</option>
-                <option>R</option>
-              </select>
-            </td>
-            <td>
-              <select>
-                <option>AA</option>
-                <option>MT</option>
-                <option>ST</option>
-                <option>R</option>
-              </select>
-            </td>
-            <td>
-              <select>
-                <option>AA</option>
-                <option>MT</option>
-                <option>ST</option>
-                <option>R</option>
-              </select>
-            </td>
-            <td>
-              <select>
-                <option>AA</option>
-                <option>MT</option>
-                <option>ST</option>
-                <option>R</option>
-              </select>
-            </td>
-            <td>
-              <select>
-                <option>AA</option>
-                <option>MT</option>
-                <option>ST</option>
-                <option>R</option>
-              </select>
-            </td>
-            <td>
-              <select>
-                <option>AA</option>
-                <option>MT</option>
-                <option>ST</option>
-                <option>R</option>
-              </select>
-            </td>
-            <td>
-              <input type="number" min="0" max="30" value="0">
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
-
-    <section id="legend">
-      <h3>Legend</h3>
+    <div id="legend">
+      <strong>Legend:</strong>
       <ul>
-        <li><strong>AA</strong> – Almost Always</li>
-        <li><strong>MT</strong> – Most of the time</li>
-        <li><strong>ST</strong> – Some of the time</li>
-        <li><strong>R</strong> – Rarely</li>
+        <li>AA: Almost Always</li>
+        <li>MT: Most of Time</li>
+        <li>ST: Some of the Time</li>
+        <li>R: Rarely</li>
       </ul>
-    </section>
-  </main>
+    </div>
 
-  <script src="script.js"></script>
+    <table id="gradesTable">
+      <thead>
+        <tr>
+          <th>Student</th>
+          <th>Participation</th>
+          <th>Language Comprehension</th>
+          <th>Language Production</th>
+          <th>Respects Rules</th>
+          <th>Teamwork</th>
+          <th>Homework</th>
+          <th>Absences</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <button id="saveGradesBtn">Save Grades</button>
+    <button id="exportExcelBtn">Export to Excel</button>
+  </div>
+
+  <script type="module" src="grades.js"></script>
 </body>
 </html>
