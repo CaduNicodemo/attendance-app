@@ -1,4 +1,4 @@
-// Firebase Auth
+// Firebase Auth 
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } 
   from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
@@ -125,10 +125,12 @@ function renderGradesTable() {
   currentGroupData.students.forEach((s,i)=>{
     const row = tbody.insertRow();
     const nameCell = row.insertCell(0);
+    nameCell.setAttribute("data-label","Student");
     nameCell.innerText = s.name;
 
     cfg.categories.forEach(cat=>{
       const cell = row.insertCell();
+      cell.setAttribute("data-label", cat);
       const select = document.createElement("select");
       cfg.concepts.forEach(c=>{
         const opt = document.createElement("option");
