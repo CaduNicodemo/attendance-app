@@ -383,3 +383,12 @@ function openGradesPage(group){
   localStorage.setItem("groupsData", JSON.stringify(groupsData));
   window.location.href = "grades.html";
 }
+document.getElementById("openGradesBtn").addEventListener("click", () => {
+  if(groups[currentGroupIndex]){
+    localStorage.setItem("currentGroup", groups[currentGroupIndex].name);
+    window.location.href = "grades.html";
+  } else {
+    alert("Select a group first!");
+  }
+});
+
