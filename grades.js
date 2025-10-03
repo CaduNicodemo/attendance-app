@@ -19,15 +19,46 @@ const auth = getAuth(app);
 let currentGroupName = localStorage.getItem("currentGroup");
 let currentGroupData = null;
 
-const categories = [
-  "Participation in Class",
-  "Language Comprehension",
-  "Language Production",
-  "Respects Rules",
-  "Teamwork",
-  "Homework",
-  "Absences"
-];
+function getCategoriesForLevel(level) {
+  switch (level) {
+    case "Kids1":
+    case "Kids2":
+      return [
+        "Participation in Class",
+        "Language Comprehension",
+        "Language Production",
+        "Respects Rules",
+        "Teamwork",
+        "Homework",
+        "Absences"
+      ];
+    case "Juniors":
+    case "Juniors1":
+    case "Juniors2":
+      return [
+        "Oral Test",
+        "Writing",
+        "Listening",
+        "Final Project"
+      ];
+    case "TeensA":
+    case "Teens1":
+    case "Teens2":
+    case "Teens3":
+    case "Teens4":
+    case "Teens5":
+    case "Teens6":
+      return [
+        "Oral Test",
+        "Writing",
+        "Listening",
+        "Reading",
+        "Final Project"
+      ];
+    default:
+      return ["Oral Test", "Final Project"];
+  }
+}
 
 const concepts = ["AA","MT","ST","R"];
 
@@ -49,10 +80,16 @@ async function loadGroupGrades() {
 
   const docRef = doc(db, "groups", currentGroupName);
   const docSnap = await getDoc(docRef);
-  if(docSnap.exists()){
-    currentGroupData = docSnap.data();
-    document.getElementById("groupTitle").innerText = `Grades - ${currentGroupName}`;
-    renderGradesTable();
+  if (docSnap.exists()) {
+  currentGroupData = docSnap.data();
+  document.getElementById("groupTitle").innerText = `Grades - ${currentGroupName}`;
+  
+  // 🔹 Define categories dinamicamente com base no level salvo no Firestore
+  window.categories = getCategoriesForLevel(currentGroupData.level || "default");
+  
+  renderGradesTable();
+}
+
   } else {
     alert("Group not found");
   }
