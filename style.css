@@ -22,7 +22,12 @@ header {
   gap: 10px;
   margin-bottom: 20px;
 }
-
+.group-button{
+  padding: .5rem;
+  font-weight: bold;
+  color: white;
+  text-align: center;
+}
 .buttons {
   display: flex;
   gap: 10px;
