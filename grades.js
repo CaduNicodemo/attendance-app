@@ -20,18 +20,113 @@ const auth = getAuth(app);
 let currentGroupName = localStorage.getItem("currentGroup");
 let currentGroupData = null;
 
-const categories = [
-  "Participation in Class",
-  "Language Comprehension",
-  "Language Production",
-  "Respects Rules",
-  "Teamwork",
-  "Homework",
-  "Absences"
-];
+const groupCategories = {
+  Kids: {
+    categories: [
+      "PARTICIPATION IN CLASS",
+      "LANGUAGE COMPREHENSION",
+      "LANGUAGE PRODUCTION",
+      "RESPECTS RULES",
+      "TEAMWORK",
+      "HOMEWORK",
+      "ABSENCES"
+    ],
+    concepts: conceptsKids
+  },
 
-const concepts = ["AA", "MT", "ST", "R"];
+  Juniors: {
+    categories: [
+      "PARTICIPATION IN CLASS",
+      "ENGAGE IN CONVERSATIONS AND RESPOND PROPERLY",
+      "ENGAGEMENT IN STORYTELLING ACTIVITIES",
+      "BE KIND, RESPECTFUL, AND HELPFUL",
+      "AUTONOMY TO DO TASKS AND USE MATERIALS",
+      "REGULAR COMPLETION OF HOMEWORK",
+      "USE KEYWORDS AND SHORT SENTENCES IN WRITING",
+      "ORAL SPELLING",
+      "ABSENCES"
+    ],
+    concepts: conceptsJuniors
+  },
 
+  Juniors1_2: {
+    categories: [
+      "PARTICIPATION IN CLASS",
+      "LISTENING",
+      "SPEAKING",
+      "READING",
+      "WRITING",
+      "RESPECTS RULES",
+      "COOPERATION WITH PEERS",
+      "WORKS INDEPENDENTLY OF THE TEACHER",
+      "CARE WITH MATERIAL",
+      "HOMEWORK",
+      "ABSENCES"
+    ],
+    concepts: conceptsJuniors12,
+    tests: ["LISTENING TEST", "READING & UoE TEST", "WRITING TEST", "SPEAKING TEST"]
+  },
+
+  TeensA1_2: {
+    categories: [
+      "PARTICIPATION IN CLASS",
+      "LISTENING",
+      "SPEAKING",
+      "READING",
+      "WRITING",
+      "RESPECTS RULES",
+      "COOPERATION WITH PEERS",
+      "WORKS INDEPENDENTLY OF THE TEACHER",
+      "CARE WITH MATERIAL",
+      "HOMEWORK",
+      "ABSENCES",
+      "PORTFOLIO 1"
+      "PORTFOLIO 2"
+      "PORTFOLIO 3"
+      "PORTFOLIO 4"
+      "PORTFOLIO 5"
+      "PORTFOLIO 6"
+      "PORTFOLIO 7"
+    ],
+    concepts: conceptsTeens,
+    tests: ["LISTENING TEST", "READING & UoE TEST", "WRITING TEST", "SPEAKING TEST"]
+  },
+
+  Teens3_6: {
+    categories: [
+      "PARTICIPATION IN CLASS",
+      "LISTENING",
+      "SPEAKING",
+      "READING",
+      "WRITING",
+      "RESPECTS RULES",
+      "COOPERATION WITH PEERS",
+      "WORKS INDEPENDENTLY OF THE TEACHER",
+      "CARE WITH MATERIAL",
+      "HOMEWORK",
+      "ABSENCES",
+      "PORTFOLIO 1"
+      "PORTFOLIO 2"
+      "PORTFOLIO 3"
+      "PORTFOLIO 4"
+      "PORTFOLIO 5"
+      "PORTFOLIO 6"
+      "PORTFOLIO 7"
+      "PORTFOLIO 8"
+      "PORTFOLIO 9"
+      "PORTFOLIO 10"
+      "PROJECT 1",
+      "PROJECT 2"
+    ],
+    concepts: conceptsTeens,
+    tests: ["LISTENING TEST", "READING & UoE TEST", "WRITING TEST", "SPEAKING TEST"]
+  }
+};
+
+const conceptsKids = ["AA", "MT", "ST", "R"];
+const conceptsJuniors = ["AA", "MT", "ST", "R"];
+const conceptsJuniors12 = ["E", "VG", "G", "S", "NI"];
+const conceptsTeens = ["E", "VG", "G", "S", "NI"];
 /* ---------------- Auth ---------------- */
 onAuthStateChanged(auth, (user) => {
   if (!user) {
