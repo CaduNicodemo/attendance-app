@@ -392,11 +392,8 @@ function openGradesPage(group){
   window.location.href = "grades.html";
 }
 document.getElementById("openGradesBtn").addEventListener("click", () => {
-  if(groups[currentGroupIndex]){
-    localStorage.setItem("currentGroup", groups[currentGroupIndex].name);
-    window.location.href = "grades.html";
-  } else {
-    alert("Select a group first!");
-  }
+    const selectedGroup = document.getElementById("groupSelect").value;
+  if(!selectedGroup) return alert("Selecione uma turma");
+  localStorage.setItem("currentGroup", selectedGroup);
+  window.location.href = "grades.html";
 });
-
