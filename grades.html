@@ -3,29 +3,38 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Grades</title>
+  <title>Grades - Attendance App</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
-    <h1 id="groupTitle">Grades</h1>
-    <button id="backBtn">🏠 Home</button>
+    <header>
+      <h1 id="groupTitle">Grades</h1>
+      <div class="buttons">
+        <button id="backBtn">Back</button>
+        <button id="saveGradesBtn">Save Grades</button>
+        <button id="exportExcelBtn">Export CSV</button>
+      </div>
+      <p id="conceptLegend"></p>
+    </header>
+
     <div class="table-wrapper">
-      <table id="gradesTable" border="1">
-      <thead>
-        <tr>
-          <th>Student</th>
-          <!-- Categories serão inseridas dinamicamente -->
-        </tr>
-      </thead>
-      <tbody></tbody>
+      <table id="gradesTable">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <!-- Cabeçalho será preenchido dinamicamente pelo grades.js -->
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Linhas serão preenchidas dinamicamente pelo grades.js -->
+        </tbody>
       </table>
     </div>
-    <button id="saveGradesBtn">Save Grades</button>
-    <button id="exportExcelBtn">Export CSV</button>
-    <div id="conceptLegend"></div>
   </div>
-<script type="module" src="config.js"></script>
-<script type="module" src="grades.js"></script>
+
+  <!-- Scripts -->
+  <script type="module" src="./config.js"></script>
+  <script type="module" src="./grades.js"></script>
 </body>
 </html>
