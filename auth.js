@@ -16,7 +16,7 @@ const registerMsg = document.getElementById("registerMsg");
 onAuthStateChanged(auth, (user) => {
     currentUser = user;
     if (!user) {
-        window.location.href = "login.html";
+        window.location.href = "index.html";
     }
 });
 // Mostrar/ocultar seções
