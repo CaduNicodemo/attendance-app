@@ -1,6 +1,9 @@
 import { 
-  auth, db, 
-  createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut,
+  auth, db,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
   doc, setDoc, getDoc, serverTimestamp
 } from "./config.js";
 
