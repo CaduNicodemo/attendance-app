@@ -1,111 +1,255 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Attendance and Homework</title>
-  <link rel="icon" type="image/png" href="favicon.png">
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>Attendance and Homework</title>
+    <link rel="icon" type="image/png" href="BC89276E-5621-4B42-8A58-72CF3D6013CC.png">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .container {
+            max-width: 900px;
+            width: 100%;
+            padding: 20px;
+            margin: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        h1,
+        h2,
+        h3 {
+            color: #333;
+        }
+        
+        input,
+        select,
+        button {
+            margin: 5px;
+            padding: 5px 10px;
+        }
+        
+        table {
+            border-collapse: collapse;
+            margin-top: 10px;
+            width: 100%;
+        }
+        
+        table,
+        th,
+        td {
+            border: 1px solid #aaa;
+            padding: 5px;
+            text-align: center;
+        }
+        
+        th {
+            background: #e6e6e6;
+        }
+        
+        tr:nth-child(even) {
+            background: #fafafa;
+        }
+        
+        .group-buttons {
+            margin: 10px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .group-button {
+            flex: 1 1 calc(20% - 10px);
+            min-width: 120px;
+            max-width: 180px;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #555;
+            cursor: pointer;
+            text-align: center;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            z-index: 1000;
+        }
+        
+        .overlay-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        button:hover {
+            opacity: 0.9;
+        }
+        
+        .delete-group-btn {
+            background: #d9534f;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        /* Destaque da aula de hoje */
+        
+        .today-class {
+            background-color: #026fff !important;
+            font-weight: bold;
+        }
+    </style>
 </head>
+
 <body>
-  <!-- Área de login -->
-  <div id="loginSection" style="display:flex; flex-direction:column; gap:10px; max-width:300px; margin:auto;">
-    <h2>Login</h2>
-    <input id="loginEmail" type="email" placeholder="Email">
-    <input id="loginPassword" type="password" placeholder="Senha">
-    <button id="loginBtn">Entrar</button>
-    <p id="loginMsg" style="color:red;"></p>
-  </div>
-  <!-- Área de registro -->
-<div id="registerSection" style="display:none; flex-direction:column; gap:10px; max-width:300px; margin:auto;">
-  <h2>Cadastro</h2>
-  <input id="registerName" type="text" placeholder="Nome completo">
-  <input id="registerEmail" type="email" placeholder="Email">
-  <input id="registerPassword" type="password" placeholder="Senha">
-  <button id="registerBtn">Registrar</button>
-  <p id="registerMsg" style="color:red;"></p>
-  <p style="text-align:center;">
-    Já tem conta? <a href="#" id="showLogin">Entrar</a>
-  </p>
-</div>
-
-<!-- Link para trocar -->
-<p style="text-align:center; margin-top:10px;">
-  Novo por aqui? <a href="#" id="showRegister">Criar conta</a>
-</p>
-
-
-  <!-- Área principal do app (inicialmente escondida) -->
-  <div id="mainApp" style="display:none;">
     <div class="container">
-      <h1>Attendance and Homework</h1>
+        <h1>Attendance and Homework</h1>
 
-      <!-- Barra superior com usuário logado -->
-      <div id="topbar" class="topbar" style="display:none;">
-        <span id="userInfo"></span>
-        <button id="logoutBtn">Sair</button>
-      </div>
+        <h2>Groups</h2>
+        <input id="groupName" placeholder="Groups">
+        <button id="addGroupBtn">Add Group</button>
+        <div class="group-buttons" id="groupsButtons"></div>
 
-      <!-- Grupos -->
-      <h2>Groups</h2>
-      <select id="groupType">
-        <option value="K1" data-level="Kids">K1</option>
-        <option value="K2" data-level="Kids">K2</option>
-        <option value="J" data-level="Juniors">J</option>
-        <option value="J1" data-level="Juniors1-2">J1</option>
-        <option value="J2" data-level="Juniors1-2">J2</option>
-        <option value="TA" data-level="TeensA1-2">TA</option>
-        <option value="T1" data-level="TeensA1-2">T1</option>
-        <option value="T2" data-level="TeensA1-2">T2</option>
-        <option value="T3" data-level="Teens3-6">T3</option>
-        <option value="T4" data-level="Teens3-6">T4</option>
-        <option value="T5" data-level="Teens3-6">T5</option>
-        <option value="T6" data-level="Teens3-6">T6</option>
-      </select>
-      <input id="groupName" placeholder="Group name">
-      <button id="addGroupBtn">Add Group</button>
-      <div class="group-buttons" id="groupsButtons"></div>
-      
-      <hr>
+        <hr>
 
-      <!-- Alunos -->
-      <h3>Students</h3>
-      <input id="studentName" placeholder="Student's name">
-      <button id="addStudentBtn">Add Student</button>
-      <table id="studentsTable">
-        <tr><th>Name</th><th>Delete</th></tr>
-      </table>
-      <button id="openGradesBtn">Open Grades</button>
+        <h3>Students</h3>
+        <input id="studentName" placeholder="Student's name">
+        <button id="addStudentBtn">Add Student</button>
+        <table id="studentsTable">
+            <tr>
+                <th>Name</th>
+                <th>Delete</th>
+            </tr>
+        </table>
 
-      <hr>
+        <hr>
 
-      <!-- Dias de aula -->
-      <h3>Classes</h3>
-      <div class="classes">
-        <label><input type="checkbox" id="mon"> Monday</label>
-        <label><input type="checkbox" id="tue"> Tuesday</label>
-        <label><input type="checkbox" id="wed"> Wednesday</label>
-        <label><input type="checkbox" id="thu"> Thursday</label>
-        <label><input type="checkbox" id="fri"> Friday</label>
-      </div>
-      <button id="generateClassesBtn">Next Classes</button>
-      <table id="classesTable">
-        <tr><th>Date</th><th>Class</th><th>Register</th></tr>
-      </table>
+        <h3>Classes</h3>
+        <div>
+            <label><input type="checkbox" id="mon"> Monday</label>
+            <label><input type="checkbox" id="tue"> Tuesday</label>
+            <label><input type="checkbox" id="wed"> Wednesday</label>
+            <label><input type="checkbox" id="thu"> Thursday</label>
+            <label><input type="checkbox" id="fri"> Friday</label>
+        </div>
+        <button id="generateClassesBtn">Generate Classes</button>
+        <table id="classesTable">
+            <tr>
+                <th>Date</th>
+                <th>Class</th>
+                <th>Register</th>
+            </tr>
+        </table>
 
-      <hr>
-      <button class="delete-group-btn" id="deleteGroupBtn">Delete current group</button>
+        <hr>
+        <button class="delete-group-btn" id="deleteGroupBtn">Delete current group</button>
 
-      <hr>
-      <!-- Notificações -->
-      <div id="notificationSection" style="display:none;">
-        <h3>Flagged Students</h3>
-        <textarea id="flaggedMessage" rows="6" cols="80"></textarea><br>
-        <button id="sendWhatsAppBtn">Send via WhatsApp</button>
-      </div>
+        <hr>
+        <div id="notificationSection" style="display:none;">
+            <h3>Flagged Students</h3>
+            <textarea id="flaggedMessage" rows="6" cols="80"></textarea><br>
+            <button id="sendWhatsAppBtn">Send via WhatsApp</button>
+        </div>
     </div>
-  </div>
-  <script type="module" src="script.js"></script>
-  <script type="module" src="auth.js"></script>
-</body>
-</html>
+
+    <script type="module">
+        /* ---------------- Firestore Setup ---------------- */ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"; import { getFirestore, collection, doc, setDoc, getDocs, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        const firebaseConfig = { apiKey: "AIzaSyAm4kct4BJrVydJpcAXFZuHuEOAtnpUJfc", authDomain: "attendance-rb.firebaseapp.com", projectId: "attendance-rb", storageBucket: "attendance-rb.firebasestorage.app", messagingSenderId: "884478984062", appId:
+        "1:884478984062:web:e64f5dedafb34ac7d73d2f" }; const app = initializeApp(firebaseConfig); const db = getFirestore(app); /* ---------------- Dados ---------------- */ let groups = []; let currentGroupIndex = 0; /* ---------------- Helpers ----------------
+        */ function todayISO(){ return new Date().toISOString().slice(0,10); } function daysDiff(d1,d2){ return Math.floor((new Date(d1)-new Date(d2))/(1000*60*60*24)); } function isHoliday(dateStr){ const holidays = [ "2025-01-01","2025-02-25","2025-04-18","2025-04-21","2025-05-01",
+        "2025-06-19","2025-09-07","2025-10-12","2025-11-02","2025-11-15", "2025-12-25" ]; return holidays.includes(dateStr); } /* ---------------- Load Data ---------------- */ async function loadGroups(){ const snap = await getDocs(collection(db,"groups"));
+        groups = []; snap.forEach(docSnap=>{ groups.push({ id: docSnap.id, ...docSnap.data()}); }); groups.sort((a,b)=>a.order-b.order); renderGroupButtons(); if(groups.length>0) selectGroup(0); } /* ---------------- Grupos ---------------- */ async function
+        createGroup(){ const name = document.getElementById("groupName").value.trim(); if(!name) return alert("Name your group"); const newGroup = { name, students:[], classes:[], days:[], order: groups.length }; await setDoc(doc(db,"groups",name), newGroup);
+        groups.push({ id: name, ...newGroup}); document.getElementById("groupName").value=""; renderGroupButtons(); selectGroup(groups.length-1); } function renderGroupButtons(){ const container = document.getElementById("groupsButtons"); container.innerHTML="";
+        groups.sort((a,b)=>a.order-b.order).forEach((g,i)=>{ const btn = document.createElement("div"); btn.className="group-button"; btn.draggable = true; btn.dataset.index = i; btn.style.backgroundColor = `hsl(200,60%,${40+40*(i/Math.max(groups.length-1,1))}%)`;
+        btn.innerText = g.name; btn.addEventListener("click", ()=>selectGroup(i)); btn.addEventListener("dragstart", e=>{ e.dataTransfer.setData("index", i); }); btn.addEventListener("dragover", e=>e.preventDefault()); btn.addEventListener("drop", async
+        e=>{ const from = +e.dataTransfer.getData("index"); const to = i; const moved = groups.splice(from,1)[0]; groups.splice(to,0,moved); groups.forEach((g,idx)=>g.order=idx); for(const g of groups){ await updateDoc(doc(db,"groups",g.name),{order:g.order});
+        } renderGroupButtons(); }); container.appendChild(btn); }); } function selectGroup(i){ currentGroupIndex = i; cleanupOldClasses(groups[i]); //
+        <- remover aulas antigas renderStudents(); renderClasses(); checkFlags(); } async function deleteGroup(){ if(!groups[currentGroupIndex]) return; const g=g roups[currentGroupIndex]; if(confirm(`Delete group "${g.name}"?`)){ await deleteDoc(doc(db,
+            "groups",g.id)); groups.splice(currentGroupIndex,1); currentGroupIndex=0; renderGroupButtons(); if(groups.length>0) selectGroup(0); else { document.getElementById("studentsTable").innerHTML="
+            <tr>
+                <th>Students</th>
+                <th>Remove Student</th>
+            </tr>"; document.getElementById("classesTable").innerHTML="
+            <tr>
+                <th>Date</th>
+                <th>Name</th>
+                <th>Register</th>
+            </tr>"; document.getElementById("notificationSection").style.display="none"; } } } /* ---------------- Aulas antigas ---------------- */ async function cleanupOldClasses(g){ const hoje = todayISO(); const limite = -10; // mais de 10 dias atrás
+            const novas = g.classes.filter(c => daysDiff(c.date,hoje) >= limite); if(novas.length !== g.classes.length){ g.classes = novas; await updateDoc(doc(db,"groups",g.name),{classes:g.classes}); } } /* ---------------- Alunos ---------------- */
+            async function addStudent(){ const name = document.getElementById("studentName").value.trim(); if(!name) return alert("Insert student's name"); const g = groups[currentGroupIndex]; g.students.push({name}); const hoje = todayISO(); g.classes.forEach(c=>{
+            if(c.date >= hoje && !c.records.find(r=>r.name===name)){ c.records.push({ name, attendance:false, homework:false }); } }); await updateDoc(doc(db,"groups",g.name),{students:g.students, classes:g.classes}); document.getElementById("studentName").value="";
+            renderStudents(); renderClasses(); } async function removeStudent(index){ const g = groups[currentGroupIndex]; const removed = g.students.splice(index,1)[0]; g.classes.forEach(c=>{ c.records = c.records.filter(r=>r.name !== removed.name);
+            }); await updateDoc(doc(db,"groups",g.name),{students:g.students, classes:g.classes}); renderStudents(); renderClasses(); } function renderStudents(){ const g = groups[currentGroupIndex]; const t = document.getElementById("studentsTable");
+            t.innerHTML=`
+            <tr>
+                <th colspan="2">${g ? g.name : ""}</th>
+            </tr>
+            <tr>
+                <th>Name</th>
+                <th>Remove</th>
+            </tr>`; if(!g) return; g.students.forEach((s,i)=>{ const row = t.insertRow(); row.insertCell(0).innerText=s.name; const btnCell=row.insertCell(1); const btn=document.createElement("button"); btn.innerText="Remover"; btn.addEventListener("click",
+            ()=>removeStudent(i)); btnCell.appendChild(btn); }); } /* ---------------- Aulas ---------------- */ async function generateClasses(){ const g = groups[currentGroupIndex]; if(!g) return alert("Select a group"); g.days = []; if(document.getElementById("mon").checked)
+            g.days.push(1); if(document.getElementById("tue").checked) g.days.push(2); if(document.getElementById("wed").checked) g.days.push(3); if(document.getElementById("thu").checked) g.days.push(4); if(document.getElementById("fri").checked) g.days.push(5);
+            if(g.days.length===0) return alert("Select class days"); let d = new Date(); let end = new Date(new Date().getFullYear(),11,31); while(d
+            <=end){ const day=d .getDay(); const dateStr=d .toISOString().slice(0,10); if(g.days.includes(day) && !isHoliday(dateStr)){ if(!g.classes.find(c=>c.date===dateStr)){ g.classes.push({ date: dateStr, name: dateStr, completed: false, records: g.students.map(s=>({ name: s.name, attendance:false, homework:false })) }); } } d.setDate(d.getDate()+1); } g.classes.sort((a,b)=>a.date.localeCompare(b.date));
+                await updateDoc(doc(db,"groups",g.name),{days:g.days, classes:g.classes}); renderClasses(); } function renderClasses(){ const g = groups[currentGroupIndex]; const t = document.getElementById("classesTable"); t.innerHTML=`
+                <tr>
+                    <th>Date</th>
+                    <th>Name</th>
+                    <th>Register</th>
+                </tr>`; if(!g) return; const hoje = todayISO(); g.classes.forEach((c,i)=>{ const row = t.insertRow(); if(c.date===hoje) row.classList.add("today-class"); row.insertCell(0).innerText = c.date; const nameCell=row.insertCell(1); const inp=document.createElement("input");
+                inp.type="text"; inp.value=c.name||c.date; inp.addEventListener("change",async e=>{ c.name=e.target.value.trim()||c.date; await updateDoc(doc(db,"groups",g.name),{classes:g.classes}); }); nameCell.appendChild(inp); const cell=row.insertCell(2);
+                const mark=document.createElement("button"); mark.innerText="Register"; mark.addEventListener("click", ()=>openClass(i)); const del=document.createElement("button"); del.innerText="Delete Class"; del.addEventListener("click", async ()=>{
+                g.classes.splice(i,1); await updateDoc(doc(db,"groups",g.name),{classes:g.classes}); renderClasses(); }); cell.appendChild(mark); cell.appendChild(del); }); } /* ---------------- Overlay ---------------- */ function openClass(classIndex){
+                const g = groups[currentGroupIndex]; const cls = g.classes[classIndex]; if(!cls.name) cls.name=cls.date; let html=`
+                <h3>Register Class: ${cls.date}</h3>
+                <label>Class name: <input type="text" id="className" value="${cls.name}"></label>
+                <table border="1">
+                    <tr>
+                        <th>Student</th>
+                        <th>Attendance</th>
+                        <th>Homework</th>
+                    </tr>`; cls.records.forEach((r,i)=>{ html+=`
+                    <tr>
+                        <td>${r.name}</td>
+                        <td><input type="checkbox" id="att_${i}" ${r.attendance? "checked": ""}></td>
+                        <td><input type="checkbox" id="hw_${i}" ${r.homework? "checked": ""}></td>
+                    </tr>`; }); html+=`
+                </table>
+                <button id="saveBtn">Save</button>
+                <button id="cancelBtn">Close</button>`; const div=document.createElement("div"); div.innerHTML=html; div.className="overlay-content"; const overlay=document.createElement("div"); overlay.className="overlay"; overlay.appendChild(div); document.body.appendChild(overlay);
+                div.querySelector("#saveBtn").addEventListener("click", ()=>saveClass(classIndex)); div.querySelector("#cancelBtn").addEventListener("click", cancelOverlay); } async function saveClass(classIndex){ const g = groups[currentGroupIndex];
+                const cls = g.classes[classIndex]; cls.name=document.getElementById("className").value.trim()||cls.date; cls.records.forEach((r,i)=>{ r.attendance=document.getElementById(`att_${i}`).checked; r.homework=document.getElementById(`hw_${i}`).checked;
+                }); cls.completed=true; await updateDoc(doc(db,"groups",g.name),{classes:g.classes}); renderClasses(); checkFlags(); cancelOverlay(); } function cancelOverlay(){ const overlay=document.querySelector(".overlay"); if(overlay) overlay.remove();
+                } /* ---------------- Flags ---------------- */ function checkFlags(){ const g = groups[currentGroupIndex]; if(!g) return; const today=todayISO(); const filled=g.classes.filter(c=>c.date
+                <=today&&c.completed); if(filled.length<2){ document.getElementById( "notificationSection").style.display="none" ; return; } const lastTwo=filled.slice(-2); const flagged=[]; g.students.forEach(s=>{ const recs=lastTwo.map(c=>c.records.find(r=>r.name===s.name)||{attendance:false,homework:false}); const abs=recs.map(r=>r.attendance); const hw=recs.map(r=>r.homework); let reason=""; if(!abs[0]&&!abs[1]) reason+="Missed 2 aulas; ";
+                    if(!hw[0]&&!hw[1]) reason+="Didn't deliver homework 2x; "; if(reason) flagged.push({name:s.name,reason,dates:lastTwo.map(c=>c.date)}); }); if(flagged.length>0){ document.getElementById("notificationSection").style.display="block";
+                    let msg=`${g.name} - Flagged Students:\n`; flagged.forEach(f=>{ msg+=`${f.name} - ${f.reason}Datas: ${f.dates.join(", ")}\n`; }); document.getElementById("flaggedMessage").value=msg; } else { document.getElementById("notificationSection").style.display="none";
+                    } } /* ---------------- WhatsApp ---------------- */ function sendWhatsApp(){ const phone = "+5511991463208"; const text = encodeURIComponent(document.getElementById("flaggedMessage").value); const url = `https://wa.me/${phone}?text=${text}`;
+                    window.open(url,"_blank"); } /* ---------------- Init ---------------- */ document.getElementById("addGroupBtn").addEventListener("click",createGroup); document.getElementById("addStudentBtn").addEventListener("click",addStudent);
+                    document.getElementById("generateClassesBtn").addEventListener("click",generateClasses); document.getElementById("deleteGroupBtn").addEventListener("click",deleteGroup); document.getElementById("sendWhatsAppBtn").addEventListener("click",sendWhatsApp);
