@@ -23,10 +23,7 @@ if (document.getElementById("loginBtn")) {
     const loginBtn = document.getElementById("loginBtn");
     const loginMsg = document.getElementById("loginMsg");
 
-    const registerEmail = document.getElementById("registerEmail");
-    const registerPassword = document.getElementById("registerPassword");
-    const registerBtn = document.getElementById("registerBtn");
-    const registerMsg = document.getElementById("registerMsg");
+
     // Redireciona usuário logado
     onAuthStateChanged(auth, (user) => {
         if (user) {
@@ -49,15 +46,24 @@ if (document.getElementById("loginBtn")) {
         console.error("Botão de login não encontrado no DOM!");
     }
 };
-
-// Função registro
-registerBtn.addEventListener("click", async() => {
-    try {
-        await createUserWithEmailAndPassword(auth, registerEmail.value, registerPassword.value);
-        // onAuthStateChanged vai redirecionar
-        console.log("Usuário registrado com sucesso");
-    } catch (err) {
-        registerMsg.textContent = "Erro no registro: " + err.message;
+if (document.getElementById("registerBtn")) {
+    const registerEmail = document.getElementById("registerEmail");
+    const registerPassword = document.getElementById("registerPassword");
+    const registerBtn = document.getElementById("registerBtn");
+    const registerMsg = document.getElementById("registerMsg");
+    // Função registro
+    if (registerBtn) {
+        registerBtn.addEventListener("click", async() => {
+            try {
+                await createUserWithEmailAndPassword(auth, registerEmail.value, registerPassword.value);
+                // onAuthStateChanged vai redirecionar
+                console.log("Usuário registrado com sucesso");
+            } catch (err) {
+                registerMsg.textContent = "Erro no registro: " + err.message;
+            }
+        });
+    } else {
+        console.error("Botão de registro não encontrado no DOM!");
     }
-});
+};
 export { app, auth, db, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword };
