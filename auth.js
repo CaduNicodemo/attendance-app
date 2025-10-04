@@ -17,37 +17,38 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-const loginEmail = document.getElementById("loginEmail");
-const loginPassword = document.getElementById("loginPassword");
-const loginBtn = document.getElementById("loginBtn");
-const loginMsg = document.getElementById("loginMsg");
+if (document.getElementById("loginBtn")) {
+    const loginEmail = document.getElementById("loginEmail");
+    const loginPassword = document.getElementById("loginPassword");
+    const loginBtn = document.getElementById("loginBtn");
+    const loginMsg = document.getElementById("loginMsg");
 
-const registerEmail = document.getElementById("registerEmail");
-const registerPassword = document.getElementById("registerPassword");
-const registerBtn = document.getElementById("registerBtn");
-const registerMsg = document.getElementById("registerMsg");
-
-// Redireciona usuário logado
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        // Usuário logado -> redireciona
-        window.location.href = "groups.html";
-    }
-});
-
-// Função login
-if (loginBtn) {
-    loginBtn.addEventListener("click", async() => {
-        try {
-            await signInWithEmailAndPassword(auth, loginEmail.value, loginPassword.value);
-            // onAuthStateChanged vai redirecionar
-        } catch (err) {
-            loginMsg.textContent = "Erro no login: " + err.message;
+    const registerEmail = document.getElementById("registerEmail");
+    const registerPassword = document.getElementById("registerPassword");
+    const registerBtn = document.getElementById("registerBtn");
+    const registerMsg = document.getElementById("registerMsg");
+    // Redireciona usuário logado
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            // Usuário logado -> redireciona
+            window.location.href = "groups.html";
         }
     });
-} else {
-    console.error("Botão de login não encontrado no DOM!");
-}
+
+    // Função login
+    if (loginBtn) {
+        loginBtn.addEventListener("click", async() => {
+            try {
+                await signInWithEmailAndPassword(auth, loginEmail.value, loginPassword.value);
+                // onAuthStateChanged vai redirecionar
+            } catch (err) {
+                loginMsg.textContent = "Erro no login: " + err.message;
+            }
+        });
+    } else {
+        console.error("Botão de login não encontrado no DOM!");
+    }
+};
 
 // Função registro
 registerBtn.addEventListener("click", async() => {
