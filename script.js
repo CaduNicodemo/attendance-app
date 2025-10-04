@@ -1,20 +1,8 @@
 // script.js
 import { auth, db } from "./config.js";
-import { getCurrentUser } from './auth.js';
-import {
-    signInWithEmailAndPassword,
-    signOut
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-import {
-    collection,
-    doc,
-    getDoc,
-    setDoc,
-    getDocs,
-    updateDoc,
-    deleteDoc
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { collection, doc, getDoc, setDoc, getDocs, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 /* ---------------- Estado de autenticação ---------------- */
 onAuthStateChanged(auth, (user) => {
