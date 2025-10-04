@@ -1,7 +1,25 @@
+// config.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, doc, setDoc, getDocs, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import {
+  getFirestore,
+  collection,
+  doc,
+  setDoc,
+  getDocs,
+  getDoc,
+  updateDoc,
+  deleteDoc,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
+// 🔹 Sua configuração do Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyAm4kct4BJrVydJpcAXFZuHuEOAtnpUJfc",
   authDomain: "attendance-rb.firebaseapp.com",
@@ -11,11 +29,29 @@ const firebaseConfig = {
   appId: "1:884478984062:web:e64f5dedafb34ac7d73d2f"
 };
 
+// 🔹 Inicializa o app
 const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-// 🔽 exporta tudo o que será usado em outros scripts
+
+// 🔹 Inicializa os serviços
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+// 🔹 Exporta para uso em outros módulos
 export {
-  collection, doc, setDoc, getDocs, getDoc, updateDoc, deleteDoc, serverTimestamp,
-  createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged
+  db,
+  auth,
+  // Firestore
+  collection,
+  doc,
+  setDoc,
+  getDocs,
+  getDoc,
+  updateDoc,
+  deleteDoc,
+  serverTimestamp,
+  // Auth
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
 };
