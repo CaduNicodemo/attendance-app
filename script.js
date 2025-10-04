@@ -78,6 +78,28 @@ function isHoliday(dateStr) {
     ];
     return holidays.includes(dateStr);
 }
+// Ordem explícita das turmas
+const priorityOrder = [
+    "K1", "K2", "J", "J1", "J2", "TA",
+    "T1", "T2", "T3", "T4", "T5", "T6"
+];
+
+// Função para inferir tipo a partir do nome completo do grupo
+function inferTypeFromName(name) {
+    if (name.startsWith("Kids1")) return "K1";
+    if (name.startsWith("Kids2")) return "K2";
+    if (name.startsWith("Juniors1")) return "J1";
+    if (name.startsWith("Juniors2")) return "J2";
+    if (name.startsWith("Juniors")) return "J";
+    if (name.startsWith("TeensA")) return "TA";
+    if (name.startsWith("Teens1")) return "T1";
+    if (name.startsWith("Teens2")) return "T2";
+    if (name.startsWith("Teens3")) return "T3";
+    if (name.startsWith("Teens4")) return "T4";
+    if (name.startsWith("Teens5")) return "T5";
+    if (name.startsWith("Teens6")) return "T6";
+    return ""; // default
+}
 
 /* ---------------- Carregar grupos ---------------- */
 async function loadGroups() {
@@ -128,72 +150,81 @@ function renderGroupButtons() {
     const container = document.getElementById("groupsButtons");
     if (!container) return;
     container.innerHTML = "";
-    groups.sort((a, b) => (a.order || 0) - (b.order || 0)).forEach((g, i) => {
+    groups.sort((a, b) => {
+        const aType = inferTypeFromName(a.name);
+        const bType = inferTypeFromName(b.name);
+        const aIdx = priorityOrder.indexOf(aType);
+        const bIdx = priorityOrder.indexOf(bType);
+
+        if (aIdx !== bIdx) return aIdx - bIdx;
+        return (a.name || "").localeCompare(b.name || "");
+    });
+
+    groups.forEach((g, i) => {
         const btn = document.createElement("div");
         btn.className = "group-button";
         btn.draggable = true;
         btn.dataset.index = i;
         btn.style.backgroundColor = `hsl(200,60%,${40+40*(i/Math.max(groups.length-1,1))}%)`;
         btn.innerText = g.name;
+
         btn.addEventListener("click", () => selectGroup(i));
-
-        // Duplo clique: abre página de notas (grades)
-        btn.addEventListener("dblclick", () => {
-            openGradesPage(g);
-        });
-
-        async function sortGroupsByTypeAndName() {
-            if (!Array.isArray(groups)) return;
-            // cria array de objetos para ordenar
-            const annotated = groups.map(g => {
-                const typeKey = g.type || inferTypeFromName(g.name || "");
-                // encontra índice na priorityOrder, se não encontrado retorna grande (coloca no final)
-                const idx = priorityOrder.indexOf(typeKey) !== -1 ? priorityOrder.indexOf(typeKey) : Number.MAX_SAFE_INTEGER;
-                return { g, typeKey, priorityIndex: idx };
-            });
-
-            // ordenar por priorityIndex, depois por nome (alfabético)
-            annotated.sort((a, b) => {
-                if (a.priorityIndex !== b.priorityIndex) return a.priorityIndex - b.priorityIndex;
-                const an = (a.g.name || "").toLowerCase();
-                const bn = (b.g.name || "").toLowerCase();
-                if (an < bn) return -1;
-                if (an > bn) return 1;
-                return 0;
-            });
-
-            // aplicar nova ordem e persistir se necessário
-            const updates = [];
-            annotated.forEach((item, index) => {
-                const g = item.g;
-                if (g.order !== index) {
-                    g.order = index;
-                    // persiste alteração
-                    updates.push({ name: g.name, order: index });
-                }
-            });
-
-            // reorder groups array to reflect sorted order
-            groups = annotated.map(a => a.g);
-
-            // persiste no Firestore (somente os que mudaram)
-            for (const up of updates) {
-                try {
-                    await updateDoc(doc(db, "groups", up.name), { order: up.order });
-                } catch (err) {
-                    // se usar doc id diferente, tente por id e por name
-                    try {
-                        await updateDoc(doc(db, "groups", up.name), { order: up.order });
-                    } catch (e) {
-                        console.warn("Não foi possível salvar order para", up.name, e);
-                    }
-                }
-            }
-        }
+        btn.addEventListener("dblclick", () => openGradesPage(g));
 
         container.appendChild(btn);
     });
-}
+
+    async function sortGroupsByTypeAndName() {
+        if (!Array.isArray(groups)) return;
+        // cria array de objetos para ordenar
+        const annotated = groups.map(g => {
+            const typeKey = g.type || inferTypeFromName(g.name || "");
+            // encontra índice na priorityOrder, se não encontrado retorna grande (coloca no final)
+            const idx = priorityOrder.indexOf(typeKey) !== -1 ? priorityOrder.indexOf(typeKey) : Number.MAX_SAFE_INTEGER;
+            return { g, typeKey, priorityIndex: idx };
+        });
+
+        // ordenar por priorityIndex, depois por nome (alfabético)
+        annotated.sort((a, b) => {
+            if (a.priorityIndex !== b.priorityIndex) return a.priorityIndex - b.priorityIndex;
+            const an = (a.g.name || "").toLowerCase();
+            const bn = (b.g.name || "").toLowerCase();
+            if (an < bn) return -1;
+            if (an > bn) return 1;
+            return 0;
+        });
+
+        // aplicar nova ordem e persistir se necessário
+        const updates = [];
+        annotated.forEach((item, index) => {
+            const g = item.g;
+            if (g.order !== index) {
+                g.order = index;
+                // persiste alteração
+                updates.push({ name: g.name, order: index });
+            }
+        });
+
+        // reorder groups array to reflect sorted order
+        groups = annotated.map(a => a.g);
+
+        // persiste no Firestore (somente os que mudaram)
+        for (const up of updates) {
+            try {
+                await updateDoc(doc(db, "groups", up.name), { order: up.order });
+            } catch (err) {
+                // se usar doc id diferente, tente por id e por name
+                try {
+                    await updateDoc(doc(db, "groups", up.name), { order: up.order });
+                } catch (e) {
+                    console.warn("Não foi possível salvar order para", up.name, e);
+                }
+            }
+        }
+    }
+
+    container.appendChild(btn);
+};
 
 /* ---------------- Select Group ---------------- */
 function selectGroup(i) {
