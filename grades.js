@@ -1,5 +1,5 @@
 // Importa do config.js
-import { auth, db, getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut,getFirestore, collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc } from "./config.js";
+import { auth, db, signInWithEmailAndPassword, onAuthStateChanged, signOut,getFirestore, collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc } from "./config.js";
 
 let currentGroupName = localStorage.getItem("currentGroup");
 let currentGroupData = null;
