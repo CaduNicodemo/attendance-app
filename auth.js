@@ -1,11 +1,24 @@
 import { 
   auth, db,
+} from "./config.js";
+import {
+  getFirestore,
+  collection,
+  doc,
+  setDoc,
+  getDocs,
+  getDoc,
+  updateDoc,
+  deleteDoc,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import {
+  getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
-  onAuthStateChanged,
-  doc, setDoc, getDoc, serverTimestamp
-} from "./config.js";
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const loginSection = document.getElementById("loginSection");
 const registerSection = document.getElementById("registerSection");
