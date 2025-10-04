@@ -54,7 +54,7 @@ document.getElementById("loginBtn").addEventListener("click", async() => {
             await signOut(auth);
         } else if (role === "user" || role === "admin") {
             loginMsg.textContent = "";
-            window.location.href = role === "admin" ? "admin.html" : "user.html";
+            window.location.href = role === "admin" ? "admin.html" : "index.html";
         }
 
     } catch (error) {
