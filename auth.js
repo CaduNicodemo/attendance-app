@@ -2,17 +2,6 @@ import {
   auth, db,
 } from "./config.js";
 import {
-  getFirestore,
-  collection,
-  doc,
-  setDoc,
-  getDocs,
-  getDoc,
-  updateDoc,
-  deleteDoc,
-  serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import {
   getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
