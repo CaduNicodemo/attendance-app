@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="style.css">
 </head>
+
 
 <body>
     <!-- Área de login -->
@@ -31,10 +33,13 @@
         </p>
     </div>
 
+
     <!-- Link para trocar -->
     <p style="text-align:center; margin-top:10px;">
         Novo por aqui? <a href="#" id="showRegister">Criar conta</a>
     </p>
+
+
 
 
     <!-- Área principal do app (inicialmente escondida) -->
@@ -42,11 +47,13 @@
         <div class="container">
             <h1>Attendance and Homework</h1>
 
+
             <!-- Barra superior com usuário logado -->
             <div id="topbar" class="topbar" style="display:none;">
                 <span id="userInfo"></span>
                 <button id="logoutBtn">Sair</button>
             </div>
+
 
             <!-- Grupos -->
             <h2>Groups</h2>
@@ -68,7 +75,9 @@
             <button id="addGroupBtn">Add Group</button>
             <div class="group-buttons" id="groupsButtons"></div>
 
+
             <hr>
+
 
             <!-- Alunos -->
             <h3>Students</h3>
@@ -82,7 +91,9 @@
             </table>
             <button id="openGradesBtn">Open Grades</button>
 
+
             <hr>
+
 
             <!-- Dias de aula -->
             <h3>Classes</h3>
@@ -102,8 +113,10 @@
                 </tr>
             </table>
 
+
             <hr>
             <button class="delete-group-btn" id="deleteGroupBtn">Delete current group</button>
+
 
             <hr>
             <!-- Notificações -->
@@ -114,9 +127,6 @@
             </div>
         </div>
     </div>
-    <script type="module" src="auth.js"></script>
     <script type="module" src="script.js"></script>
-
+    <script type="module" src="auth.js"></script>
 </body>
-
-</html>
