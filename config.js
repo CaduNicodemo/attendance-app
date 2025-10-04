@@ -14,3 +14,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+// 🔽 exporta tudo o que será usado em outros scripts
+export {
+  collection, doc, setDoc, getDocs, getDoc, updateDoc, deleteDoc, serverTimestamp,
+  createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged
+};
