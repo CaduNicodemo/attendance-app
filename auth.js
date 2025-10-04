@@ -17,47 +17,40 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-const emailInput = document.getElementById("email");
-const passwordInput = document.getElementById("password");
+const loginEmail = document.getElementById("loginEmail");
+const loginPassword = document.getElementById("loginPassword");
 const loginBtn = document.getElementById("loginBtn");
+const loginMsg = document.getElementById("loginMsg");
+
+const registerEmail = document.getElementById("registerEmail");
+const registerPassword = document.getElementById("registerPassword");
 const registerBtn = document.getElementById("registerBtn");
-const messageEl = document.getElementById("message");
+const registerMsg = document.getElementById("registerMsg");
 
 // Redireciona usuário logado
 onAuthStateChanged(auth, (user) => {
     if (user) {
         // Usuário logado -> redireciona
         window.location.href = "groups.html";
-    } else {
-        // Nenhum usuário logado
-        messageEl.textContent = "Faça login ou registre-se";
     }
 });
 
 // Função login
 loginBtn.addEventListener("click", async() => {
-    const email = emailInput.value.trim();
-    const password = passwordInput.value.trim();
-    if (!email || !password) return messageEl.textContent = "Preencha todos os campos";
-
     try {
-        await signInWithEmailAndPassword(auth, email, password);
+        await signInWithEmailAndPassword(auth, loginEmail.value, loginPassword.value);
         // onAuthStateChanged vai redirecionar
     } catch (err) {
-        messageEl.textContent = "Erro no login: " + err.message;
+        loginMsg.textContent = "Erro no login: " + err.message;
     }
 });
 
 // Função registro
 registerBtn.addEventListener("click", async() => {
-    const email = emailInput.value.trim();
-    const password = passwordInput.value.trim();
-    if (!email || !password) return messageEl.textContent = "Preencha todos os campos";
-
     try {
-        await createUserWithEmailAndPassword(auth, email, password);
+        await createUserWithEmailAndPassword(auth, registerEmail.value, registerPassword.value);
         // onAuthStateChanged vai redirecionar
     } catch (err) {
-        messageEl.textContent = "Erro no registro: " + err.message;
+        registerMsg.textContent = "Erro no registro: " + err.message;
     }
 });
