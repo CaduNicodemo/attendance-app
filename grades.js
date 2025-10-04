@@ -1,13 +1,5 @@
-// Firebase Auth 
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } 
-  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-// Firebase Firestore
-import { getFirestore, collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc } 
-  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-// Importa auth e db do config.js (já inicializados)
-import { auth, db } from "./config.js";
+// Importa do config.js
+import { auth, db, getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut,getFirestore, collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc } from "./config.js";
 
 let currentGroupName = localStorage.getItem("currentGroup");
 let currentGroupData = null;
