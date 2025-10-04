@@ -54,3 +54,4 @@ registerBtn.addEventListener("click", async() => {
         registerMsg.textContent = "Erro no registro: " + err.message;
     }
 });
+export { app, auth, db, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword };
