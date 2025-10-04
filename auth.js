@@ -36,14 +36,18 @@ onAuthStateChanged(auth, (user) => {
 });
 
 // Função login
-loginBtn.addEventListener("click", async() => {
-    try {
-        await signInWithEmailAndPassword(auth, loginEmail.value, loginPassword.value);
-        // onAuthStateChanged vai redirecionar
-    } catch (err) {
-        loginMsg.textContent = "Erro no login: " + err.message;
-    }
-});
+if (loginBtn) {
+    loginBtn.addEventListener("click", async() => {
+        try {
+            await signInWithEmailAndPassword(auth, loginEmail.value, loginPassword.value);
+            // onAuthStateChanged vai redirecionar
+        } catch (err) {
+            loginMsg.textContent = "Erro no login: " + err.message;
+        }
+    });
+} else {
+    console.error("Botão de login não encontrado no DOM!");
+}
 
 // Função registro
 registerBtn.addEventListener("click", async() => {
