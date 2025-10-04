@@ -1,7 +1,6 @@
 // script.js
 import { auth, db } from "./config.js";
 import {
-    onAuthStateChanged,
     signInWithEmailAndPassword,
     signOut
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
