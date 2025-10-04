@@ -109,8 +109,11 @@ async function loadGroups() {
         snap.forEach(docSnap => {
             groups.push({ id: docSnap.id, ...docSnap.data() });
         });
-        groups.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+        await sortGroupsByTypeAndName();
+
         renderGroupButtons();
+
         if (groups.length > 0) selectGroup(0);
     } catch (err) {
         console.error("Erro ao carregar grupos:", err);
@@ -150,15 +153,6 @@ function renderGroupButtons() {
     const container = document.getElementById("groupsButtons");
     if (!container) return;
     container.innerHTML = "";
-    groups.sort((a, b) => {
-        const aType = inferTypeFromName(a.name);
-        const bType = inferTypeFromName(b.name);
-        const aIdx = priorityOrder.indexOf(aType);
-        const bIdx = priorityOrder.indexOf(bType);
-
-        if (aIdx !== bIdx) return aIdx - bIdx;
-        return (a.name || "").localeCompare(b.name || "");
-    });
 
     groups.forEach((g, i) => {
         const btn = document.createElement("div");
@@ -214,17 +208,10 @@ async function sortGroupsByTypeAndName() {
         try {
             await updateDoc(doc(db, "groups", up.name), { order: up.order });
         } catch (err) {
-            // se usar doc id diferente, tente por id e por name
-            try {
-                await updateDoc(doc(db, "groups", up.name), { order: up.order });
-            } catch (e) {
-                console.warn("Não foi possível salvar order para", up.name, e);
-            }
+            console.warn("Não foi possível salvar order para", up.name, e);
         }
     }
 }
-
-container.appendChild(btn);;
 
 /* ---------------- Select Group ---------------- */
 function selectGroup(i) {
