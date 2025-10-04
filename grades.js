@@ -1,5 +1,5 @@
 // grades.js
-import { auth, db, onAuthStateChanged } from "./config.js";
+import { auth, db, onAuthStateChanged } from "./auth.js";
 import { signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
