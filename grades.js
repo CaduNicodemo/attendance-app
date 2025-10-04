@@ -1,14 +1,7 @@
 // grades.js
-
-// Importa do config.js
-import { auth, db } from "./config.js";
-import { getCurrentUser } from './auth.js';
-import {
-    createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,
-    signOut,
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { doc, setDoc, getDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { auth, db, onAuthStateChanged } from "./config.js";
+import { signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 let currentGroupName = localStorage.getItem("currentGroup");
 let currentGroupData = null;
