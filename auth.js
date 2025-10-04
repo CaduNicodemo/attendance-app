@@ -1,97 +1,63 @@
-// auth.js
-import { auth, db } from "./config.js";
-import {
-    createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,
-    signOut,
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-let currentUser = null;
-// Elementos do DOM
-const loginSection = document.getElementById("loginSection");
-const registerSection = document.getElementById("registerSection");
-const loginMsg = document.getElementById("loginMsg");
-const registerMsg = document.getElementById("registerMsg");
-onAuthStateChanged(auth, (user) => {
-    currentUser = user;
-    if (!user) {
-        window.location.href = "index.html";
-    }
-});
-// Mostrar/ocultar seções
-document.getElementById("showRegister").addEventListener("click", e => {
-    e.preventDefault();
-    loginSection.style.display = "none";
-    registerSection.style.display = "flex";
-});
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-document.getElementById("showLogin").addEventListener("click", e => {
-    e.preventDefault();
-    registerSection.style.display = "none";
-    loginSection.style.display = "flex";
-});
-
-// Login
-document.getElementById("loginBtn").addEventListener("click", async() => {
-    const email = document.getElementById("loginEmail").value;
-    const password = document.getElementById("loginPassword").value;
-
-    try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        const uid = userCredential.user.uid;
-
-        const userDoc = await getDoc(doc(db, "users", uid));
-        if (!userDoc.exists()) {
-            loginMsg.textContent = "Conta inválida. Contate o administrador.";
-            await signOut(auth);
-            return;
-        }
-
-        const role = userDoc.data().role;
-        if (role === "pending") {
-            loginMsg.textContent = "Aguardando aprovação do administrador.";
-            await signOut(auth);
-        } else if (role === "user" || role === "admin") {
-            loginMsg.textContent = "";
-            window.location.href = role === "admin" ? "admin.html" : "index.html";
-        }
-
-    } catch (error) {
-        loginMsg.textContent = "Erro ao fazer login: " + error.message;
-    }
-});
-
-// Registro
-document.getElementById("registerBtn").addEventListener("click", async() => {
-    const name = document.getElementById("registerName").value.trim();
-    const email = document.getElementById("registerEmail").value.trim();
-    const password = document.getElementById("registerPassword").value;
-
-    if (!name || !email || !password) {
-        registerMsg.textContent = "Preencha todos os campos.";
-        return;
-    }
-
-    try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const uid = userCredential.user.uid;
-
-        await setDoc(doc(db, "users", uid), {
-            name,
-            email,
-            role: "pending",
-            createdAt: serverTimestamp()
-        });
-
-        registerMsg.style.color = "green";
-        registerMsg.textContent = "Cadastro enviado! Aguarde aprovação.";
-        await signOut(auth);
-
-    } catch (error) {
-        registerMsg.textContent = "Erro ao registrar: " + error.message;
-    }
-});
-export function getCurrentUser() {
-    return currentUser;
+// Config do seu Firebase
+const firebaseConfig = {
+    apiKey: "AIzaSyAm4kct4BJrVydJpcAXFZuHuEOAtnpUJfc",
+    authDomain: "attendance-rb.firebaseapp.com",
+    projectId: "attendance-rb",
+    storageBucket: "attendance-rb.firebasestorage.app",
+    messagingSenderId: "884478984062",
+    appId: "1:884478984062:web:e64f5dedafb34ac7d73d2f"
 };
+
+// Inicializa Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const emailInput = document.getElementById("email");
+const passwordInput = document.getElementById("password");
+const loginBtn = document.getElementById("loginBtn");
+const registerBtn = document.getElementById("registerBtn");
+const messageEl = document.getElementById("message");
+
+// Redireciona usuário logado
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        // Usuário logado -> redireciona
+        window.location.href = "index.html";
+    } else {
+        // Nenhum usuário logado
+        messageEl.textContent = "Faça login ou registre-se";
+    }
+});
+
+// Função login
+loginBtn.addEventListener("click", async() => {
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
+    if (!email || !password) return messageEl.textContent = "Preencha todos os campos";
+
+    try {
+        await signInWithEmailAndPassword(auth, email, password);
+        // onAuthStateChanged vai redirecionar
+    } catch (err) {
+        messageEl.textContent = "Erro no login: " + err.message;
+    }
+});
+
+// Função registro
+registerBtn.addEventListener("click", async() => {
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
+    if (!email || !password) return messageEl.textContent = "Preencha todos os campos";
+
+    try {
+        await createUserWithEmailAndPassword(auth, email, password);
+        // onAuthStateChanged vai redirecionar
+    } catch (err) {
+        messageEl.textContent = "Erro no registro: " + err.message;
+    }
+});
