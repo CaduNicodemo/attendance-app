@@ -1,5 +1,5 @@
 // Importa do config.js
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, getFirestore, collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, auth, db } from "./config.js";
+import {signInWithEmailAndPassword, onAuthStateChanged, signOut, getFirestore, collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, auth, db } from "./config.js";
 
 
 /* ---------------- Estado de autenticação ---------------- */
