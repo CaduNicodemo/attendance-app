@@ -1,5 +1,6 @@
 // script.js
 import { auth, db } from "./config.js";
+import { getCurrentUser } from './auth.js';
 import {
     signInWithEmailAndPassword,
     signOut

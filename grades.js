@@ -2,6 +2,7 @@
 
 // Importa do config.js
 import { auth, db } from "./config.js";
+import { getCurrentUser } from './auth.js';
 import {
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,

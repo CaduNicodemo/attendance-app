@@ -7,13 +7,18 @@ import {
     onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
+let currentUser = null;
 // Elementos do DOM
 const loginSection = document.getElementById("loginSection");
 const registerSection = document.getElementById("registerSection");
 const loginMsg = document.getElementById("loginMsg");
 const registerMsg = document.getElementById("registerMsg");
-
+onAuthStateChanged(auth, (user) => {
+    currentUser = user;
+    if (!user) {
+        window.location.href = "login.html";
+    }
+});
 // Mostrar/ocultar seções
 document.getElementById("showRegister").addEventListener("click", e => {
     e.preventDefault();
@@ -87,3 +92,6 @@ document.getElementById("registerBtn").addEventListener("click", async() => {
         registerMsg.textContent = "Erro ao registrar: " + error.message;
     }
 });
+export function getCurrentUser() {
+    return currentUser;
+};
