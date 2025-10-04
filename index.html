@@ -16,6 +16,24 @@
     <button id="loginBtn">Entrar</button>
     <p id="loginMsg" style="color:red;"></p>
   </div>
+  <!-- Área de registro -->
+<div id="registerSection" style="display:none; flex-direction:column; gap:10px; max-width:300px; margin:auto;">
+  <h2>Cadastro</h2>
+  <input id="registerName" type="text" placeholder="Nome completo">
+  <input id="registerEmail" type="email" placeholder="Email">
+  <input id="registerPassword" type="password" placeholder="Senha">
+  <button id="registerBtn">Registrar</button>
+  <p id="registerMsg" style="color:red;"></p>
+  <p style="text-align:center;">
+    Já tem conta? <a href="#" id="showLogin">Entrar</a>
+  </p>
+</div>
+
+<!-- Link para trocar -->
+<p style="text-align:center; margin-top:10px;">
+  Novo por aqui? <a href="#" id="showRegister">Criar conta</a>
+</p>
+
 
   <!-- Área principal do app (inicialmente escondida) -->
   <div id="mainApp" style="display:none;">
