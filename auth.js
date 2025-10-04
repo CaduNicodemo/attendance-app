@@ -50,6 +50,7 @@ registerBtn.addEventListener("click", async() => {
     try {
         await createUserWithEmailAndPassword(auth, registerEmail.value, registerPassword.value);
         // onAuthStateChanged vai redirecionar
+        console.log("Usuário registrado com sucesso");
     } catch (err) {
         registerMsg.textContent = "Erro no registro: " + err.message;
     }
