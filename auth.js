@@ -27,7 +27,7 @@ const messageEl = document.getElementById("message");
 onAuthStateChanged(auth, (user) => {
     if (user) {
         // Usuário logado -> redireciona
-        window.location.href = "index.html";
+        window.location.href = "groups.html";
     } else {
         // Nenhum usuário logado
         messageEl.textContent = "Faça login ou registre-se";
