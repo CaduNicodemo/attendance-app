@@ -13,6 +13,21 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+const calendarBtn = document.getElementById("calendarButton");
+const calendarMsg = document.getElementById("calendarMessage");
 
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    calendarBtn.addEventListener("click", () => {
+      window.location.href = "calendar.html";
+    });
+    calendarMsg.style.display = "none";
+    calendarBtn.style.display = "inline-block";
+  } else {
+    calendarBtn.style.display = "none";
+    calendarMsg.style.display = "block";
+    calendarMsg.textContent = "Faça login para acessar o calendário.";
+  }
+}
 export const auth = getAuth(app);
 export const db = getFirestore(app);
