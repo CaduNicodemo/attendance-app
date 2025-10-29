@@ -79,7 +79,7 @@ if (document.getElementById("registerBtn")) {
 };
 
 // Função para outros módulos obterem o usuário atual
-export function getCurrentUser() {
+function getCurrentUser() {
     return currentUser;
 };
 export { app, auth, db, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, getCurrentUser };
