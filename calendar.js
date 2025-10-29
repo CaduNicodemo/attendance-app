@@ -2,7 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/fireba
 import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 import { getCurrentUser } from "./auth.js";
 
-// 🔥 Configuração do Firebase (a mesma do seu projeto)
+// 🔥 Configuração Firebase
 const firebaseConfig = {
     apiKey: "AIzaSyAm4kct4BJrVydJpcAXFZuHuEOAtnpUJfc",
     authDomain: "attendance-rb.firebaseapp.com",
@@ -15,45 +15,69 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+// 🎨 Elementos da página
 const addEventBtn = document.getElementById('addEventBtn');
 const eventForm = document.getElementById('eventForm');
 const saveEventBtn = document.getElementById('saveEventBtn');
 const cancelEventBtn = document.getElementById('cancelEventBtn');
 const groupSelect = document.getElementById('groupSelect');
-const eventList = document.getElementById('eventList');
+let calendar;
 
-// 🧑‍🏫 Mostrar formulário
-addEventBtn.addEventListener('click', () => {
-  eventForm.style.display = 'block';
+// 🧩 Inicializa o calendário
+document.addEventListener('DOMContentLoaded', async () => {
+  const calendarEl = document.getElementById('calendar');
+  calendar = new FullCalendar.Calendar(calendarEl, {
+    initialView: 'dayGridMonth',
+    locale: 'pt-br',
+    height: 'auto',
+    events: await loadEvents(),
+  });
+  calendar.render();
+
+  loadGroups();
 });
 
-// ❌ Cancelar
-cancelEventBtn.addEventListener('click', () => {
-  eventForm.style.display = 'none';
-});
-
-// 🔄 Carregar turmas do usuário
+// 🔄 Carrega as turmas do Firestore
 async function loadGroups() {
   const user = await getCurrentUser();
   if (!user) {
-    eventList.innerHTML = "<li>Faça login para ver as turmas.</li>";
+    alert("Faça login para criar eventos.");
     return;
   }
 
-  const querySnapshot = await getDocs(collection(db, "groups"));
-  groupSelect.innerHTML = ""; // Limpa
-  querySnapshot.forEach((doc) => {
-    const group = doc.data();
+  const snapshot = await getDocs(collection(db, "groups"));
+  groupSelect.innerHTML = "";
+  snapshot.forEach((doc) => {
+    const data = doc.data();
     const option = document.createElement('option');
     option.value = doc.id;
-    option.textContent = group.name || "Sem nome";
+    option.textContent = data.name || "Sem nome";
     groupSelect.appendChild(option);
   });
 }
 
+// 📅 Carrega eventos do Firestore
+async function loadEvents() {
+  const snapshot = await getDocs(collection(db, "events"));
+  const events = [];
+  snapshot.forEach((doc) => {
+    const data = doc.data();
+    events.push({
+      title: data.title,
+      start: data.date,
+      color: "#007bff"
+    });
+  });
+  return events;
+}
+
+// 🧠 Mostrar/ocultar formulário
+addEventBtn.addEventListener('click', () => eventForm.style.display = 'block');
+cancelEventBtn.addEventListener('click', () => eventForm.style.display = 'none');
+
 // 💾 Salvar evento
 saveEventBtn.addEventListener('click', async () => {
-  const title = document.getElementById('eventTitle').value;
+  const title = document.getElementById('eventTitle').value.trim();
   const date = document.getElementById('eventDate').value;
   const groupId = groupSelect.value;
   const user = await getCurrentUser();
@@ -78,24 +102,8 @@ saveEventBtn.addEventListener('click', async () => {
     });
     alert("Evento salvo!");
     eventForm.style.display = 'none';
-    loadEvents();
+    calendar.addEvent({ title, start: date, color: "#007bff" });
   } catch (error) {
     console.error("Erro ao salvar evento:", error);
   }
 });
-
-// 📅 Carregar eventos
-async function loadEvents() {
-  const snapshot = await getDocs(collection(db, "events"));
-  eventList.innerHTML = "";
-  snapshot.forEach((doc) => {
-    const event = doc.data();
-    const li = document.createElement("li");
-    li.textContent = `${event.title} - ${event.date}`;
-    eventList.appendChild(li);
-  });
-}
-
-// Inicializar
-loadGroups();
-loadEvents();
