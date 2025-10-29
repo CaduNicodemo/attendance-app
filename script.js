@@ -361,6 +361,15 @@ async function generateClasses() {
     }
     renderClasses();
 }
+document.addEventListener("DOMContentLoaded", () => {
+  const calendarBtn = document.getElementById("calendarButton");
+  if (calendarBtn) {
+    calendarBtn.addEventListener("click", () => {
+      // Redireciona o usuário para a página de calendário
+      window.location.href = "calendar.html";
+    });
+  }
+});
 
 /* ---------------- Format date BR ---------------- */
 function formatDateBR(dateStr) {
