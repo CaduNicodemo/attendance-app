@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
-import { getCurrentUser } from "./auth.js";
+import { getCurrentUser, db } from "./auth.js";
 
 // 🔥 Configuração Firebase
 const firebaseConfig = {
@@ -14,6 +14,10 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const user = getCurrentUser();
+if (!user) {
+    alert("Faça login");
+}
 
 // 🎨 Elementos da página
 const addEventBtn = document.getElementById('addEventBtn');
