@@ -17,6 +17,17 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+
+let currentUser = null;
+
+onAuthStateChanged(auth, (user) => {
+    currentUser = user;
+    // Se quiser redirecionar em login.html, continue aqui
+    if (user && window.location.pathname.includes("login.html")) {
+        window.location.href = "index.html";
+    }
+});
+
 if (document.getElementById("loginBtn")) {
     const loginEmail = document.getElementById("loginEmail");
     const loginPassword = document.getElementById("loginPassword");
@@ -66,4 +77,9 @@ if (document.getElementById("registerBtn")) {
         console.error("Botão de registro não encontrado no DOM!");
     }
 };
-export { app, auth, db, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword };
+
+// Função para outros módulos obterem o usuário atual
+export function getCurrentUser() {
+    return currentUser;
+};
+export { app, auth, db, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, getCurrentUser };
