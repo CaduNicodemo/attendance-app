@@ -21,7 +21,7 @@ let calendar;
 let groupColors = {};
 let allEvents = [];
 
-const auth = getAuth();
+const auth = getAuth(app);
 
 // 🧩 Espera o Firebase Auth carregar o estado do usuário
 onAuthStateChanged(auth, async (user) => {

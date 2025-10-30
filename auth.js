@@ -4,7 +4,7 @@ import {
   onAuthStateChanged,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
 
 // Variável global para armazenar o usuário atual
 let currentUser = null;
@@ -56,5 +56,3 @@ if (document.getElementById("registerBtn")) {
     }
   });
 }
-
-export { auth, db }
