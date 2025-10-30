@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
@@ -21,12 +21,12 @@
 
     #calendar {
       max-width: 900px;
-      margin: 40px auto;
+      margin: 20px auto;
       background: white;
       padding: 20px;
       border-radius: 12px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      min-height: 600px; /* Garante que o calendário apareça */
+      min-height: 600px;
     }
 
     #addEventBtn {
@@ -44,7 +44,7 @@
     #eventForm {
       display: none;
       max-width: 400px;
-      margin: 0 auto;
+      margin: 0 auto 20px auto;
       background: #fff;
       padding: 20px;
       border-radius: 10px;
@@ -76,12 +76,24 @@
       background: #dc3545;
       color: white;
     }
+
+    #filterSelect {
+      display: block;
+      margin: 0 auto 20px auto;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      max-width: 200px;
+    }
   </style>
 </head>
 <body>
   <h2>Calendário de Eventos</h2>
+
+  <!-- Botão criar evento -->
   <button id="addEventBtn">+ Criar Evento</button>
 
+  <!-- Formulário de novo evento -->
   <div id="eventForm">
     <h3>Novo Evento</h3>
     <input type="text" id="eventTitle" placeholder="Título do evento">
@@ -93,14 +105,20 @@
     </div>
   </div>
 
+  <!-- Seletor de filtro de grupos -->
+  <select id="filterSelect">
+    <option value="all">Todos os grupos</option>
+    <!-- Opções serão preenchidas dinamicamente pelo JS -->
+  </select>
+
+  <!-- Calendário -->
   <div id="calendar"></div>
 
-  <!-- ✅ FullCalendar (apenas UMA versão) -->
+  <!-- FullCalendar -->
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
 
-  <!-- ✅ Scripts da sua aplicação -->
+  <!-- Scripts da aplicação -->
   <script type="module" src="./auth.js"></script>
   <script type="module" src="./calendar.js"></script>
-
 </body>
 </html>
