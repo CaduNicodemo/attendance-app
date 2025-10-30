@@ -14,12 +14,6 @@ onAuthStateChanged(auth, (user) => {
   currentUser = user;
   console.log("Auth state changed:", user);
 
-  // Se já estiver logado e não estiver no calendário, redireciona
-  if (user && !window.location.href.includes("calendar.html")) {
-    window.location.href = "calendar.html";
-  }
-});
-
 // --- Pega o usuário atual ---
 export function getCurrentUser() {
   return currentUser;
@@ -36,7 +30,7 @@ if (document.getElementById("loginBtn")) {
     try {
       console.log("Tentando login com:", loginEmail.value, loginPassword.value);
       await signInWithEmailAndPassword(auth, loginEmail.value, loginPassword.value);
-      loginMsg.textContent = "";
+      console.log("Login bem sucediso")
       window.location.href = "calendar.html";
     } catch (err) {
       console.error("Erro no login:", err);

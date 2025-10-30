@@ -1,12 +1,11 @@
 // calendar.js
-import { db, getCurrentUser } from "./auth.js";
+import { db } from "./auth.js";
 import {
   collection,
   getDocs,
   addDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-// ✅ NÃO repita firebaseConfig aqui — o app já é inicializado em auth.js
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 // 🎨 Elementos da página
 const addEventBtn = document.getElementById('addEventBtn');
@@ -17,11 +16,12 @@ const groupSelect = document.getElementById('groupSelect');
 let calendar;
 let groupColors = {};
 
-// 🧩 Inicializa o calendário após o carregamento do DOM
-document.addEventListener('DOMContentLoaded', async () => {
-  const user = await getCurrentUser();
+const auth = getAuth();
+
+// 🧩 Espera o Firebase Auth carregar o estado do usuário
+onAuthStateChanged(auth, async (user) => {
   if (!user) {
-    alert("Faça login primeiro.");
+    console.warn("Usuário não logado. Redirecionando...");
     window.location.href = "index.html";
     return;
   }
@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   console.log("Usuário logado:", user.uid);
   console.log("Firestore db:", db);
 
-  await loadGroups(); // carregar grupos antes dos eventos
+  await loadGroups();
   const events = await loadEvents();
 
   const calendarEl = document.getElementById('calendar');
@@ -44,34 +44,43 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // 🔄 Carrega grupos do Firestore
 async function loadGroups() {
-  const snapshot = await getDocs(collection(db, "groups"));
-  groupSelect.innerHTML = "";
-  snapshot.forEach((doc) => {
-    const data = doc.data();
-    const color = data.color || getRandomColor();
-    groupColors[doc.id] = color;
+  try {
+    const snapshot = await getDocs(collection(db, "groups"));
+    groupSelect.innerHTML = "";
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      const color = data.color || getRandomColor();
+      groupColors[doc.id] = color;
 
-    const option = document.createElement('option');
-    option.value = doc.id;
-    option.textContent = data.name || "Sem nome";
-    option.style.color = color;
-    groupSelect.appendChild(option);
-  });
+      const option = document.createElement('option');
+      option.value = doc.id;
+      option.textContent = data.name || "Sem nome";
+      option.style.color = color;
+      groupSelect.appendChild(option);
+    });
+  } catch (err) {
+    console.error("Erro ao carregar grupos:", err);
+  }
 }
 
 // 📅 Carrega eventos existentes
 async function loadEvents() {
-  const snapshot = await getDocs(collection(db, "events"));
-  const events = [];
-  snapshot.forEach((doc) => {
-    const data = doc.data();
-    events.push({
-      title: data.title,
-      start: data.date,
-      color: groupColors[data.groupId] || "#007bff",
+  try {
+    const snapshot = await getDocs(collection(db, "events"));
+    const events = [];
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      events.push({
+        title: data.title,
+        start: data.date,
+        color: groupColors[data.groupId] || "#007bff",
+      });
     });
-  });
-  return events;
+    return events;
+  } catch (err) {
+    console.error("Erro ao carregar eventos:", err);
+    return [];
+  }
 }
 
 // 💾 Salvar novo evento
@@ -79,7 +88,7 @@ saveEventBtn.addEventListener('click', async () => {
   const title = document.getElementById('eventTitle').value.trim();
   const date = document.getElementById('eventDate').value;
   const groupId = groupSelect.value;
-  const user = await getCurrentUser();
+  const user = auth.currentUser;
 
   if (!user) {
     alert("Faça login antes de criar um evento.");
