@@ -41,6 +41,7 @@ if (document.getElementById("loginBtn")) {
 
     loginBtn.addEventListener("click", async () => {
            try {
+            console.log("Tentando login com:", loginEmail.value, loginPassword.value);
         await signInWithEmailAndPassword(auth, loginEmail.value, loginPassword.value);
         // Redireciona somente depois do login bem-sucedido
         window.location.href = "index.html";
