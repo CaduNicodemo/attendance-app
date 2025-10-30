@@ -12,7 +12,7 @@ let currentUser = null;
 // --- Observa mudanças na autenticação ---
 onAuthStateChanged(auth, (user) => {
   currentUser = user;
-  console.log("Auth state changed:", user);}
+    console.log("Auth state changed:", user);})
 
 // --- Pega o usuário atual ---
 export function getCurrentUser() {
