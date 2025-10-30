@@ -1,5 +1,5 @@
 // calendar.js
-import { db } from "./config.js"; // 🔹 Corrigido para importar de config.js
+import { db, app } from "./config.js"; // 🔹 Corrigido para importar de config.js
 import {
   collection,
   getDocs,

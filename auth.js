@@ -1,5 +1,5 @@
 // auth.js
-import { auth, db } from "./config.js";
+import { auth, db, app} from "./config.js";
 import {
   onAuthStateChanged,
   createUserWithEmailAndPassword,
