@@ -1,16 +1,6 @@
 import { collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 import { getCurrentUser, db } from "./auth.js";
 
-// 🔥 Configuração Firebase
-const firebaseConfig = {
-    apiKey: "AIzaSyAm4kct4BJrVydJpcAXFZuHuEOAtnpUJfc",
-    authDomain: "attendance-rb.firebaseapp.com",
-    projectId: "attendance-rb",
-    storageBucket: "attendance-rb.firebasestorage.app",
-    messagingSenderId: "884478984062",
-    appId: "1:884478984062:web:e64f5dedafb34ac7d73d2f"
-};
-
 const user = getCurrentUser();
 if (!user) {
     alert("Faça login");
