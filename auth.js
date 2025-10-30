@@ -24,11 +24,7 @@ let currentUser = null;
 // Observa mudanças de autenticação
 onAuthStateChanged(auth, (user) => {
     currentUser = user;
-
-    // Redireciona se o usuário estiver logado e estiver na página de login
-    if (user && window.location.pathname.includes("login.html")) {
-        window.location.href = "index.html";
-    }
+    console.log("Auth state changed:", user);
 });
 
 // Função para pegar o usuário atual
@@ -44,12 +40,13 @@ if (document.getElementById("loginBtn")) {
     const loginMsg = document.getElementById("loginMsg");
 
     loginBtn.addEventListener("click", async () => {
-        try {
-            await signInWithEmailAndPassword(auth, loginEmail.value, loginPassword.value);
-            // onAuthStateChanged vai redirecionar automaticamente
-        } catch (err) {
-            loginMsg.textContent = "Erro no login: " + err.message;
-        }
+           try {
+        await signInWithEmailAndPassword(auth, loginEmail.value, loginPassword.value);
+        // Redireciona somente depois do login bem-sucedido
+        window.location.href = "index.html";
+    } catch (err) {
+        loginMsg.textContent = "Erro no login: " + err.message;
+    }
     });
 }
 
