@@ -31,7 +31,7 @@ if (document.getElementById("loginBtn")) {
       console.log("Tentando login com:", loginEmail.value, loginPassword.value);
       await signInWithEmailAndPassword(auth, loginEmail.value, loginPassword.value);
       console.log("Login bem sucediso")
-      window.location.href = "calendar.html";
+      window.location.href = "groups.html";
     } catch (err) {
       console.error("Erro no login:", err);
       loginMsg.textContent = "Erro no login: " + err.message;

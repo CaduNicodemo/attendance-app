@@ -95,13 +95,12 @@
 
   <div id="calendar"></div>
 
-  <!-- Importa o FullCalendar primeiro -->
+  <!-- ✅ FullCalendar (apenas UMA versão) -->
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
 
-  <!-- E só depois o seu script -->
-<!-- index.html -->
-<script type="module" src="./auth.js"></script>
-<script type="module" src="./index.js"></script>
+  <!-- ✅ Scripts da sua aplicação -->
+  <script type="module" src="./auth.js"></script>
+  <script type="module" src="./calendar.js"></script>
 
 </body>
 </html>
