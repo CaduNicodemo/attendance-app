@@ -35,6 +35,7 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
 // 🔹 ADICIONAR GRUPO COM COR ESPECÍFICA
 // =======================================================
 document.getElementById("addGroupBtn").addEventListener("click", async () => {
+    console.log("Botão Add Group clicado!")
   const groupName = document.getElementById("groupName").value.trim();
   const groupTypeSelect = document.getElementById("groupType");
   const groupType = groupTypeSelect.value;
