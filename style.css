@@ -29,7 +29,9 @@ body {
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);justify-items: center;
+  justify-items: center;
   justify-self: center;
+  text-align: center;
 }
 
 .container {
@@ -39,7 +41,9 @@ body {
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);justify-items: center;
+  justify-items: center;
   justify-self: center;
+  text-align: center;
 }
 
 input {
