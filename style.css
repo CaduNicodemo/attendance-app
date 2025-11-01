@@ -2,7 +2,8 @@
     --azul-rb: #3531A5;
     --branco-rb: #FFFFFF;        --vermelho-rb: #D51317;   --preto-rb: #000000;
     --cinza-rb: #1F1F2B;
-    --cinza-claro-rb: #666680;
+    --cinza-claro-rb: #888888;
+    --cinza-leve-rb: #c9c9c9;
     --vermelho-claro-grupo: #e63030;--laranja-grupo: #e7861e;--amarelo-grupo: #ecd81f;
     --verde-grupo: #28943f;
     --azul-claro-grupo: #34bce6;    --azul-grupo: #303999;
@@ -12,7 +13,7 @@
 
 body {
   font-family: Arial, sans-serif;
-  background-color: var(--cinza-claro-rb);
+  background-color: var(--cinza-leve-rb);
   margin: 0;
   padding: 0;
 }
@@ -23,7 +24,15 @@ body {
   background: var(--branco-rb);
   padding: 20px;
   border-radius: 10px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);text-align: center;
+}
+input {
+  width: calc(100% - 22px);
+  padding: 10px;
+  margin: 8px 0;
+  border: 1px solid var(--cinza-rb);
+  border-radius: 4px;
+  box-sizing: border-box;
 }
 button{
   background-color: var(--azul-rb);
