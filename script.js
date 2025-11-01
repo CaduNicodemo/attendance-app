@@ -9,6 +9,8 @@ import {
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
 
 let currentUser = null;
+let selectedGroupId = null;
+let selectedGroupColor = null;
 
 // =======================================================
 // 🔹 LOGIN STATUS
@@ -58,7 +60,7 @@ document.getElementById("addGroupBtn").addEventListener("click", async () => {
     });
 
     document.getElementById("groupName").value = "";
-    loadGroups(); // recarrega após adicionar
+    loadGroups();
   } catch (err) {
     console.error("Erro ao adicionar grupo:", err);
   }
@@ -83,42 +85,112 @@ async function loadGroups() {
     const groupDiv = document.createElement("div");
     groupDiv.classList.add("group-item");
 
-    // Botão principal do grupo
     const groupBtn = document.createElement("button");
     groupBtn.textContent = group.name;
     groupBtn.classList.add("group-name");
     groupBtn.style.background = group.color || "var(--azul-grupo)";
     groupBtn.addEventListener("click", () => {
-      localStorage.setItem("selectedGroupId", docSnap.id);
-      window.location.href = "grades.html";
-    });
-
-    // Botão de deletar
-    const deleteBtn = document.createElement("button");
-    deleteBtn.textContent = "🗑️";
-    deleteBtn.classList.add("delete-group");
-    deleteBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      deleteGroup(docSnap.id);
+      selectGroup(docSnap.id, group.color);
     });
 
     groupDiv.appendChild(groupBtn);
-    groupDiv.appendChild(deleteBtn);
     container.appendChild(groupDiv);
   });
 }
 
 // =======================================================
-// 🔹 DELETAR GRUPO (mover para JS, não HTML!)
+// 🔹 SELECIONAR GRUPO
 // =======================================================
-async function deleteGroup(groupId) {
+async function selectGroup(groupId, color) {
+  selectedGroupId = groupId;
+  selectedGroupColor = color;
+  document.body.style.background = color;
+  document.getElementById("groupDetails").style.display = "block";
+  loadStudents();
+  showLessons();
+}
+
+// =======================================================
+// 🔹 DELETAR GRUPO
+// =======================================================
+document.getElementById("deleteGroupBtn").addEventListener("click", async () => {
+  if (!selectedGroupId) return;
   if (!confirm("Tem certeza que deseja deletar este grupo?")) return;
+
   try {
-    await deleteDoc(doc(db, "groups", groupId));
+    await deleteDoc(doc(db, "groups", selectedGroupId));
     alert("Grupo deletado com sucesso!");
-    loadGroups(); // recarrega a lista
-  } catch (error) {
-    console.error("Erro ao deletar grupo:", error);
-    alert("Erro ao deletar grupo.");
+    document.getElementById("groupDetails").style.display = "none";
+    loadGroups();
+  } catch (err) {
+    console.error("Erro ao deletar grupo:", err);
   }
+});
+
+// =======================================================
+// 🔹 CARREGAR ALUNOS
+// =======================================================
+async function loadStudents() {
+  const studentsTable = document.getElementById("studentsTable");
+  studentsTable.innerHTML = `
+    <tr><th>Name</th><th>Attendance</th><th>Homework</th><th>Delete</th></tr>
+  `;
+
+  const studentsRef = collection(db, "groups", selectedGroupId, "students");
+  const snapshot = await getDocs(studentsRef);
+
+  snapshot.forEach((docSnap) => {
+    const student = docSnap.data();
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${student.name}</td>
+      <td><input type="checkbox" class="attCheckbox"></td>
+      <td><input type="checkbox" class="hwCheckbox"></td>
+      <td><button class="deleteStudentBtn" data-id="${docSnap.id}">X</button></td>
+    `;
+    studentsTable.appendChild(tr);
+  });
+}
+
+// =======================================================
+// 🔹 ADICIONAR ALUNO
+// =======================================================
+document.getElementById("addStudentBtn").addEventListener("click", async () => {
+  const name = document.getElementById("studentName").value.trim();
+  if (!name || !selectedGroupId) return;
+
+  await addDoc(collection(db, "groups", selectedGroupId, "students"), {
+    name: name
+  });
+
+  document.getElementById("studentName").value = "";
+  loadStudents();
+});
+
+// =======================================================
+// 🔹 MOSTRAR AULAS (duas passadas + duas próximas)
+// =======================================================
+async function showLessons() {
+  const container = document.getElementById("lessonsList");
+  container.innerHTML = "";
+
+  const today = new Date();
+  const lessons = [];
+
+  for (let i = -2; i <= 2; i++) {
+    if (i === 0) continue;
+    const d = new Date();
+    d.setDate(today.getDate() + i * 7);
+    lessons.push({
+      date: d.toISOString().split("T")[0],
+      title: i < 0 ? "Previous lesson" : "Next lesson"
+    });
+  }
+
+  lessons.forEach(lesson => {
+    const div = document.createElement("div");
+    div.classList.add("lesson-item");
+    div.textContent = `${lesson.title}: ${lesson.date}`;
+    container.appendChild(div);
+  });
 }
