@@ -1,63 +1,72 @@
-import { db, auth, app } from "./config.js";
+// =======================================================
+// 🔹 IMPORTS
+// =======================================================
+import { db, auth } from "./config.js";
 import {
   collection, addDoc, getDocs, doc, deleteDoc,
-  updateDoc, onSnapshot
+  query, where
 } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
 
 let currentUser = null;
-let currentGroup = null;
 
 // =======================================================
-// 🔹 Espera o usuário logar
+// 🔹 LOGIN STATUS
 // =======================================================
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     currentUser = user;
     document.getElementById("mainApp").style.display = "block";
     document.getElementById("userInfo").textContent = user.email;
-    loadGroups(); // Carrega os grupos do usuário logado
+    loadGroups();
   } else {
     window.location.href = "index.html";
   }
 });
 
+// =======================================================
+// 🔹 LOGOUT
+// =======================================================
 document.getElementById("logoutBtn").addEventListener("click", async () => {
   await signOut(auth);
   window.location.href = "index.html";
 });
 
 // =======================================================
-// 🔹 ADICIONAR GRUPO COM COR SELECIONADA PELO USUÁRIO
+// 🔹 ADICIONAR GRUPO
 // =======================================================
 document.getElementById("addGroupBtn").addEventListener("click", async () => {
   const groupName = document.getElementById("groupName").value.trim();
   const groupTypeSelect = document.getElementById("groupType");
   const groupType = groupTypeSelect.value;
   const groupLevel = groupTypeSelect.selectedOptions[0].dataset.level;
-  const color = document.getElementById("groupColor").value; // 🎨 Cor escolhida
+  const color = document.getElementById("groupColor").value;
 
   if (!groupName) {
     alert("Please enter a group name.");
     return;
   }
 
-  await addDoc(collection(db, "groups"), {
-    userId: currentUser.uid,
-    name: groupName,
-    type: groupType,
-    level: groupLevel,
-    color: color, // 🔸 salva a cor do input
-    createdAt: new Date(),
-  });
+  try {
+    await addDoc(collection(db, "groups"), {
+      userId: currentUser.uid,
+      name: groupName,
+      type: groupType,
+      level: groupLevel,
+      color: color,
+      createdAt: new Date(),
+    });
 
-  document.getElementById("groupName").value = "";
+    document.getElementById("groupName").value = "";
+    loadGroups(); // recarrega após adicionar
+  } catch (err) {
+    console.error("Erro ao adicionar grupo:", err);
+  }
 });
 
 // =======================================================
-// 🔹 CARREGAR GRUPOS (E MOSTRAR CORES SALVAS)
+// 🔹 CARREGAR GRUPOS
 // =======================================================
-
 async function loadGroups() {
   const user = auth.currentUser;
   if (!user) return;
@@ -67,14 +76,14 @@ async function loadGroups() {
   const querySnapshot = await getDocs(q);
 
   const container = document.getElementById("groupsButtons");
-  container.innerHTML = ""; // limpa antes de renderizar de novo
+  container.innerHTML = "";
 
   querySnapshot.forEach(docSnap => {
     const group = docSnap.data();
     const groupDiv = document.createElement("div");
     groupDiv.classList.add("group-item");
 
-    // botão com cor
+    // Botão principal do grupo
     const groupBtn = document.createElement("button");
     groupBtn.textContent = group.name;
     groupBtn.classList.add("group-name");
@@ -84,12 +93,12 @@ async function loadGroups() {
       window.location.href = "grades.html";
     });
 
-    // botão de deletar
+    // Botão de deletar
     const deleteBtn = document.createElement("button");
     deleteBtn.textContent = "🗑️";
     deleteBtn.classList.add("delete-group");
     deleteBtn.addEventListener("click", (e) => {
-      e.stopPropagation(); // impede o clique de abrir a página do grupo
+      e.stopPropagation();
       deleteGroup(docSnap.id);
     });
 
@@ -100,29 +109,16 @@ async function loadGroups() {
 }
 
 // =======================================================
-// 🔹 CARREGAR ALUNOS DO GRUPO
+// 🔹 DELETAR GRUPO (mover para JS, não HTML!)
 // =======================================================
-async function loadStudents(groupId) {
-  const studentsTable = document.getElementById("studentsTable");
-  studentsTable.innerHTML = `
-    <tr><th>Name</th><th>Delete</th></tr>
-  `;
-
-  const studentsSnapshot = await getDocs(collection(db, "groups", groupId, "students"));
-  studentsSnapshot.forEach((studentDoc) => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${studentDoc.data().name}</td>
-      <td><button data-id="${studentDoc.id}" class="deleteStudentBtn">X</button></td>
-    `;
-    studentsTable.appendChild(tr);
-  });
-
-  document.querySelectorAll(".deleteStudentBtn").forEach((btn) => {
-    btn.addEventListener("click", async (e) => {
-      const studentId = e.target.dataset.id;
-      await deleteDoc(doc(db, "groups", groupId, "students", studentId));
-      loadStudents(groupId);
-    });
-  });
+async function deleteGroup(groupId) {
+  if (!confirm("Tem certeza que deseja deletar este grupo?")) return;
+  try {
+    await deleteDoc(doc(db, "groups", groupId));
+    alert("Grupo deletado com sucesso!");
+    loadGroups(); // recarrega a lista
+  } catch (error) {
+    console.error("Erro ao deletar grupo:", error);
+    alert("Erro ao deletar grupo.");
+  }
 }
