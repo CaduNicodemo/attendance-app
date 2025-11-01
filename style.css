@@ -60,3 +60,15 @@ button{
   cursor: pointer;
   margin: 1rem;  
 }
+.color-option {
+  width: 30px;
+  height: 30px;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  margin: 3px;
+}
+
+.color-option.selected {
+  border-color: var(--cinza-rb);
+}
