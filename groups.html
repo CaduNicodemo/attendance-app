@@ -20,14 +20,32 @@
       <h2>Groups</h2>
       <select id="groupType">
         <option value="K1" data-level="Kids">K1</option>
+        <option value="K2" data-level="Kids">K2</option>
+        <option value="J" data-level="Juniors">J</option>
         <option value="J1" data-level="Juniors">J1</option>
+        <option value="J2" data-level="Juniors">J2</option>
+        <option value="TA" data-level="Teens">TA</option>
         <option value="T1" data-level="Teens">T1</option>
+        <option value="T2" data-level="Teens">T2</option>
+        <option value="T3" data-level="Teens">T3</option>
+        <option value="T4" data-level="Teens">T4</option>
+        <option value="T5" data-level="Teens">T5</option>
+        <option value="T6" data-level="Teens">T6</option>
       </select>
 
       <input id="groupName" placeholder="Group name">
-      <input type="color" id="groupColor" value="#007bff">
+      <div id="colorPalette">
+        <button class="color-option" data-color="var(--vermelho-claro-grupo)" style="background: var(--vermelho-claro-grupo);"></button>
+        <button class="color-option" data-color="var(--laranja-grupo)" style="background: var(--laranja-grupo);"></button>
+        <button class="color-option" data-color="var(--amarelo-grupo)" style="background: var(--amarelo-grupo);"></button>
+        <button class="color-option" data-color="var(--verde-grupo)" style="background: var(--verde-grupo);"></button>
+        <button class="color-option" data-color="var(--azul-claro-grupo)" style="background: var(--azul-claro-grupo);"></button>
+        <button class="color-option" data-color="var(--azul-grupo)" style="background: var(--azul-grupo);"></button>
+        <button class="color-option" data-color="var(--roxo-grupo)" style="background: var(--roxo-grupo);"></button>
+        <button class="color-option" data-color="var(--rosa-grupo)" style="background: var(--rosa-grupo);"></button>
+      </div>
+      <input type="hidden" id="groupColor" value="var(--azul-rb)">   
       <button id="addGroupBtn">Add Group</button>
-
       <div id="groupsButtons"></div>
 
       <h3>Students</h3>
