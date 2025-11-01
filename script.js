@@ -1,20 +1,16 @@
 import { db, auth, app } from "./config.js";
 import {
   collection, addDoc, getDocs, doc, deleteDoc,
-  setDoc, getDoc, updateDoc, onSnapshot
+  updateDoc, onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
-
-// 🔹 Função auxiliar para gerar uma cor aleatória bonita (será salva no grupo)
-function generateRandomColor() {
-  const hue = Math.floor(Math.random() * 360);
-  return `hsl(${hue}, 70%, 60%)`;
-}
 
 let currentUser = null;
 let currentGroup = null;
 
-// Espera o usuário logar
+// =======================================================
+// 🔹 Espera o usuário logar
+// =======================================================
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     currentUser = user;
@@ -32,29 +28,26 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
 });
 
 // =======================================================
-// 🔹 ADICIONAR GRUPO COM COR ESPECÍFICA
+// 🔹 ADICIONAR GRUPO COM COR SELECIONADA PELO USUÁRIO
 // =======================================================
 document.getElementById("addGroupBtn").addEventListener("click", async () => {
-    console.log("Botão Add Group clicado!")
   const groupName = document.getElementById("groupName").value.trim();
   const groupTypeSelect = document.getElementById("groupType");
   const groupType = groupTypeSelect.value;
   const groupLevel = groupTypeSelect.selectedOptions[0].dataset.level;
+  const color = document.getElementById("groupColor").value; // 🎨 Cor escolhida
 
   if (!groupName) {
     alert("Please enter a group name.");
     return;
   }
 
-  // Gera uma cor e salva no Firestore
-  const color = generateRandomColor();
-
   await addDoc(collection(db, "groups"), {
     userId: currentUser.uid,
     name: groupName,
     type: groupType,
     level: groupLevel,
-    color: color, // 🔸 cor salva junto
+    color: color, // 🔸 salva a cor do input
     createdAt: new Date(),
   });
 
@@ -62,52 +55,48 @@ document.getElementById("addGroupBtn").addEventListener("click", async () => {
 });
 
 // =======================================================
-// 🔹 CARREGAR GRUPOS (E MOSTRAR CORES)
+// 🔹 CARREGAR GRUPOS (E MOSTRAR CORES SALVAS)
 // =======================================================
 async function loadGroups() {
   const q = collection(db, "groups");
-  const snapshot = await getDocs(q);
 
-  const groupsDiv = document.getElementById("groupsButtons");
-  groupsDiv.innerHTML = "";
+  // 🔁 onSnapshot: atualiza automaticamente ao adicionar/excluir grupo
+  onSnapshot(q, (snapshot) => {
+    const groupsDiv = document.getElementById("groupsButtons");
+    groupsDiv.innerHTML = "";
 
-  snapshot.forEach((docSnap) => {
-    const group = docSnap.data();
+    snapshot.forEach((docSnap) => {
+      const group = docSnap.data();
 
-    if (group.userId === currentUser.uid) {
-      const btn = document.createElement("button");
-      btn.textContent = group.name;
+      if (group.userId === currentUser.uid) {
+        const btn = document.createElement("button");
+        btn.textContent = group.name;
 
-      // 🔸 Usa a cor salva (ou gera uma nova, caso grupo antigo)
-      const color = group.color || generateRandomColor();
-      btn.style.backgroundColor = color;
-      btn.style.color = "#fff";
-      btn.style.border = "none";
-      btn.style.padding = "8px 14px";
-      btn.style.margin = "4px";
-      btn.style.borderRadius = "6px";
-      btn.style.cursor = "pointer";
+        // 🔹 Usa cor salva (ou padrão caso grupo antigo)
+        const color = group.color || "#007bff";
+        btn.style.backgroundColor = color;
+        btn.style.color = "#fff";
+        btn.className = "group-button";
 
-      // 🔹 Atualiza Firestore se o grupo ainda não tinha cor
-      if (!group.color) {
-        updateDoc(doc(db, "groups", docSnap.id), { color });
+        // 🔹 Atualiza Firestore se o grupo ainda não tinha cor
+        if (!group.color) {
+          updateDoc(doc(db, "groups", docSnap.id), { color });
+        }
+
+        btn.addEventListener("click", () => {
+          currentGroup = { id: docSnap.id, ...group };
+          loadStudents(docSnap.id);
+        });
+
+        groupsDiv.appendChild(btn);
       }
-
-      btn.addEventListener("click", () => {
-        currentGroup = { id: docSnap.id, ...group };
-        loadStudents(docSnap.id);
-      });
-
-      groupsDiv.appendChild(btn);
-    }
+    });
   });
 }
 
 // =======================================================
-// (As funções de aluno, classes e flagged students seguem como antes)
+// 🔹 CARREGAR ALUNOS DO GRUPO
 // =======================================================
-
-// Exemplo de função existente mantida
 async function loadStudents(groupId) {
   const studentsTable = document.getElementById("studentsTable");
   studentsTable.innerHTML = `
