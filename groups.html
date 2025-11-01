@@ -54,6 +54,19 @@
       <table id="studentsTable"><tr><th>Name</th><th>Delete</th></tr></table>
     </div>
   </div>
+  <script>
+  // Ao clicar em um botão de cor, atualiza o input hidden
+  document.querySelectorAll('.color-option').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const selectedColor = btn.dataset.color;
+      document.getElementById('groupColor').value = selectedColor;
+
+      // Opcional: destacar o botão selecionado
+      document.querySelectorAll('.color-option').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    });
+  });
+  </script>
 
   <script type="module" src="script.js"></script>
 </body>
