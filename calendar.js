@@ -1,164 +1,127 @@
-import { db, app } from "./config.js";
+import { db, auth } from "./config.js";
 import {
-  collection, addDoc, query, where, onSnapshot
+  collection, addDoc, getDocs, query, where, onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
 
-const addEventBtn = document.getElementById('addEventBtn');
-const eventForm = document.getElementById('eventForm');
-const saveEventBtn = document.getElementById('saveEventBtn');
-const cancelEventBtn = document.getElementById('cancelEventBtn');
-const groupSelect = document.getElementById('groupSelect');
-const calendarEl = document.getElementById('calendar');
-let filterSelect;
+let currentUser = null;
 let calendar;
-let groupColors = {};
 let allEvents = [];
 
-const auth = getAuth(app);
-
 // =======================================================
-// 🔐 Inicialização com autenticação
+// Espera login
 // =======================================================
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     window.location.href = "index.html";
     return;
   }
-  await loadGroups(user.uid);
-  renderCalendar();
-  watchEventsRealtime(user.uid);
+
+  currentUser = user;
+  await loadGroups();
+  initCalendar();
 });
 
 // =======================================================
-// 🔹 Carrega grupos do Firestore
+// Inicializa calendário
 // =======================================================
-async function loadGroups(userId) {
-  const q = query(collection(db, "groups"), where("userId", "==", userId));
-  const snapshot = await getDocs(q);
-  groupSelect.innerHTML = "";
-
-  snapshot.forEach((docSnap) => {
-    const data = docSnap.data();
-    const color = data.color || getRandomColor();
-    groupColors[docSnap.id] = color;
-
-    const option = document.createElement("option");
-    option.value = docSnap.id;
-    option.textContent = data.name;
-    option.style.color = color;
-    groupSelect.appendChild(option);
-  });
-}
-
-// =======================================================
-// 🕒 Atualização em tempo real dos eventos
-// =======================================================
-function watchEventsRealtime(userId) {
-  const q = query(collection(db, "events"), where("userId", "==", userId));
-
-  onSnapshot(q, (snapshot) => {
-    allEvents = [];
-    snapshot.forEach((docSnap) => {
-      const data = docSnap.data();
-      allEvents.push({
-        title: data.title,
-        start: data.date,
-        color: groupColors[data.groupId] || "#007bff",
-        groupId: data.groupId,
-      });
-    });
-
-    updateCalendar();
-  });
-}
-
-// =======================================================
-// 📅 Renderiza e atualiza calendário
-// =======================================================
-function renderCalendar() {
+function initCalendar() {
+  const calendarEl = document.getElementById("calendar");
   calendar = new FullCalendar.Calendar(calendarEl, {
-    initialView: 'dayGridMonth',
-    locale: 'pt-br',
-    height: 'auto',
-    events: allEvents,
+    initialView: "dayGridMonth",
+    events: [],
+    eventDisplay: "block",
   });
   calendar.render();
-  createFilterSelect();
-}
-
-function updateCalendar() {
-  if (!calendar) return;
-  calendar.removeAllEvents();
-
-  const selected = filterSelect?.value || "all";
-  const toShow = selected === "all"
-    ? allEvents
-    : allEvents.filter(ev => ev.groupId === selected);
-
-  toShow.forEach(ev => calendar.addEvent(ev));
 }
 
 // =======================================================
-// 💾 Salvar evento
+// Carrega grupos e popula selects
 // =======================================================
-saveEventBtn.addEventListener('click', async () => {
-  const title = document.getElementById('eventTitle').value.trim();
-  const date = document.getElementById('eventDate').value;
-  const groupId = groupSelect.value;
-  const user = auth.currentUser;
+async function loadGroups() {
+  const q = query(collection(db, "groups"), where("userId", "==", currentUser.uid));
+  const snapshot = await getDocs(q);
 
-  if (!user || !title || !date || !groupId) {
-    alert("Preencha todos os campos.");
-    return;
-  }
+  const groupSelect = document.getElementById("groupSelect");
+  const filterSelect = document.getElementById("filterSelect");
+  groupSelect.innerHTML = `<option value="">Selecione o grupo</option>`;
+  filterSelect.innerHTML = `<option value="all">Todos</option>`;
+
+  snapshot.forEach(docSnap => {
+    const g = docSnap.data();
+    const opt1 = document.createElement("option");
+    opt1.value = docSnap.id;
+    opt1.textContent = g.name;
+    groupSelect.appendChild(opt1);
+
+    const opt2 = document.createElement("option");
+    opt2.value = docSnap.id;
+    opt2.textContent = g.name;
+    filterSelect.appendChild(opt2);
+  });
+}
+
+// =======================================================
+// Adicionar evento
+// =======================================================
+document.getElementById("addEventBtn").addEventListener("click", () => {
+  document.getElementById("eventForm").style.display = "block";
+});
+
+document.getElementById("cancelEventBtn").addEventListener("click", () => {
+  document.getElementById("eventForm").style.display = "none";
+});
+
+document.getElementById("saveEventBtn").addEventListener("click", async () => {
+  const title = document.getElementById("eventTitle").value.trim();
+  const date = document.getElementById("eventDate").value;
+  const groupId = document.getElementById("groupSelect").value;
+
+  if (!title || !date || !groupId) return alert("Preencha todos os campos!");
 
   await addDoc(collection(db, "events"), {
+    userId: currentUser.uid,
     title,
     date,
     groupId,
-    userId: user.uid,
-    createdAt: new Date(),
   });
 
-  eventForm.style.display = 'none';
+  document.getElementById("eventForm").reset();
+  document.getElementById("eventForm").style.display = "none";
+
+  loadEvents();
 });
 
 // =======================================================
-// 🎨 Utilitários
+// Carrega eventos e aplica filtro
 // =======================================================
-function getRandomColor() {
-  const colors = ["#007bff", "#28a745", "#ffc107", "#dc3545", "#17a2b8", "#6f42c1", "#fd7e14"];
-  return colors[Math.floor(Math.random() * colors.length)];
+async function loadEvents() {
+  const q = query(collection(db, "events"), where("userId", "==", currentUser.uid));
+  onSnapshot(q, (snapshot) => {
+    allEvents = [];
+    snapshot.forEach(docSnap => {
+      const ev = docSnap.data();
+      allEvents.push({
+        title: ev.title,
+        start: ev.date,
+        groupId: ev.groupId,
+      });
+    });
+    renderFilteredEvents();
+  });
 }
 
 // =======================================================
-// 🔍 Filtro de grupos
+// Filtro
 // =======================================================
-function createFilterSelect() {
-  filterSelect = document.createElement("select");
-  filterSelect.style.display = "block";
-  filterSelect.style.margin = "20px auto";
-  filterSelect.style.padding = "8px";
-  filterSelect.style.borderRadius = "6px";
-  filterSelect.style.border = "1px solid #ccc";
+const filterSelect = document.getElementById("filterSelect");
+filterSelect.addEventListener("change", renderFilteredEvents);
 
-  const allOption = document.createElement("option");
-  allOption.value = "all";
-  allOption.textContent = "Todos os grupos";
-  filterSelect.appendChild(allOption);
+function renderFilteredEvents() {
+  if (!calendar) return;
+  const selected = filterSelect.value;
+  calendar.removeAllEvents();
 
-  for (const [id, color] of Object.entries(groupColors)) {
-    const opt = document.createElement("option");
-    opt.value = id;
-    opt.textContent = groupSelect.querySelector(`option[value="${id}"]`)?.textContent || "Grupo";
-    opt.style.color = color;
-    filterSelect.appendChild(opt);
-  }
-
-  calendarEl.parentNode.insertBefore(filterSelect, calendarEl);
-  filterSelect.addEventListener("change", updateCalendar);
+  const filtered = selected === "all" ? allEvents : allEvents.filter(ev => ev.groupId === selected);
+  filtered.forEach(ev => calendar.addEvent(ev));
 }
-
-addEventBtn.addEventListener('click', () => eventForm.style.display = 'block');
-cancelEventBtn.addEventListener('click', () => eventForm.style.display = 'none');

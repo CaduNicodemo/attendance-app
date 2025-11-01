@@ -1,58 +1,51 @@
 // auth.js
-import { auth, db, app} from "./config.js";
+import { auth } from "./config.js";
 import {
   onAuthStateChanged,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
 } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
 
-// Variável global para armazenar o usuário atual
 let currentUser = null;
 
-// --- Observa mudanças na autenticação ---
+// 🔸 Acompanha login
 onAuthStateChanged(auth, (user) => {
   currentUser = user;
-    console.log("Auth state changed:", user);})
+  console.log("Auth state changed:", user?.email || "deslogado");
+});
 
-// --- Pega o usuário atual ---
 export function getCurrentUser() {
   return currentUser;
 }
 
-// --- Login ---
+// 🔹 Login
 if (document.getElementById("loginBtn")) {
-  const loginEmail = document.getElementById("loginEmail");
-  const loginPassword = document.getElementById("loginPassword");
-  const loginBtn = document.getElementById("loginBtn");
-  const loginMsg = document.getElementById("loginMsg");
+  const email = document.getElementById("loginEmail");
+  const password = document.getElementById("loginPassword");
+  const msg = document.getElementById("loginMsg");
 
-  loginBtn.addEventListener("click", async () => {
+  document.getElementById("loginBtn").addEventListener("click", async () => {
     try {
-      console.log("Tentando login com:", loginEmail.value, loginPassword.value);
-      await signInWithEmailAndPassword(auth, loginEmail.value, loginPassword.value);
-      console.log("Login bem sucediso")
+      await signInWithEmailAndPassword(auth, email.value, password.value);
       window.location.href = "groups.html";
     } catch (err) {
-      console.error("Erro no login:", err);
-      loginMsg.textContent = "Erro no login: " + err.message;
+      msg.textContent = "Erro no login: " + err.message;
     }
   });
 }
 
-// --- Registro ---
+// 🔹 Registro
 if (document.getElementById("registerBtn")) {
-  const registerEmail = document.getElementById("registerEmail");
-  const registerPassword = document.getElementById("registerPassword");
-  const registerBtn = document.getElementById("registerBtn");
-  const registerMsg = document.getElementById("registerMsg");
+  const email = document.getElementById("registerEmail");
+  const password = document.getElementById("registerPassword");
+  const msg = document.getElementById("registerMsg");
 
-  registerBtn.addEventListener("click", async () => {
+  document.getElementById("registerBtn").addEventListener("click", async () => {
     try {
-      await createUserWithEmailAndPassword(auth, registerEmail.value, registerPassword.value);
-      registerMsg.textContent = "Conta criada com sucesso! Faça login.";
+      await createUserWithEmailAndPassword(auth, email.value, password.value);
+      msg.textContent = "Conta criada com sucesso! Faça login.";
     } catch (err) {
-      console.error("Erro no registro:", err);
-      registerMsg.textContent = "Erro no registro: " + err.message;
+      msg.textContent = "Erro no registro: " + err.message;
     }
   });
 }

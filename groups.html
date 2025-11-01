@@ -1,118 +1,39 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Attendance and Homework</title>
-  <link rel="icon" type="image/png" href="favicon.png">
   <link rel="stylesheet" href="style.css">
-  <style>
-    /* Estilo simples para o seletor de cor e botões */
-    #groupColor {
-      width: 60px;
-      height: 35px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      vertical-align: middle;
-    }
-
-    .group-button {
-      border: none;
-      color: white;
-      padding: 8px 16px;
-      margin: 5px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-  </style>
 </head>
-
 <body>
-  <!-- Área principal do app (inicialmente escondida) -->
-  <div id="mainApp">
+  <div id="mainApp" style="display:none;">
     <div class="container">
       <h1>Attendance and Homework</h1>
 
-      <!-- Barra superior com usuário logado -->
-      <div id="topbar" class="topbar">
-        <a href="calendar.html">
-            <button id="calendarButton">Calendar</button>
-        </a>
+      <div id="topbar">
+        <a href="calendar.html"><button>Calendar</button></a>
         <span id="userInfo"></span>
         <button id="logoutBtn">Sair</button>
       </div>
 
-      <!-- Grupos -->
       <h2>Groups</h2>
       <select id="groupType">
         <option value="K1" data-level="Kids">K1</option>
-        <option value="K2" data-level="Kids">K2</option>
-        <option value="J" data-level="Juniors">J</option>
-        <option value="J1" data-level="Juniors1-2">J1</option>
-        <option value="J2" data-level="Juniors1-2">J2</option>
-        <option value="TA" data-level="TeensA1-2">TA</option>
-        <option value="T1" data-level="TeensA1-2">T1</option>
-        <option value="T2" data-level="TeensA1-2">T2</option>
-        <option value="T3" data-level="Teens3-6">T3</option>
-        <option value="T4" data-level="Teens3-6">T4</option>
-        <option value="T5" data-level="Teens3-6">T5</option>
-        <option value="T6" data-level="Teens3-6">T6</option>
+        <option value="J1" data-level="Juniors">J1</option>
+        <option value="T1" data-level="Teens">T1</option>
       </select>
 
       <input id="groupName" placeholder="Group name">
-      <input type="color" id="groupColor" value="#007bff" title="Escolha uma cor">
+      <input type="color" id="groupColor" value="#007bff">
       <button id="addGroupBtn">Add Group</button>
 
-      <div class="group-buttons" id="groupsButtons"></div>
+      <div id="groupsButtons"></div>
 
-      <hr>
-
-      <!-- Alunos -->
       <h3>Students</h3>
-      <input id="studentName" placeholder="Student's name">
+      <input id="studentName" placeholder="Student name">
       <button id="addStudentBtn">Add Student</button>
-      <table id="studentsTable">
-        <tr>
-          <th>Name</th>
-          <th>Delete</th>
-        </tr>
-      </table>
-      <a href="grades.html">
-        <button id="openGradesBtn">Open Grades</button>
-    </a>
-      <hr>
-
-      <!-- Dias de aula -->
-      <h3>Classes</h3>
-      <div class="classes">
-        <label><input type="checkbox" id="mon"> Monday</label>
-        <label><input type="checkbox" id="tue"> Tuesday</label>
-        <label><input type="checkbox" id="wed"> Wednesday</label>
-        <label><input type="checkbox" id="thu"> Thursday</label>
-        <label><input type="checkbox" id="fri"> Friday</label>
-      </div>
-      <button id="generateClassesBtn">Next Classes</button>
-      <table id="classesTable">
-        <tr>
-          <th>Date</th>
-          <th>Class</th>
-          <th>Register</th>
-        </tr>
-      </table>
-
-      <hr>
-      <button class="delete-group-btn" id="deleteGroupBtn">Delete current group</button>
-
-      <hr>
-      <!-- Notificações -->
-      <div id="notificationSection">
-        <h3>Flagged Students</h3>
-        <textarea id="flaggedMessage" rows="6" cols="80"></textarea><br>
-        <button id="sendWhatsAppBtn">Send via WhatsApp</button>
-      </div>
+      <table id="studentsTable"><tr><th>Name</th><th>Delete</th></tr></table>
     </div>
   </div>
 

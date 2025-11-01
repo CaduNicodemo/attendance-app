@@ -1,45 +1,18 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Attendance and Homework</title>
-    <link rel="icon" type="image/png" href="favicon.png">
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>Login</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-
-
 <body>
-    <!-- Área de login -->
-    <div id="loginSection" style="display:flex; flex-direction:column; gap:10px; max-width:300px; margin:auto;">
-        <h2>Login</h2>
-        <input id="loginEmail" type="email" placeholder="Email">
-        <input id="loginPassword" type="password" placeholder="Senha">
-        <button id="loginBtn">Entrar</button>
-        <p id="loginMsg" style="color:red;"></p>
-    </div>
-    <!-- Área de registro -->
-    <div id="registerSection" style="display:flex; flex-direction:column; gap:10px; max-width:300px; margin:auto;">
-        <h2>Cadastro</h2>
-        <input id="registerName" type="text" placeholder="Nome completo">
-        <input id="registerEmail" type="email" placeholder="Email">
-        <input id="registerPassword" type="password" placeholder="Senha">
-        <button id="registerBtn">Registrar</button>
-        <p id="registerMsg" style="color:red;"></p>
-        <p style="text-align:center;">
-            Já tem conta? <a href="#" id="showLogin">Entrar</a>
-        </p>
-    </div>
+  <h2>Login</h2>
+  <input id="loginEmail" placeholder="Email" type="email"><br>
+  <input id="loginPassword" placeholder="Senha" type="password"><br>
+  <button id="loginBtn">Entrar</button>
+  <p id="loginMsg"></p>
+  <a href="register.html">Criar conta</a>
 
-
-    <!-- Link para trocar -->
-    <p style="text-align:center; margin-top:10px;">
-        Novo por aqui? <a href="#" id="showRegister">Criar conta</a>
-    </p>
-    <!-- index.html -->
-<script type="module" src="./auth.js"></script>
-<script type="module" src="./index.js"></script>
-
+  <script type="module" src="auth.js"></script>
 </body>
+</html>
