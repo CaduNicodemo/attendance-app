@@ -1,17 +1,19 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Attendance and Homework</title>
   <link rel="stylesheet" href="style.css">
+
 </head>
 <body>
   <div id="topbar">
-        <a href="calendar.html"><button>Calendar</button></a>
-        <span id="userInfo"></span>
-        <button id="logoutBtn">Sair</button>
-      </div>
+    <a href="calendar.html"><button>Calendar</button></a>
+    <span id="userInfo"></span>
+    <button id="logoutBtn">Sair</button>
+  </div>
+
   <div id="mainApp" style="display:none;">
     <div class="container">
       <h1>Attendance and Homework</h1>
@@ -43,28 +45,47 @@
         <button class="color-option" data-color="var(--roxo-grupo)" style="background: var(--roxo-grupo);"></button>
         <button class="color-option" data-color="var(--rosa-grupo)" style="background: var(--rosa-grupo);"></button>
       </div>
-      <input type="hidden" id="groupColor" value="var(--azul-rb)">   
+
+      <input type="hidden" id="groupColor" value="var(--azul-grupo)">   
       <button id="addGroupBtn">Add Group</button>
+
       <div id="groupsButtons"></div>
 
       <h3>Students</h3>
       <input id="studentName" placeholder="Student name">
       <button id="addStudentBtn">Add Student</button>
-      <table id="studentsTable"><tr><th>Name</th><th>Delete</th></tr></table>
+      <table id="studentsTable">
+        <tr><th>Name</th><th>Delete</th></tr>
+      </table>
     </div>
   </div>
-  <script>
-  // Ao clicar em um botão de cor, atualiza o input hidden
-  document.querySelectorAll('.color-option').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const selectedColor = btn.dataset.color;
-      document.getElementById('groupColor').value = selectedColor;
 
-      // Opcional: destacar o botão selecionado
-      document.querySelectorAll('.color-option').forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
+  <script>
+    // Cor de grupo
+    document.querySelectorAll('.color-option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const selectedColor = btn.dataset.color;
+        document.getElementById('groupColor').value = selectedColor;
+        document.querySelectorAll('.color-option').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+      });
     });
-  });
+
+    // Deletar grupo
+    async function deleteGroup(groupId) {
+      if (!confirm("Tem certeza que deseja deletar este grupo?")) return;
+
+      try {
+        const { deleteDoc, doc, getFirestore } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+        const db = getFirestore();
+        await deleteDoc(doc(db, "groups", groupId));
+        alert("Grupo deletado com sucesso!");
+        location.reload();
+      } catch (error) {
+        console.error("Erro ao deletar grupo:", error);
+        alert("Erro ao deletar grupo.");
+      }
+    }
   </script>
 
   <script type="module" src="script.js"></script>

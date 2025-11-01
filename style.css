@@ -89,3 +89,38 @@ button{
 .color-option.selected {
   border-color: var(--cinza-rb);
 }
+
+#groupsButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.group-item {
+  display: flex;
+  align-items: center;
+  background: var(--cinza-claro, #f2f2f2);
+  border-radius: 8px;
+  padding: 6px 10px;
+  gap: 6px;
+}
+
+.group-name {
+  font-weight: bold;
+  color: #333;
+}
+
+.delete-group {
+  background:var(--cinza-rb);
+  border: none;
+  color:var(--branco-rb);
+  border-radius: 6px;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.delete-group:hover {
+  background:var(--vermelho-rb);
+}
