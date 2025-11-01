@@ -23,18 +23,16 @@ body {
 }
 
 #topbar{
-  max-width: 80%;
-  margin: 20px auto;
   background: var(--branco-rb);
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);justify-items: center;
-  justify-self: center;
+  box-shadow: 0 2px 6px var(--cinza-rb);
   justify-content: space-evenly;
   display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
   align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
 }
 
 .containerInput {
