@@ -57,40 +57,45 @@ document.getElementById("addGroupBtn").addEventListener("click", async () => {
 // =======================================================
 // 🔹 CARREGAR GRUPOS (E MOSTRAR CORES SALVAS)
 // =======================================================
+
 async function loadGroups() {
-  const q = collection(db, "groups");
+  const user = auth.currentUser;
+  if (!user) return;
 
-  // 🔁 onSnapshot: atualiza automaticamente ao adicionar/excluir grupo
-  onSnapshot(q, (snapshot) => {
-    const groupsDiv = document.getElementById("groupsButtons");
-    groupsDiv.innerHTML = "";
+  const groupsRef = collection(db, "groups");
+  const q = query(groupsRef, where("userId", "==", user.uid));
+  const querySnapshot = await getDocs(q);
 
-    snapshot.forEach((docSnap) => {
-      const group = docSnap.data();
+  const container = document.getElementById("groupsButtons");
+  container.innerHTML = ""; // limpa antes de renderizar de novo
 
-      if (group.userId === currentUser.uid) {
-        const btn = document.createElement("button");
-        btn.textContent = group.name;
+  querySnapshot.forEach(docSnap => {
+    const group = docSnap.data();
+    const groupDiv = document.createElement("div");
+    groupDiv.classList.add("group-item");
 
-        // 🔹 Usa cor salva (ou padrão caso grupo antigo)
-        const color = group.color || "#007bff";
-        btn.style.backgroundColor = color;
-        btn.style.color = "#fff";
-        btn.className = "group-button";
-
-        // 🔹 Atualiza Firestore se o grupo ainda não tinha cor
-        if (!group.color) {
-          updateDoc(doc(db, "groups", docSnap.id), { color });
-        }
-
-        btn.addEventListener("click", () => {
-          currentGroup = { id: docSnap.id, ...group };
-          loadStudents(docSnap.id);
-        });
-
-        groupsDiv.appendChild(btn);
-      }
+    // botão com cor
+    const groupBtn = document.createElement("button");
+    groupBtn.textContent = group.name;
+    groupBtn.classList.add("group-name");
+    groupBtn.style.background = group.color || "var(--azul-grupo)";
+    groupBtn.addEventListener("click", () => {
+      localStorage.setItem("selectedGroupId", docSnap.id);
+      window.location.href = "grades.html";
     });
+
+    // botão de deletar
+    const deleteBtn = document.createElement("button");
+    deleteBtn.textContent = "🗑️";
+    deleteBtn.classList.add("delete-group");
+    deleteBtn.addEventListener("click", (e) => {
+      e.stopPropagation(); // impede o clique de abrir a página do grupo
+      deleteGroup(docSnap.id);
+    });
+
+    groupDiv.appendChild(groupBtn);
+    groupDiv.appendChild(deleteBtn);
+    container.appendChild(groupDiv);
   });
 }
 
