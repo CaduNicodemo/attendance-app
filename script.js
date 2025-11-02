@@ -141,56 +141,70 @@ document.getElementById("addStudentBtn").addEventListener("click", async () => {
 });
 
 // =======================================================
-// SHOW LESSONS
+// SHOW LESSONS (DD/MM/AAAA, background condicional)
 async function showLessons() {
   if (!selectedGroupId) return;
   const container = document.getElementById("lessonsList");
   container.innerHTML = "";
-  const groupDoc = await getDoc(doc(db, "users", currentUser.uid, "groups", selectedGroupId));
-  if (!groupDoc.exists()) return;
+
   const today = new Date();
   const lessons = [];
 
   for (let i = -2; i <= 2; i++) {
     if (i === 0) continue;
-    const date = new Date(today);
-    date.setDate(today.getDate() + i * 7);
-    lessons.push({ date: date.toISOString().split("T")[0], title: i<0?"Previous":"Next" });
+    const d = new Date(today);
+    d.setDate(today.getDate() + i * 7);
+    lessons.push(d);
   }
 
-  lessons.forEach(lesson => {
+  for (const dateObj of lessons) {
+    const dateStr = dateObj.toISOString().split("T")[0]; // YYYY-MM-DD
+    const formatted = `${String(dateObj.getDate()).padStart(2,'0')}/${String(dateObj.getMonth()+1).padStart(2,'0')}/${dateObj.getFullYear()}`;
+
+    // checar se já existe dados para essa aula
+    const lessonSnap = await getDoc(doc(db, "users", currentUser.uid, "groups", selectedGroupId, "lessons", dateStr));
+    const bgColor = lessonSnap.exists() ? "var(--cinza-rb)" : "var(--cinza-claro-rb)";
+
     const div = document.createElement("div");
-    div.textContent = `${lesson.title} lesson: ${lesson.date}`;
+    div.textContent = formatted;
+    div.style.background = bgColor;
+    div.style.padding = "8px";
+    div.style.marginBottom = "5px";
+    div.style.borderRadius = "5px";
     div.style.cursor = "pointer";
-    div.addEventListener("click", () => openLessonModal(lesson.date));
+    div.addEventListener("click", () => openLessonModal(dateStr));
+
     container.appendChild(div);
-  });
+  }
 }
 
 // =======================================================
 // MODAL: PRESENCE & HOMEWORK
-// =======================================================
-const modal = document.getElementById("lessonModal");
-const modalTable = document.getElementById("modalStudentsTable");
-const modalTitle = document.getElementById("modalTitle");
-
-document.getElementById("closeLessonBtn").addEventListener("click", () => modal.style.display="none");
-document.getElementById("saveLessonBtn").addEventListener("click", saveLessonData);
-
 async function openLessonModal(date) {
   currentLessonDate = date;
   modalTitle.textContent = `Lesson ${date}`;
   modalTable.innerHTML = `<tr><th>Student</th><th>Attendance</th><th>Homework</th></tr>`;
 
   const studentsSnap = await getDocs(collection(db, "users", currentUser.uid, "groups", selectedGroupId, "students"));
+  const lessonSnap = await getDoc(doc(db, "users", currentUser.uid, "groups", selectedGroupId, "lessons", date));
+  const savedData = lessonSnap.exists() ? lessonSnap.data() : {};
+
   studentsSnap.forEach(docSnap => {
     const student = docSnap.data();
+    const attChecked = savedData[docSnap.id]?.attendance || false;
+    const hwChecked = savedData[docSnap.id]?.homework || false;
+
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${student.name}</td>
-      <td><input type="checkbox" class="attCheckbox" data-id="${docSnap.id}"></td>
-      <td><input type="checkbox" class="hwCheckbox" data-id="${docSnap.id}"></td>`;
+    tr.innerHTML = `
+      <td>${student.name}</td>
+      <td><input type="checkbox" class="attCheckbox" data-id="${docSnap.id}" ${attChecked ? 'checked' : ''}></td>
+      <td><input type="checkbox" class="hwCheckbox" data-id="${docSnap.id}" ${hwChecked ? 'checked' : ''}></td>
+    `;
     modalTable.appendChild(tr);
   });
+
+  modal.style.display = "flex";
+}
 
   // carregar dados já salvos
   const lessonSnap = await getDoc(doc(db, "users", currentUser.uid, "groups", selectedGroupId, "lessons", date));
@@ -199,9 +213,7 @@ async function openLessonModal(date) {
     modalTable.querySelectorAll(".attCheckbox").forEach(cb => cb.checked = data[cb.dataset.id]?.attendance||false);
     modalTable.querySelectorAll(".hwCheckbox").forEach(cb => cb.checked = data[cb.dataset.id]?.homework||false);
   }
-
-  modal.style.display = "flex";
-}
+modal.style.display = "flex";
 
 async function saveLessonData() {
   if (!currentLessonDate) return;
