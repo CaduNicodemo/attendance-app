@@ -1,3 +1,6 @@
+// =======================================================
+// 🔹 IMPORTS
+// =======================================================
 import { db, auth } from "./config.js";
 import {
   collection, addDoc, getDocs, doc, deleteDoc,
@@ -8,10 +11,10 @@ import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/
 let currentUser = null;
 let selectedGroupId = null;
 let selectedGroupColor = null;
-let currentLessonDate = null;
 
 // =======================================================
-// LOGIN
+// 🔹 LOGIN STATUS
+// =======================================================
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     currentUser = user;
@@ -23,13 +26,17 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
+// =======================================================
+// 🔹 LOGOUT
+// =======================================================
 document.getElementById("logoutBtn").addEventListener("click", async () => {
   await signOut(auth);
   window.location.href = "index.html";
 });
 
 // =======================================================
-// ADD GROUP
+// 🔹 ADICIONAR GRUPO
+// =======================================================
 document.getElementById("addGroupBtn").addEventListener("click", async () => {
   const groupName = document.getElementById("groupName").value.trim();
   const groupTypeSelect = document.getElementById("groupType");
@@ -37,38 +44,43 @@ document.getElementById("addGroupBtn").addEventListener("click", async () => {
   const groupLevel = groupTypeSelect.selectedOptions[0].dataset.level;
   const color = document.getElementById("groupColor").value;
 
-  const daysCheckboxes = document.querySelectorAll("#groupDays input[type='checkbox']");
-  const daysOfWeek = Array.from(daysCheckboxes)
-    .filter(cb => cb.checked)
-    .map(cb => cb.value);
-
-  if (!groupName) { alert("Enter a group name."); return; }
+  if (!groupName) {
+    alert("Please enter a group name.");
+    return;
+  }
 
   try {
-    await addDoc(collection(db, "users", currentUser.uid, "groups"), {
+    await addDoc(collection(db, "groups"), {
+      userId: currentUser.uid,
       name: groupName,
       type: groupType,
       level: groupLevel,
       color: color,
-      daysOfWeek: daysOfWeek,
-      createdAt: new Date()
+      createdAt: new Date(),
+      lessonDays: [] // Aqui você poderá adicionar dias da semana do grupo
     });
+
     document.getElementById("groupName").value = "";
-    daysCheckboxes.forEach(cb => cb.checked = false);
     loadGroups();
   } catch (err) {
-    console.error(err);
+    console.error("Erro ao adicionar grupo:", err);
   }
 });
 
 // =======================================================
-// LOAD GROUPS
+// 🔹 CARREGAR GRUPOS
+// =======================================================
 async function loadGroups() {
   if (!currentUser) return;
+
+  const groupsRef = collection(db, "groups");
+  const q = query(groupsRef, where("userId", "==", currentUser.uid));
+  const querySnapshot = await getDocs(q);
+
   const container = document.getElementById("groupsButtons");
   container.innerHTML = "";
-  const snapshot = await getDocs(collection(db, "users", currentUser.uid, "groups"));
-  snapshot.forEach(docSnap => {
+
+  querySnapshot.forEach(docSnap => {
     const group = docSnap.data();
     const groupDiv = document.createElement("div");
     groupDiv.classList.add("group-item");
@@ -77,7 +89,9 @@ async function loadGroups() {
     groupBtn.textContent = group.name;
     groupBtn.classList.add("group-name");
     groupBtn.style.background = group.color || "var(--azul-grupo)";
-    groupBtn.addEventListener("click", () => selectGroup(docSnap.id, group.color));
+    groupBtn.addEventListener("click", () => {
+      selectGroup(docSnap.id, group.color);
+    });
 
     groupDiv.appendChild(groupBtn);
     container.appendChild(groupDiv);
@@ -85,65 +99,82 @@ async function loadGroups() {
 }
 
 // =======================================================
-// SELECT GROUP
+// 🔹 SELECIONAR GRUPO
+// =======================================================
 async function selectGroup(groupId, color) {
   selectedGroupId = groupId;
   selectedGroupColor = color;
   document.body.style.background = color;
   document.getElementById("groupDetails").style.display = "block";
-  loadStudents();
-  showLessons();
+  await loadStudents();
+  await showLessons();
 }
 
 // =======================================================
-// DELETE GROUP
+// 🔹 DELETAR GRUPO
+// =======================================================
 document.getElementById("deleteGroupBtn").addEventListener("click", async () => {
   if (!selectedGroupId) return;
-  if (!confirm("Delete group?")) return;
+  if (!confirm("Tem certeza que deseja deletar este grupo?")) return;
 
-  await deleteDoc(doc(db, "users", currentUser.uid, "groups", selectedGroupId));
-  selectedGroupId = null;
-  document.getElementById("groupDetails").style.display = "none";
-  loadGroups();
+  try {
+    await deleteDoc(doc(db, "groups", selectedGroupId));
+    alert("Grupo deletado com sucesso!");
+    document.getElementById("groupDetails").style.display = "none";
+    loadGroups();
+  } catch (err) {
+    console.error("Erro ao deletar grupo:", err);
+  }
 });
 
 // =======================================================
-// LOAD STUDENTS
+// 🔹 CARREGAR ALUNOS
+// =======================================================
 async function loadStudents() {
-  if (!selectedGroupId) return;
-  const table = document.getElementById("studentsTable");
-  table.innerHTML = `<tr><th>Name</th><th>Delete</th></tr>`;
-  const snapshot = await getDocs(collection(db, "users", currentUser.uid, "groups", selectedGroupId, "students"));
+  const studentsTable = document.getElementById("studentsTable");
+  studentsTable.innerHTML = `
+    <tr><th>Name</th><th>Delete</th></tr>
+  `;
 
-  snapshot.forEach(docSnap => {
+  const studentsRef = collection(db, "groups", selectedGroupId, "students");
+  const snapshot = await getDocs(studentsRef);
+
+  snapshot.forEach((docSnap) => {
     const student = docSnap.data();
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${student.name}</td><td><button data-id="${docSnap.id}">X</button></td>`;
-    table.appendChild(tr);
+    tr.innerHTML = `
+      <td>${student.name}</td>
+      <td><button class="deleteStudentBtn" data-id="${docSnap.id}">X</button></td>
+    `;
+    studentsTable.appendChild(tr);
   });
 
-  table.querySelectorAll("button").forEach(btn => {
+  // Deletar aluno
+  document.querySelectorAll(".deleteStudentBtn").forEach(btn => {
     btn.addEventListener("click", async (e) => {
-      await deleteDoc(doc(db, "users", currentUser.uid, "groups", selectedGroupId, "students", e.target.dataset.id));
+      const studentId = e.target.dataset.id;
+      await deleteDoc(doc(db, "groups", selectedGroupId, "students", studentId));
       loadStudents();
     });
   });
 }
 
 // =======================================================
-// ADD STUDENT
+// 🔹 ADICIONAR ALUNO
+// =======================================================
 document.getElementById("addStudentBtn").addEventListener("click", async () => {
   const name = document.getElementById("studentName").value.trim();
   if (!name || !selectedGroupId) return;
-  await addDoc(collection(db, "users", currentUser.uid, "groups", selectedGroupId, "students"), { name });
+
+  await addDoc(collection(db, "groups", selectedGroupId, "students"), { name });
   document.getElementById("studentName").value = "";
   loadStudents();
 });
 
 // =======================================================
-// SHOW LESSONS (DD/MM/AAAA, background condicional)
+// 🔹 MOSTRAR AULAS (2 passadas + 2 futuras)
+// =======================================================
 async function showLessons() {
-  if (!selectedGroupId) return;
   const container = document.getElementById("lessonsList");
   container.innerHTML = "";
 
@@ -152,81 +183,96 @@ async function showLessons() {
 
   for (let i = -2; i <= 2; i++) {
     if (i === 0) continue;
-    const d = new Date(today);
+    const d = new Date();
     d.setDate(today.getDate() + i * 7);
-    lessons.push(d);
+
+    // Format DD/MM/YYYY
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const year = d.getFullYear();
+    const dateFormatted = `${day}/${month}/${year}`;
+
+    lessons.push({ date: dateFormatted, isoDate: d.toISOString().split("T")[0] });
   }
 
-  for (const dateObj of lessons) {
-    const dateStr = dateObj.toISOString().split("T")[0]; // YYYY-MM-DD
-    const formatted = `${String(dateObj.getDate()).padStart(2,'0')}/${String(dateObj.getMonth()+1).padStart(2,'0')}/${dateObj.getFullYear()}`;
+  for (const lesson of lessons) {
+    const lessonDiv = document.createElement("div");
+    lessonDiv.classList.add("lesson-item");
+    lessonDiv.textContent = lesson.date;
 
-    // checar se já existe dados para essa aula
-    const lessonSnap = await getDoc(doc(db, "users", currentUser.uid, "groups", selectedGroupId, "lessons", dateStr));
-    const bgColor = lessonSnap.exists() ? "var(--cinza-rb)" : "var(--cinza-claro-rb)";
+    // Verificar se presença/homework preenchido
+    const lessonDocRef = doc(db, "groups", selectedGroupId, "lessons", lesson.isoDate);
+    const lessonSnapshot = await getDoc(lessonDocRef);
+    if (lessonSnapshot.exists()) {
+      lessonDiv.style.background = "var(--cinza-rb)";
+    } else {
+      lessonDiv.style.background = "var(--cinza-claro-rb)";
+    }
 
-    const div = document.createElement("div");
-    div.textContent = formatted;
-    div.style.background = bgColor;
-    div.style.padding = "8px";
-    div.style.marginBottom = "5px";
-    div.style.borderRadius = "5px";
-    div.style.cursor = "pointer";
-    div.addEventListener("click", () => openLessonModal(dateStr));
-
-    container.appendChild(div);
+    lessonDiv.addEventListener("click", () => openLessonModal(lesson.isoDate));
+    container.appendChild(lessonDiv);
   }
 }
 
 // =======================================================
-// MODAL: PRESENCE & HOMEWORK
-async function openLessonModal(date) {
-  currentLessonDate = date;
-  modalTitle.textContent = `Lesson ${date}`;
-  modalTable.innerHTML = `<tr><th>Student</th><th>Attendance</th><th>Homework</th></tr>`;
+// 🔹 ABRIR MODAL DE AULA
+// =======================================================
+async function openLessonModal(lessonDate) {
+  if (!selectedGroupId || !currentUser) return;
 
-  const studentsSnap = await getDocs(collection(db, "users", currentUser.uid, "groups", selectedGroupId, "students"));
-  const lessonSnap = await getDoc(doc(db, "users", currentUser.uid, "groups", selectedGroupId, "lessons", date));
-  const savedData = lessonSnap.exists() ? lessonSnap.data() : {};
+  const modal = document.getElementById("lessonModal");
+  const modalTable = document.getElementById("lessonModalTable");
+  modalTable.innerHTML = `
+    <tr>
+      <th>Student</th>
+      <th>Attendance</th>
+      <th>Homework</th>
+    </tr>
+  `;
 
-  studentsSnap.forEach(docSnap => {
-    const student = docSnap.data();
-    const attChecked = savedData[docSnap.id]?.attendance || false;
-    const hwChecked = savedData[docSnap.id]?.homework || false;
+  const studentsRef = collection(db, "groups", selectedGroupId, "students");
+  const studentsSnapshot = await getDocs(studentsRef);
+
+  // Busca os dados da aula
+  const lessonDocRef = doc(db, "groups", selectedGroupId, "lessons", lessonDate);
+  const lessonSnapshot = await getDoc(lessonDocRef);
+  const lessonData = lessonSnapshot.exists() ? lessonSnapshot.data() : {};
+
+  studentsSnapshot.forEach(studentDoc => {
+    const student = studentDoc.data();
+    const studentId = studentDoc.id;
 
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${student.name}</td>
-      <td><input type="checkbox" class="attCheckbox" data-id="${docSnap.id}" ${attChecked ? 'checked' : ''}></td>
-      <td><input type="checkbox" class="hwCheckbox" data-id="${docSnap.id}" ${hwChecked ? 'checked' : ''}></td>
+      <td><input type="checkbox" class="attCheckbox" data-student-id="${studentId}" ${lessonData[studentId]?.attendance ? "checked" : ""}></td>
+      <td><input type="checkbox" class="hwCheckbox" data-student-id="${studentId}" ${lessonData[studentId]?.homework ? "checked" : ""}></td>
     `;
     modalTable.appendChild(tr);
   });
 
   modal.style.display = "flex";
+
+  // Salvar alterações
+  document.getElementById("saveLessonBtn").onclick = async () => {
+    const lessonDataToSave = {};
+    document.querySelectorAll("#lessonModalTable tr").forEach(row => {
+      const studentId = row.querySelector(".attCheckbox")?.dataset.studentId;
+      if (studentId) {
+        lessonDataToSave[studentId] = {
+          attendance: row.querySelector(".attCheckbox").checked,
+          homework: row.querySelector(".hwCheckbox").checked
+        };
+      }
+    });
+
+    await setDoc(doc(db, "groups", selectedGroupId, "lessons", lessonDate), lessonDataToSave);
+    modal.style.display = "none";
+    showLessons(); // Atualiza cores
+  };
 }
 
-  // carregar dados já salvos
-  const lessonSnap = await getDoc(doc(db, "users", currentUser.uid, "groups", selectedGroupId, "lessons", date));
-  if (lessonSnap.exists()) {
-    const data = lessonSnap.data();
-    modalTable.querySelectorAll(".attCheckbox").forEach(cb => cb.checked = data[cb.dataset.id]?.attendance||false);
-    modalTable.querySelectorAll(".hwCheckbox").forEach(cb => cb.checked = data[cb.dataset.id]?.homework||false);
-  }
-modal.style.display = "flex";
-
-async function saveLessonData() {
-  if (!currentLessonDate) return;
-  const data = {};
-  modalTable.querySelectorAll(".attCheckbox").forEach(cb => {
-    data[cb.dataset.id] = { attendance: cb.checked };
-  });
-  modalTable.querySelectorAll(".hwCheckbox").forEach(cb => {
-    if (!data[cb.dataset.id]) data[cb.dataset.id] = {};
-    data[cb.dataset.id].homework = cb.checked;
-  });
-
-  await setDoc(doc(db, "users", currentUser.uid, "groups", selectedGroupId, "lessons", currentLessonDate), data);
-  modal.style.display = "none";
-  alert("Saved successfully!");
-}
+// Fechar modal
+document.getElementById("closeLessonBtn").addEventListener("click", () => {
+  document.getElementById("lessonModal").style.display = "none";
+});

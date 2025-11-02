@@ -42,7 +42,6 @@
         <label><input type="checkbox" value="6"> Sábado</label>
       </div>
 
-
       <input id="groupName" placeholder="Group name">
       <div id="colorPalette">
         <button class="color-option" data-color="var(--vermelho-claro-grupo)" style="background: var(--vermelho-claro-grupo);"></button>
@@ -109,6 +108,24 @@
       });
     });
   </script>
+<!-- =====================
+   MODAL DE AULA
+===================== -->
+<div id="lessonModal">
+  <div id="lessonModalContent">
+    <h3>Mark Attendance & Homework</h3>
+    <table id="lessonModalTable">
+      <tr>
+        <th>Student</th>
+        <th>Attendance</th>
+        <th>Homework</th>
+      </tr>
+      <!-- Alunos serão adicionados aqui dinamicamente -->
+    </table>
+    <button id="saveLessonBtn">Save</button>
+    <button id="closeLessonBtn">Close</button>
+  </div>
+</div>
 
   <script type="module" src="script.js"></script>
 </body>
