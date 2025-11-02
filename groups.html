@@ -16,7 +16,7 @@
   <div id="mainApp" style="display:none;">
     <div class="container">
       <h1>Attendance and Homework</h1>
-  
+
       <h2>Groups</h2>
       <select id="groupType">
         <option value="K1" data-level="Kids">K1</option>
@@ -45,13 +45,23 @@
         <button class="color-option" data-color="var(--rosa-grupo)" style="background: var(--rosa-grupo);"></button>
       </div>
 
-      <input type="hidden" id="groupColor" value="var(--azul-grupo)">   
+      <div id="groupDays">
+        <label><input type="checkbox" value="0"> Domingo</label>
+        <label><input type="checkbox" value="1"> Segunda</label>
+        <label><input type="checkbox" value="2"> Terça</label>
+        <label><input type="checkbox" value="3"> Quarta</label>
+        <label><input type="checkbox" value="4"> Quinta</label>
+        <label><input type="checkbox" value="5"> Sexta</label>
+        <label><input type="checkbox" value="6"> Sábado</label>
+      </div>
+
+      <input type="hidden" id="groupColor" value="var(--azul-grupo)">
       <button id="addGroupBtn">Add Group</button>
 
       <div id="groupsButtons"></div>
 
       <!-- ===================== -->
-      <!-- Seções após selecionar grupo -->
+      <!-- Seções que aparecem após selecionar grupo -->
       <!-- ===================== -->
       <div id="groupDetails" style="display:none; margin-top: 30px;">
         <button id="deleteGroupBtn" style="background: crimson; color: white;">🗑️ Deletar Grupo</button>
@@ -61,22 +71,35 @@
           <input id="studentName" placeholder="Student name">
           <button id="addStudentBtn">Add Student</button>
           <table id="studentsTable">
-            <tr><th>Name</th><th>Attendance</th><th>Homework</th><th>Delete</th></tr>
+            <tr><th>Name</th><th>Delete</th></tr>
           </table>
         </div>
 
         <div id="lessonsSection">
           <h3>Lessons</h3>
           <div id="lessonsList">
-            <!-- Aulas recentes e próximas -->
+            <!-- Aulas aparecerão aqui -->
           </div>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- Modal -->
+  <div id="lessonModal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
+       background: rgba(0,0,0,0.5); justify-content:center; align-items:center;">
+    <div style="background:white; padding:20px; border-radius:10px; max-height:90%; overflow-y:auto;">
+      <h3 id="modalTitle"></h3>
+      <table id="modalStudentsTable">
+        <tr><th>Student</th><th>Attendance</th><th>Homework</th></tr>
+      </table>
+      <button id="saveLessonBtn">Save</button>
+      <button id="closeLessonBtn">Close</button>
+    </div>
+  </div>
+
   <script>
-    // Selecionar cor
+    // Cor de grupo
     document.querySelectorAll('.color-option').forEach(btn => {
       btn.addEventListener('click', () => {
         const selectedColor = btn.dataset.color;

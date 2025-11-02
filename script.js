@@ -1,19 +1,17 @@
-// =======================================================
-// 🔹 IMPORTS
-// =======================================================
 import { db, auth } from "./config.js";
 import {
-  collection, addDoc, getDocs, doc, deleteDoc, query, where
+  collection, addDoc, getDocs, doc, deleteDoc,
+  query, where, setDoc, getDoc
 } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
 
 let currentUser = null;
 let selectedGroupId = null;
 let selectedGroupColor = null;
+let currentLessonDate = null;
 
 // =======================================================
-// 🔹 LOGIN STATUS
-// =======================================================
+// LOGIN
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     currentUser = user;
@@ -25,17 +23,13 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-// =======================================================
-// 🔹 LOGOUT
-// =======================================================
 document.getElementById("logoutBtn").addEventListener("click", async () => {
   await signOut(auth);
   window.location.href = "index.html";
 });
 
 // =======================================================
-// 🔹 ADICIONAR GRUPO
-// =======================================================
+// ADD GROUP
 document.getElementById("addGroupBtn").addEventListener("click", async () => {
   const groupName = document.getElementById("groupName").value.trim();
   const groupTypeSelect = document.getElementById("groupType");
@@ -43,42 +37,38 @@ document.getElementById("addGroupBtn").addEventListener("click", async () => {
   const groupLevel = groupTypeSelect.selectedOptions[0].dataset.level;
   const color = document.getElementById("groupColor").value;
 
-  if (!groupName) {
-    alert("Please enter a group name.");
-    return;
-  }
+  const daysCheckboxes = document.querySelectorAll("#groupDays input[type='checkbox']");
+  const daysOfWeek = Array.from(daysCheckboxes)
+    .filter(cb => cb.checked)
+    .map(cb => cb.value);
+
+  if (!groupName) { alert("Enter a group name."); return; }
 
   try {
-    const userGroupsRef = collection(db, "users", currentUser.uid, "groups");
-    await addDoc(userGroupsRef, {
+    await addDoc(collection(db, "users", currentUser.uid, "groups"), {
       name: groupName,
       type: groupType,
       level: groupLevel,
       color: color,
-      createdAt: new Date(),
+      daysOfWeek: daysOfWeek,
+      createdAt: new Date()
     });
-
     document.getElementById("groupName").value = "";
+    daysCheckboxes.forEach(cb => cb.checked = false);
     loadGroups();
   } catch (err) {
-    console.error("Erro ao adicionar grupo:", err);
+    console.error(err);
   }
 });
 
 // =======================================================
-// 🔹 CARREGAR GRUPOS DO USUÁRIO
-// =======================================================
+// LOAD GROUPS
 async function loadGroups() {
-  const user = auth.currentUser;
-  if (!user) return;
-
-  const groupsRef = collection(db, "users", user.uid, "groups");
-  const querySnapshot = await getDocs(groupsRef);
-
+  if (!currentUser) return;
   const container = document.getElementById("groupsButtons");
   container.innerHTML = "";
-
-  querySnapshot.forEach(docSnap => {
+  const snapshot = await getDocs(collection(db, "users", currentUser.uid, "groups"));
+  snapshot.forEach(docSnap => {
     const group = docSnap.data();
     const groupDiv = document.createElement("div");
     groupDiv.classList.add("group-item");
@@ -87,9 +77,7 @@ async function loadGroups() {
     groupBtn.textContent = group.name;
     groupBtn.classList.add("group-name");
     groupBtn.style.background = group.color || "var(--azul-grupo)";
-    groupBtn.addEventListener("click", () => {
-      selectGroup(docSnap.id, group.color);
-    });
+    groupBtn.addEventListener("click", () => selectGroup(docSnap.id, group.color));
 
     groupDiv.appendChild(groupBtn);
     container.appendChild(groupDiv);
@@ -97,8 +85,7 @@ async function loadGroups() {
 }
 
 // =======================================================
-// 🔹 SELECIONAR GRUPO
-// =======================================================
+// SELECT GROUP
 async function selectGroup(groupId, color) {
   selectedGroupId = groupId;
   selectedGroupColor = color;
@@ -109,85 +96,125 @@ async function selectGroup(groupId, color) {
 }
 
 // =======================================================
-// 🔹 DELETAR GRUPO
-// =======================================================
+// DELETE GROUP
 document.getElementById("deleteGroupBtn").addEventListener("click", async () => {
-  if (!selectedGroupId || !currentUser) return;
-  if (!confirm("Tem certeza que deseja deletar este grupo?")) return;
+  if (!selectedGroupId) return;
+  if (!confirm("Delete group?")) return;
 
-  try {
-    await deleteDoc(doc(db, "users", currentUser.uid, "groups", selectedGroupId));
-    alert("Grupo deletado com sucesso!");
-    document.getElementById("groupDetails").style.display = "none";
-    loadGroups();
-  } catch (err) {
-    console.error("Erro ao deletar grupo:", err);
-  }
+  await deleteDoc(doc(db, "users", currentUser.uid, "groups", selectedGroupId));
+  selectedGroupId = null;
+  document.getElementById("groupDetails").style.display = "none";
+  loadGroups();
 });
 
 // =======================================================
-// 🔹 CARREGAR ALUNOS
-// =======================================================
+// LOAD STUDENTS
 async function loadStudents() {
-  const studentsTable = document.getElementById("studentsTable");
-  studentsTable.innerHTML = `
-    <tr><th>Name</th><th>Attendance</th><th>Homework</th><th>Delete</th></tr>
-  `;
+  if (!selectedGroupId) return;
+  const table = document.getElementById("studentsTable");
+  table.innerHTML = `<tr><th>Name</th><th>Delete</th></tr>`;
+  const snapshot = await getDocs(collection(db, "users", currentUser.uid, "groups", selectedGroupId, "students"));
 
-  const studentsRef = collection(db, "users", currentUser.uid, "groups", selectedGroupId, "students");
-  const snapshot = await getDocs(studentsRef);
-
-  snapshot.forEach((docSnap) => {
+  snapshot.forEach(docSnap => {
     const student = docSnap.data();
     const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${student.name}</td>
-      <td><input type="checkbox" class="attCheckbox"></td>
-      <td><input type="checkbox" class="hwCheckbox"></td>
-      <td><button class="deleteStudentBtn" data-id="${docSnap.id}">X</button></td>
-    `;
-    studentsTable.appendChild(tr);
+    tr.innerHTML = `<td>${student.name}</td><td><button data-id="${docSnap.id}">X</button></td>`;
+    table.appendChild(tr);
+  });
+
+  table.querySelectorAll("button").forEach(btn => {
+    btn.addEventListener("click", async (e) => {
+      await deleteDoc(doc(db, "users", currentUser.uid, "groups", selectedGroupId, "students", e.target.dataset.id));
+      loadStudents();
+    });
   });
 }
 
 // =======================================================
-// 🔹 ADICIONAR ALUNO
-// =======================================================
+// ADD STUDENT
 document.getElementById("addStudentBtn").addEventListener("click", async () => {
   const name = document.getElementById("studentName").value.trim();
   if (!name || !selectedGroupId) return;
-
-  const studentsRef = collection(db, "users", currentUser.uid, "groups", selectedGroupId, "students");
-  await addDoc(studentsRef, { name });
-
+  await addDoc(collection(db, "users", currentUser.uid, "groups", selectedGroupId, "students"), { name });
   document.getElementById("studentName").value = "";
   loadStudents();
 });
 
 // =======================================================
-// 🔹 MOSTRAR AULAS (duas passadas + duas próximas)
-// =======================================================
+// SHOW LESSONS
 async function showLessons() {
+  if (!selectedGroupId) return;
   const container = document.getElementById("lessonsList");
   container.innerHTML = "";
-
+  const groupDoc = await getDoc(doc(db, "users", currentUser.uid, "groups", selectedGroupId));
+  if (!groupDoc.exists()) return;
   const today = new Date();
   const lessons = [];
 
   for (let i = -2; i <= 2; i++) {
     if (i === 0) continue;
-    const d = new Date();
-    d.setDate(today.getDate() + i * 7);
-    lessons.push({
-      date: d.toISOString().split("T")[0],
-      title: i < 0 ? "Previous lesson" : "Next lesson"
-    });
+    const date = new Date(today);
+    date.setDate(today.getDate() + i * 7);
+    lessons.push({ date: date.toISOString().split("T")[0], title: i<0?"Previous":"Next" });
   }
 
   lessons.forEach(lesson => {
     const div = document.createElement("div");
-    div.classList.add("lesson-item");
-    div.textContent = `${lesson.title}: ${lesson.date}`;
+    div.textContent = `${lesson.title} lesson: ${lesson.date}`;
+    div.style.cursor = "pointer";
+    div.addEventListener("click", () => openLessonModal(lesson.date));
     container.appendChild(div);
   });
+}
+
+// =======================================================
+// MODAL: PRESENCE & HOMEWORK
+// =======================================================
+const modal = document.getElementById("lessonModal");
+const modalTable = document.getElementById("modalStudentsTable");
+const modalTitle = document.getElementById("modalTitle");
+
+document.getElementById("closeLessonBtn").addEventListener("click", () => modal.style.display="none");
+document.getElementById("saveLessonBtn").addEventListener("click", saveLessonData);
+
+async function openLessonModal(date) {
+  currentLessonDate = date;
+  modalTitle.textContent = `Lesson ${date}`;
+  modalTable.innerHTML = `<tr><th>Student</th><th>Attendance</th><th>Homework</th></tr>`;
+
+  const studentsSnap = await getDocs(collection(db, "users", currentUser.uid, "groups", selectedGroupId, "students"));
+  studentsSnap.forEach(docSnap => {
+    const student = docSnap.data();
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${student.name}</td>
+      <td><input type="checkbox" class="attCheckbox" data-id="${docSnap.id}"></td>
+      <td><input type="checkbox" class="hwCheckbox" data-id="${docSnap.id}"></td>`;
+    modalTable.appendChild(tr);
+  });
+
+  // carregar dados já salvos
+  const lessonSnap = await getDoc(doc(db, "users", currentUser.uid, "groups", selectedGroupId, "lessons", date));
+  if (lessonSnap.exists()) {
+    const data = lessonSnap.data();
+    modalTable.querySelectorAll(".attCheckbox").forEach(cb => cb.checked = data[cb.dataset.id]?.attendance||false);
+    modalTable.querySelectorAll(".hwCheckbox").forEach(cb => cb.checked = data[cb.dataset.id]?.homework||false);
+  }
+
+  modal.style.display = "flex";
+}
+
+async function saveLessonData() {
+  if (!currentLessonDate) return;
+  const data = {};
+  modalTable.querySelectorAll(".attCheckbox").forEach(cb => {
+    data[cb.dataset.id] = { attendance: cb.checked };
+  });
+  modalTable.querySelectorAll(".hwCheckbox").forEach(cb => {
+    if (!data[cb.dataset.id]) data[cb.dataset.id] = {};
+    data[cb.dataset.id].homework = cb.checked;
+  });
+
+  await setDoc(doc(db, "users", currentUser.uid, "groups", selectedGroupId, "lessons", currentLessonDate), data);
+  modal.style.display = "none";
+  alert("Saved successfully!");
 }
