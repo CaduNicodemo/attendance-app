@@ -18,7 +18,8 @@
       <h1>Attendance and Homework</h1>
 
       <h2>Groups</h2>
-      <select id="groupType">
+      <div id="groupDays">
+        <select id="groupType">
         <option value="K1" data-level="Kids">K1</option>
         <option value="K2" data-level="Kids">K2</option>
         <option value="J" data-level="Juniors">J</option>
@@ -31,7 +32,16 @@
         <option value="T4" data-level="Teens">T4</option>
         <option value="T5" data-level="Teens">T5</option>
         <option value="T6" data-level="Teens">T6</option>
-      </select>
+        </select>
+        <label><input type="checkbox" value="0"> Domingo</label>
+        <label><input type="checkbox" value="1"> Segunda</label>
+        <label><input type="checkbox" value="2"> Terça</label>
+        <label><input type="checkbox" value="3"> Quarta</label>
+        <label><input type="checkbox" value="4"> Quinta</label>
+        <label><input type="checkbox" value="5"> Sexta</label>
+        <label><input type="checkbox" value="6"> Sábado</label>
+      </div>
+
 
       <input id="groupName" placeholder="Group name">
       <div id="colorPalette">
@@ -43,16 +53,6 @@
         <button class="color-option" data-color="var(--azul-grupo)" style="background: var(--azul-grupo);"></button>
         <button class="color-option" data-color="var(--roxo-grupo)" style="background: var(--roxo-grupo);"></button>
         <button class="color-option" data-color="var(--rosa-grupo)" style="background: var(--rosa-grupo);"></button>
-      </div>
-
-      <div id="groupDays">
-        <label><input type="checkbox" value="0"> Domingo</label>
-        <label><input type="checkbox" value="1"> Segunda</label>
-        <label><input type="checkbox" value="2"> Terça</label>
-        <label><input type="checkbox" value="3"> Quarta</label>
-        <label><input type="checkbox" value="4"> Quinta</label>
-        <label><input type="checkbox" value="5"> Sexta</label>
-        <label><input type="checkbox" value="6"> Sábado</label>
       </div>
 
       <input type="hidden" id="groupColor" value="var(--azul-grupo)">

@@ -122,3 +122,7 @@ button{
 .delete-group:hover {
   background:var(--vermelho-rb);
 }
+
+#groupDays {
+  display: flex;
+}
