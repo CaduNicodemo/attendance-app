@@ -51,7 +51,7 @@
       <div id="groupsButtons"></div>
 
       <!-- ===================== -->
-      <!-- Seções que aparecem após selecionar grupo -->
+      <!-- Seções após selecionar grupo -->
       <!-- ===================== -->
       <div id="groupDetails" style="display:none; margin-top: 30px;">
         <button id="deleteGroupBtn" style="background: crimson; color: white;">🗑️ Deletar Grupo</button>
@@ -68,7 +68,7 @@
         <div id="lessonsSection">
           <h3>Lessons</h3>
           <div id="lessonsList">
-            <!-- Aulas recentes e próximas aparecerão aqui -->
+            <!-- Aulas recentes e próximas -->
           </div>
         </div>
       </div>
@@ -76,7 +76,7 @@
   </div>
 
   <script>
-    // Cor de grupo
+    // Selecionar cor
     document.querySelectorAll('.color-option').forEach(btn => {
       btn.addEventListener('click', () => {
         const selectedColor = btn.dataset.color;

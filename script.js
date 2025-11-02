@@ -3,8 +3,7 @@
 // =======================================================
 import { db, auth } from "./config.js";
 import {
-  collection, addDoc, getDocs, doc, deleteDoc,
-  query, where
+  collection, addDoc, getDocs, doc, deleteDoc, query, where
 } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
 
@@ -50,8 +49,8 @@ document.getElementById("addGroupBtn").addEventListener("click", async () => {
   }
 
   try {
-    await addDoc(collection(db, "groups"), {
-      userId: currentUser.uid,
+    const userGroupsRef = collection(db, "users", currentUser.uid, "groups");
+    await addDoc(userGroupsRef, {
       name: groupName,
       type: groupType,
       level: groupLevel,
@@ -67,15 +66,14 @@ document.getElementById("addGroupBtn").addEventListener("click", async () => {
 });
 
 // =======================================================
-// 🔹 CARREGAR GRUPOS
+// 🔹 CARREGAR GRUPOS DO USUÁRIO
 // =======================================================
 async function loadGroups() {
   const user = auth.currentUser;
   if (!user) return;
 
-  const groupsRef = collection(db, "groups");
-  const q = query(groupsRef, where("userId", "==", user.uid));
-  const querySnapshot = await getDocs(q);
+  const groupsRef = collection(db, "users", user.uid, "groups");
+  const querySnapshot = await getDocs(groupsRef);
 
   const container = document.getElementById("groupsButtons");
   container.innerHTML = "";
@@ -114,11 +112,11 @@ async function selectGroup(groupId, color) {
 // 🔹 DELETAR GRUPO
 // =======================================================
 document.getElementById("deleteGroupBtn").addEventListener("click", async () => {
-  if (!selectedGroupId) return;
+  if (!selectedGroupId || !currentUser) return;
   if (!confirm("Tem certeza que deseja deletar este grupo?")) return;
 
   try {
-    await deleteDoc(doc(db, "groups", selectedGroupId));
+    await deleteDoc(doc(db, "users", currentUser.uid, "groups", selectedGroupId));
     alert("Grupo deletado com sucesso!");
     document.getElementById("groupDetails").style.display = "none";
     loadGroups();
@@ -136,7 +134,7 @@ async function loadStudents() {
     <tr><th>Name</th><th>Attendance</th><th>Homework</th><th>Delete</th></tr>
   `;
 
-  const studentsRef = collection(db, "groups", selectedGroupId, "students");
+  const studentsRef = collection(db, "users", currentUser.uid, "groups", selectedGroupId, "students");
   const snapshot = await getDocs(studentsRef);
 
   snapshot.forEach((docSnap) => {
@@ -159,9 +157,8 @@ document.getElementById("addStudentBtn").addEventListener("click", async () => {
   const name = document.getElementById("studentName").value.trim();
   if (!name || !selectedGroupId) return;
 
-  await addDoc(collection(db, "groups", selectedGroupId, "students"), {
-    name: name
-  });
+  const studentsRef = collection(db, "users", currentUser.uid, "groups", selectedGroupId, "students");
+  await addDoc(studentsRef, { name });
 
   document.getElementById("studentName").value = "";
   loadStudents();
