@@ -126,3 +126,13 @@ button{
 #groupDays {
   display: flex;
 }
+
+tbody {
+    display: grid;
+    justify-content: center;
+}
+
+table#studentsTable {
+    display: grid;
+    justify-content: space-evenly;
+}
