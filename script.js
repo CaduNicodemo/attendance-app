@@ -15,6 +15,12 @@ let selectedGroupColor = null;
 // =======================================================
 // 🔹 LOGIN STATUS
 // =======================================================
+document.addEventListener("DOMContentLoaded", () => {
+  if (!auth) {
+    console.error("Firebase Auth não inicializado corretamente.");
+  }
+});
+
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     currentUser = user;
@@ -213,15 +219,27 @@ async function showLessons() {
     container.appendChild(lessonDiv);
   }
 }
-
 // =======================================================
 // 🔹 ABRIR MODAL DE AULA
 // =======================================================
 async function openLessonModal(lessonDate) {
-  if (!selectedGroupId || !currentUser) return;
+  if (!selectedGroupId) {
+    alert("Selecione um grupo primeiro.");
+    return;
+  }
+  if (!currentUser) {
+    alert("Usuário não autenticado.");
+    return;
+  }
 
   const modal = document.getElementById("lessonModal");
   const modalTable = document.getElementById("lessonModalTable");
+
+  if (!modalTable) {
+    console.error("Elemento modalTable não encontrado no DOM.");
+    return;
+  }
+
   modalTable.innerHTML = `
     <tr>
       <th>Student</th>
@@ -233,7 +251,6 @@ async function openLessonModal(lessonDate) {
   const studentsRef = collection(db, "groups", selectedGroupId, "students");
   const studentsSnapshot = await getDocs(studentsRef);
 
-  // Busca os dados da aula
   const lessonDocRef = doc(db, "groups", selectedGroupId, "lessons", lessonDate);
   const lessonSnapshot = await getDoc(lessonDocRef);
   const lessonData = lessonSnapshot.exists() ? lessonSnapshot.data() : {};
@@ -253,7 +270,6 @@ async function openLessonModal(lessonDate) {
 
   modal.style.display = "flex";
 
-  // Salvar alterações
   document.getElementById("saveLessonBtn").onclick = async () => {
     const lessonDataToSave = {};
     document.querySelectorAll("#lessonModalTable tr").forEach(row => {
@@ -266,9 +282,9 @@ async function openLessonModal(lessonDate) {
       }
     });
 
-    await setDoc(doc(db, "groups", selectedGroupId, "lessons", lessonDate), lessonDataToSave);
+    await setDoc(lessonDocRef, lessonDataToSave);
     modal.style.display = "none";
-    showLessons(); // Atualiza cores
+    showLessons(); // Atualiza as cores
   };
 }
 
