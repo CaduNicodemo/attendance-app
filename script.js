@@ -49,7 +49,8 @@ document.getElementById("addGroupBtn").addEventListener("click", async () => {
   const groupType = groupTypeSelect.value;
   const groupLevel = groupTypeSelect.selectedOptions[0].dataset.level;
   const color = document.getElementById("groupColor").value;
-// 🔹 NOVO: Coletar dias selecionados
+  
+  // 🔹 Coletar dias selecionados
   const lessonDays = [];
   document.querySelectorAll('#groupDays input[type="checkbox"]:checked').forEach(checkbox => {
     lessonDays.push(parseInt(checkbox.value)); // Converte para número
@@ -59,11 +60,11 @@ document.getElementById("addGroupBtn").addEventListener("click", async () => {
     alert("Please enter a group name.");
     return;
   }
-   if (lessonDays.length === 0) {
+  
+  if (lessonDays.length === 0) {
     alert("Please select at least one day for lessons.");
     return;
   }
-
 
   try {
     await addDoc(collection(db, "groups"), {
