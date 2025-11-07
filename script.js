@@ -191,59 +191,13 @@ document.getElementById("addStudentBtn").addEventListener("click", async () => {
 });
 
 // =======================================================
-// 🔹 MOSTRAR AULAS (baseado nos dias do grupo)
+// 🔹 FORMATAR DATA (função auxiliar)
 // =======================================================
-async function showLessons() {
-  const container = document.getElementById("lessonsList");
-  container.innerHTML = "";
-
-  if (!selectedGroupId) return;
-
-  try {
-    // 1. Buscar os dados do grupo para pegar os lessonDays
-    const groupDocRef = doc(db, "groups", selectedGroupId);
-    const groupSnapshot = await getDoc(groupDocRef);
-    
-    if (!groupSnapshot.exists()) {
-      console.error("Grupo não encontrado");
-      return;
-    }
-
-    const group = groupSnapshot.data();
-    const lessonDays = group.lessonDays || []; // [0, 2, 4] = Domingo, Terça, Quinta
-
-    if (lessonDays.length === 0) {
-      container.innerHTML = "<p>No lesson days configured for this group</p>";
-      return;
-    }
-
-    // Gerar 2 aulas passadas + 2 aulas futuras
-    const today = new Date();
-    const lessons = generateLessonsBasedOnDays(today, lessonDays, 2, 2);
-
-    // 3. Mostrar aulas
-    for (const lesson of lessons) {
-      const lessonDiv = document.createElement("div");
-      lessonDiv.classList.add("lesson-item");
-      lessonDiv.textContent = lesson.date;
-
-      // Verificar se presença/homework preenchido
-      const lessonDocRef = doc(db, "groups", selectedGroupId, "lessons", lesson.isoDate);
-      const lessonSnapshot = await getDoc(lessonDocRef);
-      
-      if (lessonSnapshot.exists()) {
-        lessonDiv.style.background = "var(--cinza-rb)";
-      } else {
-        lessonDiv.style.background = "var(--cinza-claro-rb)";
-      }
-
-      lessonDiv.addEventListener("click", () => openLessonModal(lesson.isoDate));
-      container.appendChild(lessonDiv);
-    }
-
-  } catch (err) {
-    console.error("Erro ao carregar aulas:", err);
-  }
+function formatDate(date) {
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
 }
 
 // =======================================================
@@ -306,16 +260,62 @@ function generateLessonsBasedOnDays(startDate, lessonDays, lessonsBefore, lesson
 }
 
 // =======================================================
-// 🔹 FORMATAR DATA (função auxiliar)
+// 🔹 MOSTRAR AULAS (baseado nos dias do grupo)
 // =======================================================
-function formatDate(date) {
-  const day = String(date.getDate()).padStart(2, "0");
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const year = date.getFullYear();
-  return `${day}/${month}/${year}`;
+async function showLessons() {
+  const container = document.getElementById("lessonsList");
+  container.innerHTML = "";
+
+  if (!selectedGroupId) return;
+
+  try {
+    // 1. Buscar os dados do grupo para pegar os lessonDays
+    const groupDocRef = doc(db, "groups", selectedGroupId);
+    const groupSnapshot = await getDoc(groupDocRef);
+    
+    if (!groupSnapshot.exists()) {
+      console.error("Grupo não encontrado");
+      return;
+    }
+
+    const group = groupSnapshot.data();
+    const lessonDays = group.lessonDays || []; // [0, 2, 4] = Domingo, Terça, Quinta
+
+    if (lessonDays.length === 0) {
+      container.innerHTML = "<p>No lesson days configured for this group</p>";
+      return;
+    }
+
+    // 2. Gerar aulas baseadas nos dias específicos (2 passadas + 2 futuras)
+    const today = new Date();
+    const lessons = generateLessonsBasedOnDays(today, lessonDays, 2, 2);
+
+    // 3. Mostrar aulas
+    for (const lesson of lessons) {
+      const lessonDiv = document.createElement("div");
+      lessonDiv.classList.add("lesson-item");
+      lessonDiv.textContent = lesson.date;
+
+      // Verificar se presença/homework preenchido
+      const lessonDocRef = doc(db, "groups", selectedGroupId, "lessons", lesson.isoDate);
+      const lessonSnapshot = await getDoc(lessonDocRef);
+      
+      if (lessonSnapshot.exists()) {
+        lessonDiv.style.background = "var(--cinza-rb)";
+      } else {
+        lessonDiv.style.background = "var(--cinza-claro-rb)";
+      }
+
+      lessonDiv.addEventListener("click", () => openLessonModal(lesson.isoDate));
+      container.appendChild(lessonDiv);
+    }
+
+  } catch (err) {
+    console.error("Erro ao carregar aulas:", err);
+  }
 }
 
-}// =======================================================
+// =======================================================
 // 🔹 ABRIR MODAL DE AULA
 // =======================================================
 async function openLessonModal(lessonDate) {
