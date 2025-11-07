@@ -49,11 +49,21 @@ document.getElementById("addGroupBtn").addEventListener("click", async () => {
   const groupType = groupTypeSelect.value;
   const groupLevel = groupTypeSelect.selectedOptions[0].dataset.level;
   const color = document.getElementById("groupColor").value;
-
+// 🔹 NOVO: Coletar dias selecionados
+  const lessonDays = [];
+  document.querySelectorAll('#groupDays input[type="checkbox"]:checked').forEach(checkbox => {
+    lessonDays.push(parseInt(checkbox.value)); // Converte para número
+  });
+  
   if (!groupName) {
     alert("Please enter a group name.");
     return;
   }
+   if (lessonDays.length === 0) {
+    alert("Please select at least one day for lessons.");
+    return;
+  }
+
 
   try {
     await addDoc(collection(db, "groups"), {
@@ -63,10 +73,13 @@ document.getElementById("addGroupBtn").addEventListener("click", async () => {
       level: groupLevel,
       color: color,
       createdAt: new Date(),
-      lessonDays: [] // Aqui você poderá adicionar dias da semana do grupo
+      lessonDays: lessonDays
     });
 
     document.getElementById("groupName").value = "";
+    document.querySelectorAll('#groupDays input[type="checkbox"]').forEach(checkbox => {
+      checkbox.checked = false;
+    });
     loadGroups();
   } catch (err) {
     console.error("Erro ao adicionar grupo:", err);
