@@ -191,7 +191,6 @@ document.getElementById("addStudentBtn").addEventListener("click", async () => {
 });
 
 // =======================================================
-// =======================================================
 // 🔹 MOSTRAR AULAS (baseado nos dias do grupo)
 // =======================================================
 async function showLessons() {
@@ -218,9 +217,9 @@ async function showLessons() {
       return;
     }
 
-    // 2. Gerar aulas baseadas nos dias específicos
+    // Gerar 2 aulas passadas + 2 aulas futuras
     const today = new Date();
-    const lessons = generateLessonsBasedOnDays(today, lessonDays, 4); // 4 aulas no total
+    const lessons = generateLessonsBasedOnDays(today, lessonDays, 2, 2);
 
     // 3. Mostrar aulas
     for (const lesson of lessons) {
@@ -248,40 +247,74 @@ async function showLessons() {
 }
 
 // =======================================================
-// 🔹 GERAR AULAS BASEADO NOS DIAS DA SEMANA
+// 🔹 GERAR AULAS BASEADO NOS DIAS DA SEMANA (PASSADAS + FUTURAS)
 // =======================================================
-function generateLessonsBasedOnDays(startDate, lessonDays, totalLessons) {
+function generateLessonsBasedOnDays(startDate, lessonDays, lessonsBefore, lessonsAfter) {
   const lessons = [];
   let currentDate = new Date(startDate);
-  let lessonsGenerated = 0;
   
-  // Começar 2 semanas antes para pegar aulas passadas
-  currentDate.setDate(currentDate.getDate() - 14);
+  // 🔹 AULAS PASSADAS (começar antes da data atual)
+  let pastLessonsGenerated = 0;
+  let searchDate = new Date(currentDate);
+  searchDate.setDate(searchDate.getDate() - 1); // Começar de ontem
 
-  while (lessonsGenerated < totalLessons) {
-    const dayOfWeek = currentDate.getDay(); // 0=Domingo, 1=Segunda, etc.
+  // Buscar aulas passadas
+  while (pastLessonsGenerated < lessonsBefore) {
+    const dayOfWeek = searchDate.getDay();
     
-    // Verificar se este dia está nos dias de aula do grupo
     if (lessonDays.includes(dayOfWeek)) {
-      // Formatar data
-      const day = String(currentDate.getDate()).padStart(2, "0");
-      const month = String(currentDate.getMonth() + 1).padStart(2, "0");
-      const year = currentDate.getFullYear();
-      const dateFormatted = `${day}/${month}/${year}`;
-      
+      const dateFormatted = formatDate(searchDate);
       lessons.push({
         date: dateFormatted,
-        isoDate: currentDate.toISOString().split("T")[0]
+        isoDate: searchDate.toISOString().split("T")[0],
+        isPast: true
       });
-      
-      lessonsGenerated++;
+      pastLessonsGenerated++;
     }
     
-    // Avançar para o próximo dia
-    currentDate.setDate(currentDate.getDate() + 1);
+    searchDate.setDate(searchDate.getDate() - 1); // Voltar no tempo
   }
+
+  // 🔹 AULAS FUTURAS (começar da data atual)
+  let futureLessonsGenerated = 0;
+  searchDate = new Date(currentDate); // Reset para hoje
+
+  // Buscar aulas futuras
+  while (futureLessonsGenerated < lessonsAfter) {
+    const dayOfWeek = searchDate.getDay();
+    
+    if (lessonDays.includes(dayOfWeek)) {
+      // Pular hoje se for um dia de aula (ou incluir, conforme sua preferência)
+      if (searchDate.getDate() !== currentDate.getDate() || searchDate.getMonth() !== currentDate.getMonth()) {
+        const dateFormatted = formatDate(searchDate);
+        lessons.push({
+          date: dateFormatted,
+          isoDate: searchDate.toISOString().split("T")[0],
+          isPast: false
+        });
+        futureLessonsGenerated++;
+      }
+    }
+    
+    searchDate.setDate(searchDate.getDate() + 1); // Avançar no tempo
+  }
+
+  // Ordenar todas as aulas por data
+  lessons.sort((a, b) => new Date(a.isoDate) - new Date(b.isoDate));
   
   return lessons;
+}
+
+// =======================================================
+// 🔹 FORMATAR DATA (função auxiliar)
+// =======================================================
+function formatDate(date) {
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+}
+
 }// =======================================================
 // 🔹 ABRIR MODAL DE AULA
 // =======================================================
