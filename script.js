@@ -39,9 +39,33 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
   await signOut(auth);
   window.location.href = "index.html";
 });
-
 // =======================================================
-// 🔹 ADICIONAR GRUPO
+// 🔹 CONTROLE DO MODAL DE NOVO GRUPO
+// =======================================================
+
+// Abrir modal
+document.getElementById("openGroupModalBtn").addEventListener("click", () => {
+  document.getElementById("groupModal").style.display = "flex";
+});
+
+// Fechar modal
+document.getElementById("closeGroupModalBtn").addEventListener("click", () => {
+  document.getElementById("groupModal").style.display = "none";
+  // Limpar formulário ao fechar
+  document.getElementById("groupName").value = "";
+  document.querySelectorAll('#groupDays input[type="checkbox"]').forEach(checkbox => {
+    checkbox.checked = false;
+  });
+});
+
+// Fechar modal ao clicar fora dele
+document.getElementById("groupModal").addEventListener("click", (e) => {
+  if (e.target.id === "groupModal") {
+    document.getElementById("groupModal").style.display = "none";
+  }
+});
+// =======================================================
+// 🔹 ADICIONAR GRUPO (ATUALIZADA)
 // =======================================================
 document.getElementById("addGroupBtn").addEventListener("click", async () => {
   const groupName = document.getElementById("groupName").value.trim();
@@ -50,10 +74,9 @@ document.getElementById("addGroupBtn").addEventListener("click", async () => {
   const groupLevel = groupTypeSelect.selectedOptions[0].dataset.level;
   const color = document.getElementById("groupColor").value;
   
-  // 🔹 Coletar dias selecionados
   const lessonDays = [];
   document.querySelectorAll('#groupDays input[type="checkbox"]:checked').forEach(checkbox => {
-    lessonDays.push(parseInt(checkbox.value)); // Converte para número
+    lessonDays.push(parseInt(checkbox.value));
   });
   
   if (!groupName) {
@@ -77,10 +100,13 @@ document.getElementById("addGroupBtn").addEventListener("click", async () => {
       lessonDays: lessonDays
     });
 
+    // Fechar modal e limpar
+    document.getElementById("groupModal").style.display = "none";
     document.getElementById("groupName").value = "";
     document.querySelectorAll('#groupDays input[type="checkbox"]').forEach(checkbox => {
       checkbox.checked = false;
     });
+    
     loadGroups();
   } catch (err) {
     console.error("Erro ao adicionar grupo:", err);

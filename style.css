@@ -6,7 +6,8 @@
     --cinza-rb: #1F1F2B;
     --cinza-claro-rb: #888888;
     --cinza-leve-rb: #c9c9c9;
-    --vermelho-claro-grupo: #e63030;--laranja-grupo: #e7861e;
+    --vermelho-claro-grupo: #e63030;
+    --laranja-grupo: #e7861e;
     --amarelo-grupo: #ecd81f;
     --verde-grupo: #28943f;
     --azul-claro-grupo: #34bce6;
@@ -15,6 +16,9 @@
     --rosa-grupo: #e95895;
 }
 
+/* ===============================
+   ESTILOS GERAIS
+================================*/
 body {
   font-family: Arial, sans-serif;
   background-color: var(--cinza-leve-rb);
@@ -22,7 +26,7 @@ body {
   padding: 0;
 }
 
-#topbar{
+#topbar {
   background: var(--branco-rb);
   box-shadow: 0 2px 6px var(--cinza-rb);
   justify-content: space-evenly;
@@ -67,7 +71,7 @@ input {
   box-sizing: border-box;
 }
 
-button{
+button {
   background-color: var(--azul-rb);
   color: var(--branco-rb);
   border: none;
@@ -76,42 +80,47 @@ button{
   cursor: pointer;
   margin: 1rem;  
 }
-.color-option {
-  width: 30px;
-  height: 30px;
-  border: 2px solid transparent;
-  border-radius: 50%;
-  cursor: pointer;
-}
 
-.color-option.selected {
-  border-color: var(--cinza-rb);
-}
-
+/* ===============================
+   GRUPOS
+================================*/
 #groupsButtons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 15px;
+  margin-top: 20px;
 }
 
 .group-item {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
 .group-name {
+  width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: 10px;
+  color: white;
   font-weight: bold;
-  color: #333;
-  margin: 1px;
-  font-size: 1.5rem;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.group-name:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
 .delete-group {
-  background:var(--cinza-rb);
+  background: var(--cinza-rb);
   border: none;
-  color:var(--branco-rb);
+  color: var(--branco-rb);
   border-radius: 6px;
   padding: 4px 8px;
   cursor: pointer;
@@ -119,21 +128,61 @@ button{
 }
 
 .delete-group:hover {
-  background:var(--vermelho-rb);
+  background: var(--vermelho-rb);
 }
 
+/* ===============================
+   PALETA DE CORES
+================================*/
+.color-option {
+  width: 30px;
+  height: 30px;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  margin: 5px;
+}
+
+.color-option.selected {
+  border-color: var(--cinza-rb);
+}
+
+/* ===============================
+   DIAS DA SEMANA
+================================*/
 #groupDays {
   display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
+.days-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 15px 0;
+}
+
+.days-container label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.9rem;
+}
+
+/* ===============================
+   TABELA DE ESTUDANTES
+================================*/
 table#studentsTable {
-    display: grid;
-    justify-content: space-evenly;
+  display: grid;
+  justify-content: space-evenly;
+  width: 100%;
+  margin: 15px 0;
 }
 
-/* =========================
-   LESSONS LIST
-========================= */
+/* ===============================
+   LISTA DE AULAS
+================================*/
 #lessonsList {
   display: flex;
   flex-direction: column;
@@ -154,18 +203,20 @@ table#studentsTable {
   opacity: 0.8;
 }
 
-/* Backgrounds */
 .lesson-filled {
   background: var(--cinza-rb);
+  color: white;
 }
+
 .lesson-empty {
   background: var(--cinza-claro-rb);
 }
+
 /* ===============================
-   MODAL DE AULA (VERSÃO CORRIGIDA)
+   MODAIS
 ================================*/
-#lessonModal {
-  display: none; /* escondido por padrão */
+.modal {
+  display: none;
   position: fixed;
   top: 0; 
   left: 0;
@@ -177,31 +228,33 @@ table#studentsTable {
   z-index: 2000;
 }
 
-#lessonModalContent {
+.modal-content {
   background-color: var(--branco-rb);
   padding: 2rem;
   border-radius: 10px;
   width: 90%;
   max-width: 600px;
-  max-height: 80vh;
+  max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  text-align: center;
+  animation: fadeIn 0.3s ease;
 }
 
-#lessonModalContent h3 {
+.modal-content h3 {
   margin-top: 0;
   color: var(--cinza-rb);
-  margin-bottom: 1rem;
+  text-align: center;
+  margin-bottom: 1.5rem;
 }
 
-/* ======= TABELA ======= */
+/* ===============================
+   MODAL DE AULA ESPECÍFICO
+================================*/
 #lessonModalTable {
   width: 100%;
   border-collapse: collapse;
   margin: 1rem 0;
   font-size: 1rem;
-  background: var(--branco-rb);
 }
 
 #lessonModalTable th,
@@ -212,7 +265,7 @@ table#studentsTable {
 }
 
 #lessonModalTable th {
-  background-color: var(--cinza-rb);
+  /* A cor será definida dinamicamente via JavaScript */
   color: var(--branco-rb);
   font-weight: 600;
   text-align: center;
@@ -226,14 +279,28 @@ table#studentsTable {
   text-align: center;
 }
 
-/* ======= CHECKBOX ======= */
 #lessonModalTable input[type="checkbox"] {
   width: 20px;
   height: 20px;
   cursor: pointer;
 }
 
-/* ======= BOTÕES ======= */
+/* ===============================
+   BOTÕES DOS MODAIS
+================================*/
+.modal-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.modal-buttons button {
+  flex: 1;
+  padding: 12px;
+  margin: 0;
+}
+
 #saveLessonBtn,
 #closeLessonBtn {
   padding: 10px 20px;
@@ -247,18 +314,37 @@ table#studentsTable {
   transition: all 0.3s ease;
 }
 
-/* ======= ANIMAÇÃO ======= */
+#saveLessonBtn {
+  background-color: var(--verde-grupo);
+  color: var(--branco-rb);
+}
+
+#saveLessonBtn:hover {
+  background-color: #1e7e34;
+  transform: translateY(-2px);
+}
+
+#closeLessonBtn {
+  background-color: var(--cinza-claro-rb);
+  color: var(--cinza-rb);
+}
+
+#closeLessonBtn:hover {
+  background-color: var(--cinza-rb);
+  color: var(--branco-rb);
+  transform: translateY(-2px);
+}
+
+/* ===============================
+   ANIMAÇÕES
+================================*/
 @keyframes fadeIn {
   from { 
     opacity: 0; 
-    transform: scale(0.9); 
+    transform: scale(0.95); 
   }
   to { 
     opacity: 1; 
     transform: scale(1); 
   }
-}
-
-#lessonModalContent {
-  animation: fadeIn 0.3s ease;
 }

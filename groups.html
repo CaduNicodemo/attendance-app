@@ -18,31 +18,51 @@
       <h1>Attendance and Homework</h1>
 
       <h2>Groups</h2>
+      <div class="container">
+  <h2>Groups</h2>
+  
+  <!-- Botão para abrir modal de novo grupo -->
+  <button id="openGroupModalBtn" style="background: var(--verde-grupo); margin-bottom: 20px;">
+    ＋ New Group
+  </button>
+
+  <!-- Lista de grupos existentes -->
+  <div id="groupsButtons"></div>
+
+  <!-- Modal para criar novo grupo -->
+  <div id="groupModal" class="modal">
+    <div class="modal-content">
+      <h3>Create New Group</h3>
+      
       <div id="groupDays">
         <select id="groupType">
-        <option value="K1" data-level="Kids">K1</option>
-        <option value="K2" data-level="Kids">K2</option>
-        <option value="J" data-level="Juniors">J</option>
-        <option value="J1" data-level="Juniors">J1</option>
-        <option value="J2" data-level="Juniors">J2</option>
-        <option value="TA" data-level="Teens">TA</option>
-        <option value="T1" data-level="Teens">T1</option>
-        <option value="T2" data-level="Teens">T2</option>
-        <option value="T3" data-level="Teens">T3</option>
-        <option value="T4" data-level="Teens">T4</option>
-        <option value="T5" data-level="Teens">T5</option>
-        <option value="T6" data-level="Teens">T6</option>
+          <option value="K1" data-level="Kids">K1</option>
+          <option value="K2" data-level="Kids">K2</option>
+          <option value="J" data-level="Juniors">J</option>
+          <option value="J1" data-level="Juniors">J1</option>
+          <option value="J2" data-level="Juniors">J2</option>
+          <option value="TA" data-level="Teens">TA</option>
+          <option value="T1" data-level="Teens">T1</option>
+          <option value="T2" data-level="Teens">T2</option>
+          <option value="T3" data-level="Teens">T3</option>
+          <option value="T4" data-level="Teens">T4</option>
+          <option value="T5" data-level="Teens">T5</option>
+          <option value="T6" data-level="Teens">T6</option>
         </select>
-        <label><input type="checkbox" value="0"> Domingo</label>
-        <label><input type="checkbox" value="1"> Segunda</label>
-        <label><input type="checkbox" value="2"> Terça</label>
-        <label><input type="checkbox" value="3"> Quarta</label>
-        <label><input type="checkbox" value="4"> Quinta</label>
-        <label><input type="checkbox" value="5"> Sexta</label>
-        <label><input type="checkbox" value="6"> Sábado</label>
+        
+        <div class="days-container">
+          <label><input type="checkbox" value="0"> Domingo</label>
+          <label><input type="checkbox" value="1"> Segunda</label>
+          <label><input type="checkbox" value="2"> Terça</label>
+          <label><input type="checkbox" value="3"> Quarta</label>
+          <label><input type="checkbox" value="4"> Quinta</label>
+          <label><input type="checkbox" value="5"> Sexta</label>
+          <label><input type="checkbox" value="6"> Sábado</label>
+        </div>
       </div>
 
       <input id="groupName" placeholder="Group name">
+      
       <div id="colorPalette">
         <button class="color-option" data-color="var(--vermelho-claro-grupo)" style="background: var(--vermelho-claro-grupo);"></button>
         <button class="color-option" data-color="var(--laranja-grupo)" style="background: var(--laranja-grupo);"></button>
@@ -55,34 +75,37 @@
       </div>
 
       <input type="hidden" id="groupColor" value="var(--azul-grupo)">
-      <button id="addGroupBtn">Add Group</button>
-
-      <div id="groupsButtons"></div>
-
-      <!-- ===================== -->
-      <!-- Seções que aparecem após selecionar grupo -->
-      <!-- ===================== -->
-      <div id="groupDetails" style="display:none; margin-top: 30px;">
-        <button id="deleteGroupBtn" style="background: crimson; color: white;">🗑️ Deletar Grupo</button>
-
-        <div id="studentsSection">
-          <h3>Students</h3>
-          <input id="studentName" placeholder="Student name">
-          <button id="addStudentBtn">Add Student</button>
-          <table id="studentsTable">
-            <tr><th>Name</th><th>Delete</th></tr>
-          </table>
-        </div>
-
-        <div id="lessonsSection">
-          <h3>Lessons</h3>
-          <div id="lessonsList">
-            <!-- Aulas aparecerão aqui -->
-          </div>
-        </div>
+    
+      <div class="modal-buttons">
+        <button id="addGroupBtn" style="background: var(--verde-grupo);">Create Group</button>
+        <button id="closeGroupModalBtn" style="background: var(--cinza-claro-rb);">Cancel</button>
       </div>
     </div>
   </div>
+
+    <!-- ===================== -->
+    <!-- Seções que aparecem após selecionar grupo -->
+    <!-- ===================== -->
+    <div id="groupDetails" style="display:none; margin-top: 30px;">
+      <button id="deleteGroupBtn" style="background: crimson; color: white;">🗑️ Deletar Grupo</button>
+
+      <div id="studentsSection">
+        <h3>Students</h3>
+        <input id="studentName" placeholder="Student name">
+        <button id="addStudentBtn">Add Student</button>
+        <table id="studentsTable">
+          <tr><th>Name</th><th>Delete</th></tr>
+        </table>
+      </div>
+
+      <div id="lessonsSection">
+        <h3>Lessons</h3>
+        <div id="lessonsList">
+          <!-- Aulas aparecerão aqui -->
+        </div>
+      </div>
+    </div>
+    
 
   <script>
     // Cor de grupo
