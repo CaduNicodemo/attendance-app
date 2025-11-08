@@ -252,27 +252,6 @@ table#studentsTable {
   transition: all 0.3s ease;
 }
 
-#saveLessonBtn {
-  background-color: var(--verde-grupo);
-  color: var(--branco-rb);
-}
-
-#saveLessonBtn:hover {
-  background-color: #1e7e34;
-  transform: translateY(-2px);
-}
-
-#closeLessonBtn {
-  background-color: var(--cinza-claro-rb);
-  color: var(--cinza-rb);
-}
-
-#closeLessonBtn:hover {
-  background-color: var(--cinza-rb);
-  color: var(--branco-rb);
-  transform: translateY(-2px);
-}
-
 /* ======= ANIMAÇÃO ======= */
 @keyframes fadeIn {
   from { 
