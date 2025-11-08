@@ -317,7 +317,7 @@ async function showLessons() {
 }
 
 // =======================================================
-// 🔹 ABRIR MODAL DE AULA
+// 🔹 ABRIR MODAL DE AULA (VERSÃO CORRIGIDA)
 // =======================================================
 async function openLessonModal(lessonDate) {
   if (!selectedGroupId) {
@@ -337,13 +337,10 @@ async function openLessonModal(lessonDate) {
     return;
   }
 
-  modalTable.innerHTML = `
-    <tr>
-      <th>Student</th>
-      <th>Attendance</th>
-      <th>Homework</th>
-    </tr>
-  `;
+  // Limpar a tabela, mantendo o cabeçalho
+  const headerRow = modalTable.querySelector('tr');
+  modalTable.innerHTML = '';
+  if (headerRow) modalTable.appendChild(headerRow);
 
   const studentsRef = collection(db, "groups", selectedGroupId, "students");
   const studentsSnapshot = await getDocs(studentsRef);
@@ -352,6 +349,7 @@ async function openLessonModal(lessonDate) {
   const lessonSnapshot = await getDoc(lessonDocRef);
   const lessonData = lessonSnapshot.exists() ? lessonSnapshot.data() : {};
 
+  // Adicionar alunos à tabela
   studentsSnapshot.forEach(studentDoc => {
     const student = studentDoc.data();
     const studentId = studentDoc.id;
@@ -367,15 +365,24 @@ async function openLessonModal(lessonDate) {
 
   modal.style.display = "flex";
 
+  // 🔹 CORREÇÃO: Configurar o event listener do botão Save
   const saveBtn = document.getElementById("saveLessonBtn");
+  
+  // Remover event listeners anteriores para evitar duplicação
   const newSaveBtn = saveBtn.cloneNode(true);
   saveBtn.parentNode.replaceChild(newSaveBtn, saveBtn);
-  
-  newSaveBtn.onclick = async () => {
+
+  // Adicionar novo event listener
+  document.getElementById("saveLessonBtn").addEventListener("click", async function saveLessonHandler() {
     try {
       const lessonDataToSave = {};
       
-    document.querySelectorAll("#lessonModalTable tr").forEach(row => {
+      console.log("Coletando dados dos checkboxes...");
+      
+      // Coletar dados de todos os estudantes
+      const rows = document.querySelectorAll("#lessonModalTable tr");
+      for (let i = 1; i < rows.length; i++) { // Começa de 1 para pular o cabeçalho
+        const row = rows[i];
         const studentId = row.querySelector(".attCheckbox")?.dataset.studentId;
         const attendanceCheckbox = row.querySelector(".attCheckbox");
         const homeworkCheckbox = row.querySelector(".hwCheckbox");
@@ -383,24 +390,36 @@ async function openLessonModal(lessonDate) {
         if (studentId && attendanceCheckbox && homeworkCheckbox) {
           lessonDataToSave[studentId] = {
             attendance: attendanceCheckbox.checked,
-            homework: homeworkCheckbox.checked
+            homework: homeworkCheckbox.checked,
+            studentName: row.cells[0].textContent // Adiciona o nome do estudante
           };
         }
-      });
-    console.log("Dados a serem salvos:", lessonDataToSave);
+      }
 
-    await setDoc(lessonDocRef, lessonDataToSave);
-    console.log("Dados salvos com sucesso!");
-    modal.style.display = "none";
-    showLessons(); // Atualiza as cores
+      console.log("Dados a serem salvos:", lessonDataToSave);
+      
+      if (Object.keys(lessonDataToSave).length === 0) {
+        console.log("Nenhum dado para salvar");
+        return;
+      }
+      
+      // Salvar no Firebase
+      console.log("Salvando no Firebase...");
+      await setDoc(lessonDocRef, lessonDataToSave);
+      console.log("Dados salvos com sucesso!");
+      
+      // Fechar modal e atualizar
+      modal.style.display = "none";
+      showLessons(); // Atualiza as cores das aulas
+      
     } catch (error) {
       console.error("Erro ao salvar aula:", error);
       alert("Erro ao salvar os dados da aula: " + error.message);
     }
-  };
+  });
 }
 
-// Fechar modal
+// Fechar modal (manter como está)
 document.getElementById("closeLessonBtn").addEventListener("click", () => {
   document.getElementById("lessonModal").style.display = "none";
 });
