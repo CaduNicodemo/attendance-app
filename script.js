@@ -367,21 +367,36 @@ async function openLessonModal(lessonDate) {
 
   modal.style.display = "flex";
 
-  document.getElementById("saveLessonBtn").onclick = async () => {
-    const lessonDataToSave = {};
+  const saveBtn = document.getElementById("saveLessonBtn");
+  const newSaveBtn = saveBtn.cloneNode(true);
+  saveBtn.parentNode.replaceChild(newSaveBtn, saveBtn);
+  
+  newSaveBtn.onclick = async () => {
+    try {
+      const lessonDataToSave = {};
+      
     document.querySelectorAll("#lessonModalTable tr").forEach(row => {
-      const studentId = row.querySelector(".attCheckbox")?.dataset.studentId;
-      if (studentId) {
-        lessonDataToSave[studentId] = {
-          attendance: row.querySelector(".attCheckbox").checked,
-          homework: row.querySelector(".hwCheckbox").checked
-        };
-      }
-    });
+        const studentId = row.querySelector(".attCheckbox")?.dataset.studentId;
+        const attendanceCheckbox = row.querySelector(".attCheckbox");
+        const homeworkCheckbox = row.querySelector(".hwCheckbox");
+        
+        if (studentId && attendanceCheckbox && homeworkCheckbox) {
+          lessonDataToSave[studentId] = {
+            attendance: attendanceCheckbox.checked,
+            homework: homeworkCheckbox.checked
+          };
+        }
+      });
+    console.log("Dados a serem salvos:", lessonDataToSave);
 
     await setDoc(lessonDocRef, lessonDataToSave);
+    console.log("Dados salvos com sucesso!");
     modal.style.display = "none";
     showLessons(); // Atualiza as cores
+    } catch (error) {
+      console.error("Erro ao salvar aula:", error);
+      alert("Erro ao salvar os dados da aula: " + error.message);
+    }
   };
 }
 
