@@ -320,7 +320,7 @@ async function showLessons() {
 // 🔹 ABRIR MODAL DE AULA (VERSÃO CORRIGIDA)
 // =======================================================
 async function openLessonModal(lessonDate) {
-  if (!selectedGroupId) {
+  if (!selectedGroupId || !selectedGroupColor) {
     alert("Selecione um grupo primeiro.");
     return;
   }
@@ -342,6 +342,12 @@ async function openLessonModal(lessonDate) {
   modalTable.innerHTML = '';
   if (headerRow) modalTable.appendChild(headerRow);
 
+  const tableHeaders = modalTable.querySelectorAll('th');
+  tableHeaders.forEach(header => {
+    header.style.backgroundColor = selectedGroupColor;
+    header.style.color = 'white'; // Garantir contraste
+  });
+  
   const studentsRef = collection(db, "groups", selectedGroupId, "students");
   const studentsSnapshot = await getDocs(studentsRef);
 
