@@ -343,7 +343,7 @@ async function showLessons() {
 }
 
 // =======================================================
-// 🔹 ABRIR MODAL DE AULA (VERSÃO CORRIGIDA - SEM ERROS)
+// 🔹 ABRIR MODAL DE AULA (VERSÃO COMPLETAMENTE CORRIGIDA)
 // =======================================================
 async function openLessonModal(lessonDate) {
   if (!selectedGroupId || !selectedGroupColor) {
