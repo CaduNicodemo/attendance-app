@@ -343,7 +343,7 @@ async function showLessons() {
 }
 
 // =======================================================
-// 🔹 ABRIR MODAL DE AULA (VERSÃO CORRIGIDA)
+// 🔹 ABRIR MODAL DE AULA (VERSÃO CORRIGIDA - SEM ERROS)
 // =======================================================
 async function openLessonModal(lessonDate) {
   if (!selectedGroupId || !selectedGroupColor) {
@@ -362,7 +362,8 @@ async function openLessonModal(lessonDate) {
     console.error("Elemento modalTable não encontrado no DOM.");
     return;
   }
-// Limpar tabela, mantendo apenas o cabeçalho
+
+  // Limpar tabela, mantendo apenas o cabeçalho
   while (modalTable.rows.length > 1) {
     modalTable.deleteRow(1);
   }
@@ -373,7 +374,7 @@ async function openLessonModal(lessonDate) {
     header.style.backgroundColor = selectedGroupColor;
     header.style.color = 'white';
   });
-  
+
   const studentsRef = collection(db, "groups", selectedGroupId, "students");
   const studentsSnapshot = await getDocs(studentsRef);
 
@@ -386,7 +387,7 @@ async function openLessonModal(lessonDate) {
     const student = studentDoc.data();
     const studentId = studentDoc.id;
 
- const row = modalTable.insertRow();
+    const row = modalTable.insertRow();
     const cell1 = row.insertCell(0);
     const cell2 = row.insertCell(1);
     const cell3 = row.insertCell(2);
@@ -411,21 +412,14 @@ async function openLessonModal(lessonDate) {
   // Mostrar modal
   modal.style.display = "flex";
 
-  // 🔹 CORREÇÃO: Configurar o event listener do botão Save
+  // Configurar botão Save
   const saveBtn = document.getElementById("saveLessonBtn");
-  
-  // Remover event listeners anteriores para evitar duplicação
-  const newSaveBtn = saveBtn.cloneNode(true);
-  saveBtn.parentNode.replaceChild(newSaveBtn, saveBtn);
-
-  // Adicionar novo event listener
-  document.getElementById("saveLessonBtn").addEventListener("click", async function saveLessonHandler() {
+  saveBtn.onclick = null; // Limpar eventos anteriores
+  saveBtn.onclick = async function() {
     try {
       const lessonDataToSave = {};
       
-      console.log("Coletando dados dos checkboxes...");
-      
-       // Coletar dados dos checkboxes
+      // Coletar dados dos checkboxes
       const rows = modalTable.rows;
       for (let i = 1; i < rows.length; i++) {
         const row = rows[i];
@@ -437,6 +431,8 @@ async function openLessonModal(lessonDate) {
           attendance: attendance,
           homework: homework
         };
+      }
+
       await setDoc(lessonDocRef, lessonDataToSave);
       modal.style.display = "none";
       showLessons(); // Atualizar cores das aulas
@@ -444,35 +440,14 @@ async function openLessonModal(lessonDate) {
     } catch (error) {
       console.error("Erro ao salvar:", error);
       alert("Erro ao salvar: " + error.message);
-    };
+    }
+  };
 
   // Botão Close
   const closeBtn = document.getElementById("closeLessonBtn");
   closeBtn.onclick = function() {
     modal.style.display = "none";
   };
-}
-      console.log("Dados a serem salvos:", lessonDataToSave);
-      
-      if (Object.keys(lessonDataToSave).length === 0) {
-        console.log("Nenhum dado para salvar");
-        return;
-      }
-      
-      // Salvar no Firebase
-      console.log("Salvando no Firebase...");
-      await setDoc(lessonDocRef, lessonDataToSave);
-      console.log("Dados salvos com sucesso!");
-      
-      // Fechar modal e atualizar
-      modal.style.display = "none";
-      showLessons(); // Atualiza as cores das aulas
-      
-    } catch (error) {
-      console.error("Erro ao salvar aula:", error);
-      alert("Erro ao salvar os dados da aula: " + error.message);
-    }
-  });
 }
 
 // Fechar modal de aula ao clicar fora
