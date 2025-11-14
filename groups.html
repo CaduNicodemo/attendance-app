@@ -101,9 +101,24 @@
         </div>
       </div>
     </div>
+    <!-- ===================== MODAL DE AULA ===================== -->
+    <div id="lessonModal">
+      <div id="lessonModalContent">
+        <h3>Mark Attendance & Homework</h3>
+        <table id="lessonModalTable">
+          <tr>
+            <th>Student</th>
+            <th>Attendance</th>
+            <th>Homework</th>
+          </tr>
+          <!-- Alunos serão adicionados aqui dinamicamente -->
+        </table>
+        <button id="saveLessonBtn">Save</button>
+        <button id="closeLessonBtn">Close</button>
+      </div>
+    </div>
   </div>
     
-
   <script>
     // Cor de grupo
     document.querySelectorAll('.color-option').forEach(btn => {
@@ -115,27 +130,10 @@
       });
     });
   </script>
-<!-- =====================
-   MODAL DE AULA
-===================== -->
-<div id="lessonModal">
-  <div id="lessonModalContent">
-    <h3>Mark Attendance & Homework</h3>
-    <table id="lessonModalTable">
-      <tr>
-        <th>Student</th>
-        <th>Attendance</th>
-        <th>Homework</th>
-      </tr>
-      <!-- Alunos serão adicionados aqui dinamicamente -->
-    </table>
-    <button id="saveLessonBtn">Save</button>
-    <button id="closeLessonBtn">Close</button>
-  </div>
-</div>
 
   <script type="module" src="script.js"></script>
 </body>
 </html>
+
 
 
