@@ -441,7 +441,7 @@ async function openLessonModal(lessonDate) {
       console.error("Erro ao salvar:", error);
       alert("Erro ao salvar: " + error.message);
     }
-  };
+  }
 
   // Botão Close
   const closeBtn = document.getElementById("closeLessonBtn");
