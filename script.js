@@ -362,16 +362,16 @@ async function openLessonModal(lessonDate) {
     console.error("Elemento modalTable não encontrado no DOM.");
     return;
   }
+// Limpar tabela, mantendo apenas o cabeçalho
+  while (modalTable.rows.length > 1) {
+    modalTable.deleteRow(1);
+  }
 
-  // Limpar a tabela, mantendo o cabeçalho
-  const headerRow = modalTable.querySelector('tr');
-  modalTable.innerHTML = '';
-  if (headerRow) modalTable.appendChild(headerRow);
-
+  // Aplicar a cor do grupo ao cabeçalho da tabela
   const tableHeaders = modalTable.querySelectorAll('th');
   tableHeaders.forEach(header => {
     header.style.backgroundColor = selectedGroupColor;
-    header.style.color = 'white'; // Garantir contraste
+    header.style.color = 'white';
   });
   
   const studentsRef = collection(db, "groups", selectedGroupId, "students");
@@ -386,15 +386,29 @@ async function openLessonModal(lessonDate) {
     const student = studentDoc.data();
     const studentId = studentDoc.id;
 
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${student.name}</td>
-      <td><input type="checkbox" class="attCheckbox" data-student-id="${studentId}" ${lessonData[studentId]?.attendance ? "checked" : ""}></td>
-      <td><input type="checkbox" class="hwCheckbox" data-student-id="${studentId}" ${lessonData[studentId]?.homework ? "checked" : ""}></td>
-    `;
-    modalTable.appendChild(tr);
+ const row = modalTable.insertRow();
+    const cell1 = row.insertCell(0);
+    const cell2 = row.insertCell(1);
+    const cell3 = row.insertCell(2);
+
+    cell1.textContent = student.name;
+    
+    const attCheckbox = document.createElement("input");
+    attCheckbox.type = "checkbox";
+    attCheckbox.className = "attCheckbox";
+    attCheckbox.dataset.studentId = studentId;
+    attCheckbox.checked = lessonData[studentId]?.attendance || false;
+    cell2.appendChild(attCheckbox);
+    
+    const hwCheckbox = document.createElement("input");
+    hwCheckbox.type = "checkbox";
+    hwCheckbox.className = "hwCheckbox";
+    hwCheckbox.dataset.studentId = studentId;
+    hwCheckbox.checked = lessonData[studentId]?.homework || false;
+    cell3.appendChild(hwCheckbox);
   });
 
+  // Mostrar modal
   modal.style.display = "flex";
 
   // 🔹 CORREÇÃO: Configurar o event listener do botão Save
@@ -411,23 +425,36 @@ async function openLessonModal(lessonDate) {
       
       console.log("Coletando dados dos checkboxes...");
       
-      // Coletar dados de todos os estudantes
-      const rows = document.querySelectorAll("#lessonModalTable tr");
-      for (let i = 1; i < rows.length; i++) { // Começa de 1 para pular o cabeçalho
+       // Coletar dados dos checkboxes
+      const rows = modalTable.rows;
+      for (let i = 1; i < rows.length; i++) {
         const row = rows[i];
-        const studentId = row.querySelector(".attCheckbox")?.dataset.studentId;
-        const attendanceCheckbox = row.querySelector(".attCheckbox");
-        const homeworkCheckbox = row.querySelector(".hwCheckbox");
+        const studentId = row.querySelector('.attCheckbox').dataset.studentId;
+        const attendance = row.querySelector('.attCheckbox').checked;
+        const homework = row.querySelector('.hwCheckbox').checked;
         
-        if (studentId && attendanceCheckbox && homeworkCheckbox) {
-          lessonDataToSave[studentId] = {
-            attendance: attendanceCheckbox.checked,
-            homework: homeworkCheckbox.checked,
-            studentName: row.cells[0].textContent // Adiciona o nome do estudante
-          };
-        }
+        lessonDataToSave[studentId] = {
+          attendance: attendance,
+          homework: homework
+        };
       }
 
+      await setDoc(lessonDocRef, lessonDataToSave);
+      modal.style.display = "none";
+      showLessons(); // Atualizar cores das aulas
+      
+    } catch (error) {
+      console.error("Erro ao salvar:", error);
+      alert("Erro ao salvar: " + error.message);
+    }
+  };
+
+  // Botão Close
+  const closeBtn = document.getElementById("closeLessonBtn");
+  closeBtn.onclick = function() {
+    modal.style.display = "none";
+  };
+}
       console.log("Dados a serem salvos:", lessonDataToSave);
       
       if (Object.keys(lessonDataToSave).length === 0) {
@@ -451,7 +478,9 @@ async function openLessonModal(lessonDate) {
   });
 }
 
-// Fechar modal (manter como está)
-document.getElementById("closeLessonBtn").addEventListener("click", () => {
-  document.getElementById("lessonModal").style.display = "none";
+// Fechar modal de aula ao clicar fora
+document.getElementById("lessonModal").addEventListener("click", (e) => {
+  if (e.target.id === "lessonModal") {
+    document.getElementById("lessonModal").style.display = "none";
+  }
 });
