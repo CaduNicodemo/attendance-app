@@ -437,8 +437,6 @@ async function openLessonModal(lessonDate) {
           attendance: attendance,
           homework: homework
         };
-      }
-
       await setDoc(lessonDocRef, lessonDataToSave);
       modal.style.display = "none";
       showLessons(); // Atualizar cores das aulas
@@ -446,8 +444,7 @@ async function openLessonModal(lessonDate) {
     } catch (error) {
       console.error("Erro ao salvar:", error);
       alert("Erro ao salvar: " + error.message);
-    }
-  };
+    };
 
   // Botão Close
   const closeBtn = document.getElementById("closeLessonBtn");
