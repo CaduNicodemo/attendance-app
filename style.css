@@ -181,6 +181,7 @@ table#studentsTable {
   justify-content: space-evenly;
   width: 100%;
   margin: 15px 0;
+  border: 1px var(--preto-rb);
 }
 
 /* ===============================
@@ -191,6 +192,7 @@ table#studentsTable {
   flex-direction: column;
   gap: 5px;
   margin-top: 10px;
+  max-width: 10%;
 }
 
 #lessonsList .lesson-item {
@@ -253,6 +255,11 @@ table#studentsTable {
 /* ===============================
    MODAL DE AULA ESPECÍFICO
 ================================*/
+#lessonModal{
+  display: flex;
+  justify-content: space-evenly;
+}
+
 #lessonModalTable {
   width: 100%;
   border-collapse: collapse;
