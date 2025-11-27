@@ -145,6 +145,9 @@ document.getElementById("eventForm").style.display = "none";
 // =======================================================
 // Carrega eventos e aplica filtro
 // =======================================================
+// =======================================================
+// Carrega eventos e aplica filtro
+// =======================================================
 async function loadEvents() {
   const q = query(collection(db, "events"), where("userId", "==", currentUser.uid));
   onSnapshot(q, (snapshot) => {
@@ -152,13 +155,20 @@ async function loadEvents() {
 
     snapshot.forEach(docSnap => {
       const ev = docSnap.data();
+
+      // resolve a variável CSS para cor real
+      const colorVar = groupsData[ev.groupId] || "#6c757d";
+      const resolvedColor = getComputedStyle(document.documentElement)
+                            .getPropertyValue(colorVar)
+                            .trim() || "#6c757d";
+
       allEvents.push({
         id: docSnap.id,
         title: ev.title,
         start: ev.date,
         groupId: ev.groupId,
-        backgroundColor: groupsData[ev.groupId]?.color || "#6c757d",
-        borderColor: groupsData[ev.groupId]?.color || "#6c757d",
+        backgroundColor: resolvedColor,
+        borderColor: resolvedColor,
       });
     });
 
