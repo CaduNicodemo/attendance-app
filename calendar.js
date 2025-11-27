@@ -171,14 +171,34 @@ async function loadEvents() {
                           .trim() || "#6c757d";
       }
 
-      allEvents.push({
-        id: docSnap.id,
-        title: ev.title,
-        start: ev.date,
-        groupId: ev.groupId,
-        backgroundColor: resolvedColor,
-        borderColor: resolvedColor,
-      });
+allEvents.push({
+  id: docSnap.id,
+  title: ev.title,
+  start: ev.date,
+  groupId: ev.groupId,
+  backgroundColor: (() => {
+    const colorVar = groupsData[ev.groupId]?.color || "#6c757d";
+    if (colorVar.startsWith("var(")) {
+      const varName = colorVar.slice(4, -1).trim(); // remove "var(" e ")"
+      const resolved = getComputedStyle(document.documentElement)
+                          .getPropertyValue(varName)
+                          .trim();
+      return resolved || "#6c757d";
+    }
+    return colorVar;
+  })(),
+  borderColor: (() => {
+    const colorVar = groupsData[ev.groupId]?.color || "#6c757d";
+    if (colorVar.startsWith("var(")) {
+      const varName = colorVar.slice(4, -1).trim();
+      const resolved = getComputedStyle(document.documentElement)
+                          .getPropertyValue(varName)
+                          .trim();
+      return resolved || "#6c757d";
+    }
+    return colorVar;
+  })(),
+});
     });
 
     renderFilteredEvents();
