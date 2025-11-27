@@ -67,13 +67,10 @@ async function loadGroups() {
     const g = docSnap.data();
     const groupId = docSnap.id;
 
-    // salva nome e cor do grupo no objeto global
-    groupsData[groupId] = {
-      name: g.name,
-      color: g.color || "#6c757d" // cor padrão se não houver
-    };
+    // salva nome e cor do grupo
+    groupsData[groupId] = g.color || "#6c757d";
 
-    // preenche selects normalmente
+    // preenche selects
     const opt1 = document.createElement("option");
     opt1.value = groupId;
     opt1.textContent = g.name;
@@ -85,7 +82,6 @@ async function loadGroups() {
     filterSelect.appendChild(opt2);
   });
 }
-
 // =======================================================
 // Adicionar evento
 // =======================================================
