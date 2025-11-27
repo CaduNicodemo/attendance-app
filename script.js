@@ -329,6 +329,7 @@ async function showLessons() {
       
       if (lessonSnapshot.exists()) {
         lessonDiv.style.background = "var(--cinza-rb)";
+        lessonDiv.style.color = "var(--branco-rb)"
       } else {
         lessonDiv.style.background = "var(--cinza-claro-rb)";
       }
@@ -410,7 +411,7 @@ async function openLessonModal(lessonDate) {
   });
 
   // Mostrar modal
-  modal.style.display = "flex";
+  modal.style.display = "block";
 
   // Configurar botão Save
   const saveBtn = document.getElementById("saveLessonBtn");
