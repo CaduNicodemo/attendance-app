@@ -1,12 +1,15 @@
 import { db, auth } from "./config.js";
 import {
-  collection, addDoc, getDocs, query, where, onSnapshot
+  collection, addDoc, getDocs, query, where, onSnapshot, updateDoc, doc
 } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
 
+
 let currentUser = null;
+let editingEventId = null;
 let calendar;
 let allEvents = [];
+let groupsData = {}; 
 
 // =======================================================
 // Espera login
@@ -20,6 +23,7 @@ onAuthStateChanged(auth, async (user) => {
   currentUser = user;
   await loadGroups();
   initCalendar();
+  loadEvents()
 });
 
 // =======================================================
@@ -31,7 +35,18 @@ function initCalendar() {
     initialView: "dayGridMonth",
     events: [],
     eventDisplay: "block",
-  });
+    eventClick: (info) => {
+      const ev = info.event;
+
+      editingEventId = ev.id;
+
+      document.getElementById("eventTitle").value = ev.title;
+      document.getElementById("eventDate").value = ev.startStr;
+      document.getElementById("groupSelect").value =
+        ev.extendedProps.groupId;
+
+      document.getElementById("eventForm").style.display = "block";
+    }});
   calendar.render();
 }
 
@@ -50,6 +65,10 @@ async function loadGroups() {
   snapshot.forEach(docSnap => {
     const g = docSnap.data();
     const opt1 = document.createElement("option");
+    groupsData[docSnap.id] = {
+      name: g.name,
+      color: g.color || "#6c757d"
+    };
     opt1.value = docSnap.id;
     opt1.textContent = g.name;
     groupSelect.appendChild(opt1);
@@ -72,6 +91,20 @@ document.getElementById("cancelEventBtn").addEventListener("click", () => {
   document.getElementById("eventForm").style.display = "none";
 });
 
+document.getElementById("deleteEventBtn").addEventListener("click", async () => {
+  if (!editingEventId) return; // nada a excluir
+
+  const confirmDelete = confirm("Deseja excluir este evento?");
+  if (!confirmDelete) return;
+
+  await deleteDoc(doc(db, "events", editingEventId));
+
+  clearForm();
+  document.getElementById("eventForm").style.display = "none";
+  editingEventId = null;
+});
+
+
 document.getElementById("saveEventBtn").addEventListener("click", async () => {
   const title = document.getElementById("eventTitle").value.trim();
   const date = document.getElementById("eventDate").value;
@@ -79,17 +112,32 @@ document.getElementById("saveEventBtn").addEventListener("click", async () => {
 
   if (!title || !date || !groupId) return alert("Preencha todos os campos!");
 
+if (editingEventId) {
+  await updateDoc(doc(db, "events", editingEventId), {
+    title,
+    date,
+    groupId
+  });
+  editingEventId = null;
+} else {
   await addDoc(collection(db, "events"), {
     userId: currentUser.uid,
     title,
     date,
     groupId,
   });
+}
 
-  document.getElementById("eventForm").reset();
-  document.getElementById("eventForm").style.display = "none";
+function clearForm() {
+  document.getElementById("eventTitle").value = "";
+  document.getElementById("eventDate").value = "";
+  document.getElementById("groupSelect").value = "";
+}
 
   loadEvents();
+  clearForm();
+document.getElementById("eventForm").style.display = "none";
+
 });
 
 // =======================================================
@@ -102,9 +150,12 @@ async function loadEvents() {
     snapshot.forEach(docSnap => {
       const ev = docSnap.data();
       allEvents.push({
+        id: docSnap.id,
         title: ev.title,
         start: ev.date,
         groupId: ev.groupId,
+        backgroundColor: groupsData[ev.groupId]?.color || "#6c757d",
+        borderColor: groupsData[ev.groupId]?.color || "#6c757d",
       });
     });
     renderFilteredEvents();
