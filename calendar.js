@@ -1,6 +1,6 @@
 import { db, auth } from "./config.js";
 import {
-  collection, addDoc, getDocs, query, where, onSnapshot, updateDoc, doc
+  collection, addDoc, getDocs, query, where, onSnapshot, updateDoc, deleteDoc, doc
 } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
 
@@ -21,9 +21,9 @@ onAuthStateChanged(auth, async (user) => {
   }
 
   currentUser = user;
-  await loadGroups();
+  await loadGroups();   // ✅ espera carregar grupos e cores
   initCalendar();
-  loadEvents()
+  loadEvents();         // ✅ agora pode aplicar cores
 });
 
 // =======================================================
@@ -53,28 +53,34 @@ function initCalendar() {
 // =======================================================
 // Carrega grupos e popula selects
 // =======================================================
-async function loadGroups() {
+async function loadGroups() { 
   const q = query(collection(db, "groups"), where("userId", "==", currentUser.uid));
   const snapshot = await getDocs(q);
 
   const groupSelect = document.getElementById("groupSelect");
   const filterSelect = document.getElementById("filterSelect");
+
   groupSelect.innerHTML = `<option value="">Selecione o grupo</option>`;
   filterSelect.innerHTML = `<option value="all">Todos</option>`;
 
   snapshot.forEach(docSnap => {
     const g = docSnap.data();
-    const opt1 = document.createElement("option");
-    groupsData[docSnap.id] = {
+    const groupId = docSnap.id;
+
+    // salva nome e cor do grupo no objeto global
+    groupsData[groupId] = {
       name: g.name,
-      color: g.color || "#6c757d"
+      color: g.color || "#6c757d" // cor padrão se não houver
     };
-    opt1.value = docSnap.id;
+
+    // preenche selects normalmente
+    const opt1 = document.createElement("option");
+    opt1.value = groupId;
     opt1.textContent = g.name;
     groupSelect.appendChild(opt1);
 
     const opt2 = document.createElement("option");
-    opt2.value = docSnap.id;
+    opt2.value = groupId;
     opt2.textContent = g.name;
     filterSelect.appendChild(opt2);
   });
@@ -147,6 +153,7 @@ async function loadEvents() {
   const q = query(collection(db, "events"), where("userId", "==", currentUser.uid));
   onSnapshot(q, (snapshot) => {
     allEvents = [];
+
     snapshot.forEach(docSnap => {
       const ev = docSnap.data();
       allEvents.push({
@@ -158,6 +165,7 @@ async function loadEvents() {
         borderColor: groupsData[ev.groupId]?.color || "#6c757d",
       });
     });
+
     renderFilteredEvents();
   });
 }
