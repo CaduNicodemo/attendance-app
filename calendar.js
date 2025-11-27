@@ -53,7 +53,7 @@ function initCalendar() {
 // =======================================================
 // Carrega grupos e popula selects
 // =======================================================
-async function loadGroups() { 
+async function loadGroups() {  
   const q = query(collection(db, "groups"), where("userId", "==", currentUser.uid));
   const snapshot = await getDocs(q);
 
@@ -68,7 +68,10 @@ async function loadGroups() {
     const groupId = docSnap.id;
 
     // salva nome e cor do grupo
-    groupsData[groupId] = g.color || "#6c757d";
+    groupsData[groupId] = {
+      name: g.name,
+      color: g.color || "#6c757d"  // <-- guarda exatamente como está no Firebase
+    };
 
     // preenche selects
     const opt1 = document.createElement("option");
@@ -82,6 +85,7 @@ async function loadGroups() {
     filterSelect.appendChild(opt2);
   });
 }
+
 // =======================================================
 // Adicionar evento
 // =======================================================
@@ -156,11 +160,16 @@ async function loadEvents() {
     snapshot.forEach(docSnap => {
       const ev = docSnap.data();
 
-      // resolve a variável CSS para cor real
-      const colorVar = groupsData[ev.groupId] || "#6c757d";
-      const resolvedColor = getComputedStyle(document.documentElement)
-                            .getPropertyValue(colorVar)
-                            .trim() || "#6c757d";
+      // pega a variável CSS do grupo
+      const colorVar = groupsData[ev.groupId]?.color || "#6c757d";
+      let resolvedColor = colorVar;
+
+      // se for uma variável CSS (ex.: var(--vermelho-claro-grupo)), converte para valor real
+      if (colorVar.startsWith("var(")) {
+        resolvedColor = getComputedStyle(document.documentElement)
+                          .getPropertyValue(colorVar.slice(4, -1)) // remove "var(" e ")"
+                          .trim() || "#6c757d";
+      }
 
       allEvents.push({
         id: docSnap.id,
