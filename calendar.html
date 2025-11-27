@@ -4,20 +4,12 @@
   <meta charset="UTF-8">
   <title>Calendário de Eventos</title>
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/main.min.css" rel="stylesheet">
-  <style>
-    body { font-family: Arial; background: #f5f7fa; margin: 20px; }
-    #calendar { max-width: 900px; margin: 40px auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    #eventForm { display: none; max-width: 400px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    #addEventBtn { display: block; margin: 10px auto; background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; }
-    select, input { width: 100%; margin-bottom: 10px; }
-  </style>
   <link rel="stylesheet" href="style.css">
 
 </head>
 <body>
     <div id="topbar">
     <a href="groups.html"><button>Groups</button></a>
-    <span id="userInfo"></span>
     <button id="logoutBtn">Sair</button>
   </div>
 
@@ -25,15 +17,15 @@
 
   <div style="text-align:center;">
     <select id="filterSelect"></select>
-    <button id="addEventBtn">+ Criar Evento</button>
+    <button id="addEventBtn">+ Event</button>
   </div>
 
   <div id="eventForm">
-    <h3>Novo Evento</h3>
-    <input type="text" id="eventTitle" placeholder="Título do evento">
+    <h3>New Event</h3>
+    <input type="text" id="eventTitle" placeholder="Event title">
     <input type="date" id="eventDate">
     <select id="groupSelect"></select>
-    <div style="display:flex; justify-content:space-between;">
+    <div id="eventBtns">
       <button id="saveEventBtn">Salvar</button>
       <button id="cancelEventBtn">Cancelar</button>
       <button id="deleteEventBtn" style="background:#dc3545; color:white;">Excluir</button>

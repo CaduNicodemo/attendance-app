@@ -2,7 +2,7 @@ import { db, auth } from "./config.js";
 import {
   collection, addDoc, getDocs, query, where, onSnapshot, updateDoc, deleteDoc, doc
 } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
 
 
 let currentUser = null;
@@ -60,8 +60,8 @@ async function loadGroups() {
   const groupSelect = document.getElementById("groupSelect");
   const filterSelect = document.getElementById("filterSelect");
 
-  groupSelect.innerHTML = `<option value="">Selecione o grupo</option>`;
-  filterSelect.innerHTML = `<option value="all">Todos</option>`;
+  groupSelect.innerHTML = `<option value="">Select</option>`;
+  filterSelect.innerHTML = `<option value="all">All</option>`;
 
   snapshot.forEach(docSnap => {
     const g = docSnap.data();
@@ -219,3 +219,10 @@ function renderFilteredEvents() {
   const filtered = selected === "all" ? allEvents : allEvents.filter(ev => ev.groupId === selected);
   filtered.forEach(ev => calendar.addEvent(ev));
 }
+//===============//
+//LOGOUT
+//===============//
+document.getElementById("logoutBtn").addEventListener("click", async () => {
+  await signOut(auth);
+  window.location.href = "index.html";
+});

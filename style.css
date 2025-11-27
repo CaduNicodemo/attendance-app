@@ -32,6 +32,7 @@ h3{
   max-width: 70%;
   align-self: center;
   margin: 20px auto;
+  text-align: center;
 }
 #topbar {
   background: var(--branco-rb);
@@ -344,6 +345,55 @@ table#studentsTable {
   margin: 0;
 }
 
+#eventForm{
+  display: none;
+  max-width: 400px;
+  margin: 0 auto;
+  background: var(--branco-rb);
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+#addEventBtn{
+  display: block;
+  margin: 10px auto;
+  background: var(--azul-rb);
+  color: var(--branco-rb);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer; }
+
+#eventBtns{
+  display: flex;
+  margin: auto;
+  justify-content: center;
+}
+
+#eventTitle{
+  display: flex;
+  max-width: 50%;
+  margin: .5rem auto;
+  justify-content: center;
+  text-align: center;
+}
+
+#eventDate{
+  display: flex;
+  max-width: 50%;
+  margin: .5rem auto;
+  justify-content: center;
+}
+
+#groupSelect{
+  display: flex;
+  max-width: 50%;
+  margin: .5rem auto;
+  justify-content: center;
+  text-align: center;
+}
+
 #saveLessonBtn,
 #closeLessonBtn {
   padding: 10px 20px;
@@ -377,6 +427,14 @@ table#studentsTable {
   color: var(--branco-rb);
   transform: translateY(-2px);
 }
+
+#calendar {
+  max-width: 900px;
+  margin: 15px auto;
+  background: var(--branco-rb);
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 
 /* ===============================
    ANIMAÇÕES
