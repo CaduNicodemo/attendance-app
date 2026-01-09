@@ -337,7 +337,11 @@ async function showLessons() {
       lessonDiv.addEventListener("click", () => openLessonModal(lesson.isoDate));
       container.appendChild(lessonDiv);
     }
-
+  // Esconder alertas se não houver grupo selecionado
+  if (!selectedGroupId) {
+    document.getElementById("alertsSection").style.display = "none";
+    return;
+  }
   } catch (err) {
     console.error("Erro ao carregar aulas:", err);
   }
@@ -455,5 +459,220 @@ async function openLessonModal(lessonDate) {
 document.getElementById("lessonModal").addEventListener("click", (e) => {
   if (e.target.id === "lessonModal") {
     document.getElementById("lessonModal").style.display = "none";
+  }
+});
+// =======================================================
+// 🔹 GERAR ALERTAS
+// =======================================================
+async function generateAlerts() {
+  const alertsContainer = document.getElementById("alertsContainer");
+  const sendWhatsAppBtn = document.getElementById("sendWhatsAppBtn");
+  
+  if (!selectedGroupId) {
+    alert("Select a group first.");
+    return;
+  }
+
+  alertsContainer.innerHTML = "<p>Generating alerts...</p>";
+  alertsContainer.style.display = "block";
+  
+  try {
+    // 1. Buscar todas as aulas do grupo
+    const lessonsRef = collection(db, "groups", selectedGroupId, "lessons");
+    const lessonsSnapshot = await getDocs(lessonsRef);
+    
+    // 2. Buscar todos os alunos do grupo
+    const studentsRef = collection(db, "groups", selectedGroupId, "students");
+    const studentsSnapshot = await getDocs(studentsRef);
+    
+    // 3. Organizar dados
+    const lessonsData = {};
+    lessonsSnapshot.forEach(doc => {
+      lessonsData[doc.id] = doc.data();
+    });
+    
+    // Ordenar datas das aulas (mais antigas primeiro)
+    const sortedDates = Object.keys(lessonsData).sort();
+    
+    // 4. Verificar alertas para cada aluno
+    const alerts = [];
+    
+    studentsSnapshot.forEach(studentDoc => {
+      const studentId = studentDoc.id;
+      const studentName = studentDoc.data().name;
+      
+      let missedClassesCount = 0;
+      let missedHomeworkCount = 0;
+      let lastMissedClassDates = [];
+      let lastMissedHomeworkDates = [];
+      
+      // Verificar as últimas 5 aulas (ou menos se não houver tantas)
+      const recentDates = sortedDates.slice(-5);
+      
+      for (const date of recentDates) {
+        const lesson = lessonsData[date];
+        if (!lesson[studentId]) continue;
+        
+        // Verificar attendance
+        if (!lesson[studentId].attendance) {
+          missedClassesCount++;
+          lastMissedClassDates.push(formatDateForAlert(date));
+          if (lastMissedClassDates.length > 2) lastMissedClassDates.shift();
+        } else {
+          missedClassesCount = 0;
+          lastMissedClassDates = [];
+        }
+        
+        // Verificar homework
+        if (!lesson[studentId].homework) {
+          missedHomeworkCount++;
+          lastMissedHomeworkDates.push(formatDateForAlert(date));
+          if (lastMissedHomeworkDates.length > 2) lastMissedHomeworkDates.shift();
+        } else {
+          missedHomeworkCount = 0;
+          lastMissedHomeworkDates = [];
+        }
+        
+        // Gerar alertas se houver 2 faltas consecutivas
+        if (missedClassesCount >= 2 && lastMissedClassDates.length >= 2) {
+          alerts.push({
+            type: 'attendance',
+            studentName: studentName,
+            dates: [...lastMissedClassDates],
+            message: `"${studentName}" missed classes on ${lastMissedClassDates[0]} and ${lastMissedClassDates[1]}`
+          });
+          missedClassesCount = 0;
+          lastMissedClassDates = [];
+        }
+        
+        // Gerar alertas se houver 2 homework não feito consecutivos
+        if (missedHomeworkCount >= 2 && lastMissedHomeworkDates.length >= 2) {
+          alerts.push({
+            type: 'homework',
+            studentName: studentName,
+            dates: [...lastMissedHomeworkDates],
+            message: `"${studentName}" didn't do homework on ${lastMissedHomeworkDates[0]} and ${lastMissedHomeworkDates[1]}`
+          });
+          missedHomeworkCount = 0;
+          lastMissedHomeworkDates = [];
+        }
+      }
+    });
+    
+    // 5. Mostrar alertas
+    alertsContainer.innerHTML = "";
+    
+    if (alerts.length === 0) {
+      alertsContainer.innerHTML = "<p>✅ No alerts to show. All good!</p>";
+      sendWhatsAppBtn.style.display = "none";
+      return;
+    }
+    
+    alerts.forEach(alert => {
+      const alertDiv = document.createElement("div");
+      alertDiv.className = `alert-item alert-${alert.type}`;
+      alertDiv.innerHTML = `
+        <strong>${alert.type === 'attendance' ? '🚫 Absence' : '📝 Homework'}</strong><br>
+        ${alert.message}
+      `;
+      alertsContainer.appendChild(alertDiv);
+    });
+    
+    // 6. Mostrar botão do WhatsApp
+    sendWhatsAppBtn.style.display = "block";
+    sendWhatsAppBtn.onclick = () => sendAlertsViaWhatsApp(alerts);
+    
+  } catch (error) {
+    console.error("Error generating alerts:", error);
+    alertsContainer.innerHTML = `<p style="color: red;">Error generating alerts: ${error.message}</p>`;
+  }
+}
+
+// =======================================================
+// 🔹 FORMATAR DATA PARA ALERTAS
+// =======================================================
+function formatDateForAlert(dateString) {
+  // dateString está no formato YYYY-MM-DD
+  const [year, month, day] = dateString.split('-');
+  return `${day}/${month}/${year}`;
+}
+
+// =======================================================
+// 🔹 ENVIAR ALERTAS VIA WHATSAPP
+// =======================================================
+function sendAlertsViaWhatsApp(alerts) {
+  if (alerts.length === 0) {
+    alert("No alerts to send.");
+    return;
+  }
+  
+  // Criar mensagem formatada
+  let message = "📋 *ATTENDANCE & HOMEWORK ALERTS*\n\n";
+  
+  alerts.forEach((alert, index) => {
+    message += `${index + 1}. ${alert.message}\n`;
+  });
+  
+  message += "\n---\n";
+  message += "Generated by Lesson Manager";
+  
+  // Codificar a mensagem para URL
+  const encodedMessage = encodeURIComponent(message);
+  
+  // Número de telefone (altere para o número desejado)
+  const phoneNumber = "5511991463208"; // 
+  
+  // Criar link do WhatsApp
+  const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+  
+  // Abrir em nova aba
+  window.open(whatsappURL, '_blank');
+}
+
+// =======================================================
+// 🔹 MOSTRAR/ESCONDER SEÇÃO DE ALERTAS
+// =======================================================
+async function toggleAlertsSection() {
+  const alertsSection = document.getElementById("alertsSection");
+  
+  if (!selectedGroupId) {
+    alertsSection.style.display = "none";
+    return;
+  }
+  
+  alertsSection.style.display = "block";
+  
+  // Limpar alertas anteriores
+  document.getElementById("alertsContainer").innerHTML = "";
+  document.getElementById("alertsContainer").style.display = "none";
+  document.getElementById("sendWhatsAppBtn").style.display = "none";
+}
+
+// =======================================================
+// 🔹 ATUALIZAR FUNÇÃO SELECTGROUP
+// =======================================================
+async function selectGroup(groupId, color) {
+  selectedGroupId = groupId;
+  selectedGroupColor = color;
+  document.body.style.background = color;
+  document.getElementById("groupDetails").style.display = "block";
+  
+  // Mostrar seção de alertas
+  await toggleAlertsSection();
+  
+  await loadStudents();
+  await showLessons();
+  
+  // Rolar para a seção de detalhes
+  document.getElementById("groupDetails").scrollIntoView({ behavior: 'smooth' });
+}
+
+// =======================================================
+// 🔹 CONFIGURAR BOTÃO DE GERAR ALERTAS
+// =======================================================
+document.addEventListener("DOMContentLoaded", () => {
+  const generateAlertsBtn = document.getElementById("generateAlertsBtn");
+  if (generateAlertsBtn) {
+    generateAlertsBtn.addEventListener("click", generateAlerts);
   }
 });

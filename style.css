@@ -437,6 +437,126 @@ table#studentsTable {
   box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 
 /* ===============================
+   TAB STYLES
+================================*/
+.tabs {
+  display: flex;
+  gap: 10px;
+  border-bottom: 2px solid var(--cinza-claro-rb);
+  margin-bottom: 20px;
+  justify-content: center;
+}
+
+.tab-btn {
+  padding: 10px 20px;
+  background: transparent;
+  color: var(--cinza-rb);
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.tab-btn:hover {
+  color: var(--azul-rb);
+}
+
+.tab-btn.active {
+  color: var(--azul-rb);
+  border-bottom-color: var(--azul-rb);
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.grades-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.grades-table thead {
+  background-color: var(--azul-rb);
+  color: var(--branco-rb);
+}
+
+.grades-table th,
+.grades-table td {
+  padding: 12px;
+  text-align: center;
+  border: 1px solid var(--cinza-claro-rb);
+}
+
+.grades-table th {
+  font-weight: 600;
+}
+
+.grades-table tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.grades-table tbody tr:hover {
+  background-color: #f0f0f0;
+}
+
+.grade-input {
+  width: 60px !important;
+  padding: 8px !important;
+  margin: 0 !important;
+  border: 1px solid var(--cinza-claro-rb) !important;
+  border-radius: 4px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.grade-input:focus {
+  border-color: var(--azul-rb) !important;
+  outline: none;
+  box-shadow: 0 0 5px rgba(53, 49, 165, 0.3);
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  margin: 20px 0;
+}
+
+header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+header .buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+header .buttons button {
+  padding: 10px 20px;
+  background-color: var(--azul-rb);
+  color: var(--branco-rb);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+header .buttons button:hover {
+  background-color: #2a2780;
+  transform: translateY(-2px);
+}
+
+/* ===============================
    ANIMAÇÕES
 ================================*/
 @keyframes fadeIn {
@@ -448,4 +568,50 @@ table#studentsTable {
     opacity: 1; 
     transform: scale(1); 
   }
+}
+/* ===============================
+   ALERTAS
+================================*/
+.alert-item {
+  padding: 10px;
+  margin: 8px 0;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  border-left: 4px solid transparent;
+}
+
+.alert-attendance {
+  background: #ffe6e6;
+  border-left-color: #dc3545;
+  color: #721c24;
+}
+
+.alert-homework {
+  background: #fff3cd;
+  border-left-color: #ffc107;
+  color: #856404;
+}
+
+.alert-item strong {
+  color: #333;
+}
+
+#sendWhatsAppBtn {
+  background: #25D366;
+  color: white;
+  font-weight: bold;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 auto;
+}
+
+#sendWhatsAppBtn:hover {
+  background: #128C7E;
+  transform: translateY(-2px);
 }
