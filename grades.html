@@ -1,42 +1,107 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
-
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grades - Attendance App</title>
+    <title>Grades System</title>
     <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-    <div class="container">
-        <header>
-            <h1 id="groupTitle">Grades</h1>
-            <div class="buttons">
-                <button id="backBtn">Back</button>
-                <button id="saveGradesBtn">Save Grades</button>
-                <button id="exportExcelBtn">Export CSV</button>
-            </div>
-            <p id="conceptLegend"></p>
-        </header>
+  <div id="topbar">
+    <a href="groups.html"><button>Groups</button></a>
+    <span id="userInfo"></span>
+    <button id="logoutBtn">Sair</button>
+  </div>
 
-        <div class="table-wrapper">
-            <table id="gradesTable">
-                <thead>
-                    <tr>
-                        <th>Student</th>
-                        <!-- Cabeçalho será preenchido dinamicamente pelo grades.js -->
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Linhas serão preenchidas dinamicamente pelo grades.js -->
-                </tbody>
-            </table>
+    <div id="mainApp">
+        <div class="container">
+            <h2>Assessments</h2>
+            
+            <!-- Seletor de Grupo -->
+            <div id="groupSelector" style="margin-bottom: 20px;">
+                <select id="selectGroupForGrades">
+                    <option value="">-- Select a Group --</option>
+                    <!-- Grupos serão carregados aqui -->
+                </select>
+            </div>
+
+            <!-- Sistema Principal -->
+            <div id="gradesSystem" style="display: none;">
+                <!-- Cabeçalho -->
+                <div id="gradesHeader" style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h3 id="currentGroupName"></h3>
+                        <div id="levelInfo" class="legend">
+                            <!-- Informações do nível serão preenchidas aqui -->
+                        </div>
+                    </div>
+                    <button id="viewToggleBtn" style="background: var(--roxo-grupo);">
+                        Switch to Individual View
+                    </button>
+                </div>
+
+                <!-- MODO: VISÃO DA TURMA -->
+                <div id="classView">
+                    <h4>Class Assessment</h4>
+                    
+                    <!-- Seletor de Categoria -->
+                    <div style="margin-bottom: 20px;">
+                        <label for="categorySelect"><strong>Select Category:</strong></label>
+                        <select id="categorySelect" style="margin-left: 10px; padding: 8px; min-width: 250px;">
+                            <!-- Categorias serão preenchidas aqui -->
+                        </select>
+                    </div>
+                    
+                    <!-- Legend dos Conceitos -->
+                    <div id="conceptLegend" class="legend">
+                        <!-- Legend será preenchida aqui -->
+                    </div>
+                    
+                    <!-- Grid de Conceitos -->
+                    <div class="concept-grid" id="conceptsGrid">
+                        <!-- Conceitos serão preenchidos aqui -->
+                    </div>
+                    
+                    <!-- Lista de Alunos -->
+                    <div id="studentsList" style="margin-top: 30px;">
+                        <h5>Students</h5>
+                        <!-- Lista de alunos será gerada aqui -->
+                    </div>
+                </div>
+
+                <!-- MODO: VISÃO INDIVIDUAL -->
+                <div id="individualView" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h4 id="studentIndividualName"></h4>
+                        <button id="backToClassBtn" style="background: var(--cinza-claro-rb);">
+                            ← Back to Class View
+                        </button>
+                    </div>
+                    
+                    <!-- Todas as Categorias do Aluno -->
+                    <div id="studentAllCategories">
+                        <!-- Todas as categorias com conceitos serão preenchidas aqui -->
+                    </div>
+                    
+                    <!-- Comentários/Observações -->
+                    <div class="comments-section">
+                        <h5>Comments & Observations</h5>
+                        <textarea id="studentComments" class="comments-textarea" 
+                                  placeholder="Add comments about this student's performance, behavior, or anything relevant..."></textarea>
+                        <div class="comments-status" id="commentsStatus">
+                            Auto-saves every 2 seconds
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Scripts -->
-    <script type="module" src="./grades.js"></script>
-</body>
+    <!-- Notificação de Auto-save -->
+    <div id="autoSaveNotice" class="auto-save-notice">
+        ✓ Changes saved
+    </div>
 
+    <script type="module" src="grades.js"></script>
+</body>
 </html>

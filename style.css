@@ -614,3 +614,136 @@ header .buttons button:hover {
   background: #128C7E;
   transform: translateY(-2px);
 }
+
+  /* Estilos específicos para grades */
+        .concept-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .concept-option {
+            padding: 8px 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+        }
+        
+        .concept-option.selected {
+            border-color: var(--azul-rb);
+            background: var(--azul-rb);
+            color: white;
+            font-weight: bold;
+        }
+        
+        .concept-option:hover:not(.selected) {
+            border-color: var(--azul-claro-grupo);
+            background: #f0f8ff;
+        }
+        
+        .student-row {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .student-row:hover {
+            background: #f5f5f5;
+        }
+        
+        .student-row.selected {
+            background: #e3f2fd;
+            border-left: 4px solid var(--azul-rb);
+        }
+        
+        .student-name {
+            flex: 1;
+            font-weight: bold;
+        }
+        
+        .student-concepts {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .concept-badge {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            min-width: 30px;
+            text-align: center;
+        }
+        
+        .comments-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border: 1px solid #eee;
+        }
+        
+        .comments-textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: inherit;
+            resize: vertical;
+        }
+        
+        .comments-textarea:focus {
+            outline: none;
+            border-color: var(--azul-rb);
+        }
+        
+        .comments-status {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #666;
+            text-align: right;
+        }
+        
+        .category-item {
+            padding: 8px 0;
+            border-bottom: 1px dashed #eee;
+        }
+        
+        .category-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        
+        .legend {
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            color: #666;
+            margin: 15px 0;
+        }
+        
+        .auto-save-notice {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            background: var(--verde-grupo);
+            color: white;
+            border-radius: 6px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 1000;
+        }
+        
+        .auto-save-notice.show {
+            opacity: 1;
+        }
