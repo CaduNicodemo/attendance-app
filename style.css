@@ -581,23 +581,22 @@ header .buttons button:hover {
 }
 
 .alert-attendance {
-  background: #ffe6e6;
+  background: #c9c9c92a;
   border-left-color: #dc3545;
-  color: #721c24;
+  
 }
 
 .alert-homework {
-  background: #fff3cd;
+  background: #c9c9c92a;
   border-left-color: #ffc107;
-  color: #856404;
 }
 
 .alert-item strong {
-  color: #333;
+  color: var(--preto-rb);
 }
 
 #sendWhatsAppBtn {
-  background: #25D366;
+  background: #1DAA61;
   color: white;
   font-weight: bold;
   padding: 12px 24px;

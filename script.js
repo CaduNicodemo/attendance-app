@@ -143,6 +143,24 @@ async function loadGroups() {
     container.appendChild(groupDiv);
   });
 }
+// =======================================================
+// 🔹 MOSTRAR/ESCONDER SEÇÃO DE ALERTAS
+// =======================================================
+async function toggleAlertsSection() {
+  const alertsSection = document.getElementById("alertsSection");
+  
+  if (!selectedGroupId) {
+    alertsSection.style.display = "none";
+    return;
+  }
+  
+  alertsSection.style.display = "block";
+  
+  // Limpar alertas anteriores
+  document.getElementById("alertsContainer").innerHTML = "";
+  document.getElementById("alertsContainer").style.display = "none";
+  document.getElementById("sendWhatsAppBtn").style.display = "none";
+}
 
 // =======================================================
 // 🔹 SELECIONAR GRUPO
@@ -152,8 +170,15 @@ async function selectGroup(groupId, color) {
   selectedGroupColor = color;
   document.body.style.background = color;
   document.getElementById("groupDetails").style.display = "block";
+
+  // Mostrar seção de alertas
+  await toggleAlertsSection();
+  
   await loadStudents();
   await showLessons();
+  
+  // Rolar para a seção de detalhes
+  document.getElementById("groupDetails").scrollIntoView({ behavior: 'smooth' });
 }
 
 // =======================================================
@@ -221,9 +246,9 @@ document.getElementById("addStudentBtn").addEventListener("click", async () => {
 // 🔹 FORMATAR DATA (função auxiliar)
 // =======================================================
 function formatDate(date) {
-  const day = String(date.getDate()).padStart(2, "0");
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const year = date.getFullYear();
+ const day = String(date.getUTCDate()).padStart(2, "0");
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const year = date.getUTCFullYear();
   return `${day}/${month}/${year}`;
 }
 
@@ -237,11 +262,11 @@ function generateLessonsBasedOnDays(startDate, lessonDays, lessonsBefore, lesson
   // 🔹 AULAS PASSADAS (começar antes da data atual)
   let pastLessonsGenerated = 0;
   let searchDate = new Date(currentDate);
-  searchDate.setDate(searchDate.getDate() - 1); // Começar de ontem
+  searchDate.setUTCDate(searchDate.getUTCDate() - 1); // Começar de ontem
 
   // Buscar aulas passadas
   while (pastLessonsGenerated < lessonsBefore) {
-    const dayOfWeek = searchDate.getDay();
+    const dayOfWeek = searchDate.getUTCDay();
     
     if (lessonDays.includes(dayOfWeek)) {
       const dateFormatted = formatDate(searchDate);
@@ -253,7 +278,7 @@ function generateLessonsBasedOnDays(startDate, lessonDays, lessonsBefore, lesson
       pastLessonsGenerated++;
     }
     
-    searchDate.setDate(searchDate.getDate() - 1); // Voltar no tempo
+    searchDate.setUTCDate(searchDate.getUTCDate() - 1); // Voltar no tempo
   }
 
   // 🔹 AULAS FUTURAS (começar da data atual)
@@ -262,11 +287,11 @@ function generateLessonsBasedOnDays(startDate, lessonDays, lessonsBefore, lesson
 
   // Buscar aulas futuras
   while (futureLessonsGenerated < lessonsAfter) {
-    const dayOfWeek = searchDate.getDay();
+    const dayOfWeek = searchDate.getUTCDay();
     
     if (lessonDays.includes(dayOfWeek)) {
       // Pular hoje se for um dia de aula (ou incluir, conforme sua preferência)
-      if (searchDate.getDate() !== currentDate.getDate() || searchDate.getMonth() !== currentDate.getMonth()) {
+      if (searchDate.getUTCDate() !== currentDate.getUTCDate() || searchDate.getUTCMonth() !== currentDate.getUTCMonth()) {
         const dateFormatted = formatDate(searchDate);
         lessons.push({
           date: dateFormatted,
@@ -277,7 +302,7 @@ function generateLessonsBasedOnDays(startDate, lessonDays, lessonsBefore, lesson
       }
     }
     
-    searchDate.setDate(searchDate.getDate() + 1); // Avançar no tempo
+    searchDate.setUTCDate(searchDate.getUTCDate() + 1); // Avançar no tempo
   }
 
   // Ordenar todas as aulas por data
@@ -299,7 +324,6 @@ async function showLessons() {
     // 1. Buscar os dados do grupo para pegar os lessonDays
     const groupDocRef = doc(db, "groups", selectedGroupId);
     const groupSnapshot = await getDoc(groupDocRef);
-    
     if (!groupSnapshot.exists()) {
       console.error("Grupo não encontrado");
       return;
@@ -337,11 +361,7 @@ async function showLessons() {
       lessonDiv.addEventListener("click", () => openLessonModal(lesson.isoDate));
       container.appendChild(lessonDiv);
     }
-  // Esconder alertas se não houver grupo selecionado
-  if (!selectedGroupId) {
-    document.getElementById("alertsSection").style.display = "none";
-    return;
-  }
+  
   } catch (err) {
     console.error("Erro ao carregar aulas:", err);
   }
@@ -415,11 +435,11 @@ async function openLessonModal(lessonDate) {
   });
 
   // Mostrar modal
-  modal.style.display = "block";
+  modal.style.display = "flex";
 
   // Configurar botão Save
   const saveBtn = document.getElementById("saveLessonBtn");
-  saveBtn.onclick = null; // Limpar eventos anteriores
+  saveBtn.onclick = null;
   saveBtn.onclick = async function() {
     try {
       const lessonDataToSave = {};
@@ -453,7 +473,6 @@ async function openLessonModal(lessonDate) {
   closeBtn.onclick = function() {
     modal.style.display = "none";
   };
-}
 
 // Fechar modal de aula ao clicar fora
 document.getElementById("lessonModal").addEventListener("click", (e) => {
@@ -461,6 +480,7 @@ document.getElementById("lessonModal").addEventListener("click", (e) => {
     document.getElementById("lessonModal").style.display = "none";
   }
 });
+}
 // =======================================================
 // 🔹 GERAR ALERTAS
 // =======================================================
@@ -487,8 +507,13 @@ async function generateAlerts() {
     
     // 3. Organizar dados
     const lessonsData = {};
+    const lessonDatesFormatted = {};
+
     lessonsSnapshot.forEach(doc => {
-      lessonsData[doc.id] = doc.data();
+      const dateString = doc.id;
+      const formattedDate = formatDateFromISO(dateString);
+      lessonDatesFormatted[dateString] = formattedDate;
+      lessonsData[dateString] = doc.data();
     });
     
     // Ordenar datas das aulas (mais antigas primeiro)
@@ -509,14 +534,16 @@ async function generateAlerts() {
       // Verificar as últimas 5 aulas (ou menos se não houver tantas)
       const recentDates = sortedDates.slice(-5);
       
-      for (const date of recentDates) {
-        const lesson = lessonsData[date];
-        if (!lesson[studentId]) continue;
+      for (const dateString of recentDates) {
+        const lesson = lessonsData[dateString];
+        if (!lesson|| !lesson[studentId]) continue;
+        
+        const formattedDate = lessonDatesFormatted[dateString];
         
         // Verificar attendance
         if (!lesson[studentId].attendance) {
           missedClassesCount++;
-          lastMissedClassDates.push(formatDateForAlert(date));
+          lastMissedClassDates.push(formattedDate);
           if (lastMissedClassDates.length > 2) lastMissedClassDates.shift();
         } else {
           missedClassesCount = 0;
@@ -526,7 +553,7 @@ async function generateAlerts() {
         // Verificar homework
         if (!lesson[studentId].homework) {
           missedHomeworkCount++;
-          lastMissedHomeworkDates.push(formatDateForAlert(date));
+          lastMissedHomeworkDates.push(formattedDate);
           if (lastMissedHomeworkDates.length > 2) lastMissedHomeworkDates.shift();
         } else {
           missedHomeworkCount = 0;
@@ -539,7 +566,7 @@ async function generateAlerts() {
             type: 'attendance',
             studentName: studentName,
             dates: [...lastMissedClassDates],
-            message: `"${studentName}" missed classes on ${lastMissedClassDates[0]} and ${lastMissedClassDates[1]}`
+            message: `"${studentName}" missed classes on ${FormattedDateMinusOne(lastMissedClassDates[0])} and ${FormattedDateMinusOne(lastMissedClassDates[1])}`
           });
           missedClassesCount = 0;
           lastMissedClassDates = [];
@@ -551,7 +578,7 @@ async function generateAlerts() {
             type: 'homework',
             studentName: studentName,
             dates: [...lastMissedHomeworkDates],
-            message: `"${studentName}" didn't do homework on ${lastMissedHomeworkDates[0]} and ${lastMissedHomeworkDates[1]}`
+            message: `"${studentName}" didn't do homework on ${FormattedDateMinusOne(lastMissedHomeworkDates[0])} and ${FormattedDateMinusOne(lastMissedHomeworkDates[1])}`
           });
           missedHomeworkCount = 0;
           lastMissedHomeworkDates = [];
@@ -563,7 +590,7 @@ async function generateAlerts() {
     alertsContainer.innerHTML = "";
     
     if (alerts.length === 0) {
-      alertsContainer.innerHTML = "<p>✅ No alerts to show. All good!</p>";
+      alertsContainer.innerHTML = "<p>No alerts to show. All good!</p>";
       sendWhatsAppBtn.style.display = "none";
       return;
     }
@@ -572,7 +599,7 @@ async function generateAlerts() {
       const alertDiv = document.createElement("div");
       alertDiv.className = `alert-item alert-${alert.type}`;
       alertDiv.innerHTML = `
-        <strong>${alert.type === 'attendance' ? '🚫 Absence' : '📝 Homework'}</strong><br>
+        <strong>${alert.type === 'attendance' ? 'Absence' : 'Homework'}</strong><br>
         ${alert.message}
       `;
       alertsContainer.appendChild(alertDiv);
@@ -587,16 +614,38 @@ async function generateAlerts() {
     alertsContainer.innerHTML = `<p style="color: red;">Error generating alerts: ${error.message}</p>`;
   }
 }
-
 // =======================================================
-// 🔹 FORMATAR DATA PARA ALERTAS
+// 🔹 FORMATAR DATA DO FIREBASE (MÉTODO SIMPLES E DIRETO)
 // =======================================================
-function formatDateForAlert(dateString) {
-  // dateString está no formato YYYY-MM-DD
+function formatDateFromISO(dateString) {
+  // dateString do Firebase: "2023-10-05"
+  // Extrair partes diretamente SEM usar Date object
   const [year, month, day] = dateString.split('-');
-  return `${day}/${month}/${year}`;
+  
+  // Formatar como DD/MM/YYYY - DIRETO, sem conversão de fuso horário
+  return `${day.padStart(2, '0')}/${month.padStart(2, '0')}/${year}`;
 }
 
+// =======================================================
+// 🔹 SUBTRAIR DIAS DE DATA FORMATADA (DD/MM/YYYY)
+// =======================================================
+function FormattedDateMinusOne(formattedDate, daysToSubtract = 1) {
+  // formattedDate está como "05/10/2023"
+  const [day, month, year] = formattedDate.split('/').map(Number);
+  
+  // Criar objeto Date (cuidado com o mês -1)
+  const date = new Date(year, month - 1, day);
+  
+  // Subtrair dias
+  date.setDate(date.getDate() - daysToSubtract);
+  
+  // Formatar de volta para DD/MM/YYYY
+  const newDay = String(date.getDate()).padStart(2, '0');
+  const newMonth = String(date.getMonth() + 1).padStart(2, '0');
+  const newYear = date.getFullYear();
+  
+  return `${newDay}/${newMonth}/${newYear}`;
+}
 // =======================================================
 // 🔹 ENVIAR ALERTAS VIA WHATSAPP
 // =======================================================
@@ -607,7 +656,7 @@ function sendAlertsViaWhatsApp(alerts) {
   }
   
   // Criar mensagem formatada
-  let message = "📋 *ATTENDANCE & HOMEWORK ALERTS*\n\n";
+  let message = "ATTENDANCE & HOMEWORK ALERTS\n\n";
   
   alerts.forEach((alert, index) => {
     message += `${index + 1}. ${alert.message}\n`;
@@ -627,44 +676,6 @@ function sendAlertsViaWhatsApp(alerts) {
   
   // Abrir em nova aba
   window.open(whatsappURL, '_blank');
-}
-
-// =======================================================
-// 🔹 MOSTRAR/ESCONDER SEÇÃO DE ALERTAS
-// =======================================================
-async function toggleAlertsSection() {
-  const alertsSection = document.getElementById("alertsSection");
-  
-  if (!selectedGroupId) {
-    alertsSection.style.display = "none";
-    return;
-  }
-  
-  alertsSection.style.display = "block";
-  
-  // Limpar alertas anteriores
-  document.getElementById("alertsContainer").innerHTML = "";
-  document.getElementById("alertsContainer").style.display = "none";
-  document.getElementById("sendWhatsAppBtn").style.display = "none";
-}
-
-// =======================================================
-// 🔹 ATUALIZAR FUNÇÃO SELECTGROUP
-// =======================================================
-async function selectGroup(groupId, color) {
-  selectedGroupId = groupId;
-  selectedGroupColor = color;
-  document.body.style.background = color;
-  document.getElementById("groupDetails").style.display = "block";
-  
-  // Mostrar seção de alertas
-  await toggleAlertsSection();
-  
-  await loadStudents();
-  await showLessons();
-  
-  // Rolar para a seção de detalhes
-  document.getElementById("groupDetails").scrollIntoView({ behavior: 'smooth' });
 }
 
 // =======================================================
