@@ -254,14 +254,7 @@ async function loadUserGroups() {
 // =======================================================
 function determineLevelFromType(type) {
     // Mapeamento de tipo para nível se não tiver level salvo
-    const typeToLevel = {
-        'K1': 'Kids', 'K2': 'Kids',
-        'J': 'Juniors', 'J1': 'Juniors1-2', 'J2': 'Juniors1-2',
-        'TA': 'TeensA1-2', 'T1': 'TeensA1-2', 'T2': 'TeensA1-2',
-        'T3': 'Teens3-6', 'T4': 'Teens3-6', 'T5': 'Teens3-6', 'T6': 'Teens3-6'
-    };
-    
-    return typeToLevel[type] || 'Kids';
+    return mapGroupTypeToLevel(type);
 }
 // =======================================================
 // 🔹 SELECT GROUP FOR GRADES
