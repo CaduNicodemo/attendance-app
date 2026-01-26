@@ -23,8 +23,8 @@ const levelsConfig = {
             "Homework",
             "Absences"
         ],
-        concepts: ["AA", "MT", "ST", "R"],
-        conceptLegend: "AA=Almost Always, MT=Most of Time, ST=Some of Time, R=Rarely"
+        concepts: ["R", "ST", "MT", "AA"],
+        conceptLegend: "R=Rarely, ST=Some of Time, MT=Most of Time, AA=Almost Always"
     },
     "Juniors": {
         categories: [
@@ -38,8 +38,8 @@ const levelsConfig = {
             "Oral Spelling",
             "Absences"
         ],
-        concepts: ["AA", "MT", "ST", "R"],
-        conceptLegend: "AA=Almost Always, MT=Most of Time, ST=Some of Time, R=Rarely"
+        concepts: ["R", "ST", "MT", "AA"],
+        conceptLegend: "R=Rarely, ST=Some of Time, MT=Most of Time, AA=Almost Always"
     },
     "Juniors1-2": {
         categories: [
@@ -47,8 +47,8 @@ const levelsConfig = {
             "Respects Rules", "Cooperation with Peers", "Works Independently",
             "Care with Material", "Homework", "Absences"
         ],
-        concepts: ["E", "VG", "G", "S", "NI"],
-        conceptLegend: "E=Excellent, VG=Very Good, G=Good, S=Satisfactory, NI=Needs Improvement"
+        concepts: ["NI", "S", "G", "VG", "E"],
+        conceptLegend: "NI=Needs Improvement, S=Satisfactory, G=Good, VG=Very Good, E=Excellent"
     },
     "TeensA1-2": {
         categories: [
@@ -56,8 +56,8 @@ const levelsConfig = {
             "Respects Rules", "Cooperation with Peers", "Works Independently",
             "Care with Material", "Homework", "Absences", "Portfolio"
         ],
-        concepts: ["E", "VG", "G", "S", "NI"],
-        conceptLegend: "E=Excellent, VG=Very Good, G=Good, S=Satisfactory, NI=Needs Improvement"
+        concepts: ["NI", "S", "G", "VG", "E"],
+        conceptLegend: "NI=Needs Improvement, S=Satisfactory, G=Good, VG=Very Good, E=Excellent"
     },
     "Teens3-6": {
         categories: [
@@ -65,8 +65,8 @@ const levelsConfig = {
             "Respects Rules", "Cooperation with Peers", "Works Independently",
             "Care with Material", "Homework", "Absences", "Portfolio", "Project1", "Project2"
         ],
-        concepts: ["E", "VG", "G", "S", "NI"],
-        conceptLegend: "E=Excellent, VG=Very Good, G=Good, S=Satisfactory, NI=Needs Improvement"
+        concepts: ["NI", "S", "G", "VG", "E"],
+        conceptLegend: "NI=Needs Improvement, S=Satisfactory, G=Good, VG=Very Good, E=Excellent"
     }
 };
 
