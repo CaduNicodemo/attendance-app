@@ -2,6 +2,7 @@
 // 🔹 IMPORTS
 // =======================================================
 import { db, auth } from "./config.js";
+import { mapGroupTypeToLevel } from "./config.js"; // ← ADICIONAR ESTA LINHA
 import {
     collection, addDoc, getDocs, doc, getDoc,
     query, where, setDoc, updateDoc, deleteDoc,
