@@ -270,9 +270,30 @@ async function selectGroupForGrades(groupId) {
             selectedGroupData = groupDoc.data();
             
             // Determine level
-            const groupLevel = selectedGroupData.level || "Kids";
+            let groupLevel;
+             if (!selectedGroupData.level || 
+                selectedGroupData.level === "Teens" || 
+                selectedGroupData.level !== mapGroupTypeToLevel(selectedGroupData.type)) {
+                
+                groupLevel = mapGroupTypeToLevel(selectedGroupData.type);
+                
+                // 🔥 CORREÇÃO AUTOMÁTICA NO FIREBASE
+                try {
+                    await updateDoc(doc(db, "groups", groupId), {
+                        level: groupLevel
+                    });
+                    console.log(`✅ Nível corrigido: ${selectedGroupData.type} → ${groupLevel}`);
+                } catch (err) {
+                    console.warn("⚠️ Não foi possível corrigir no BD:", err);
+                }
+                
+            } else {
+                // 2. Se já estiver correto, usar o existente
+                groupLevel = selectedGroupData.level;
+            }
+            
             currentLevel = groupLevel;
-            currentLevelConfig = levelsConfig[groupLevel] || levelsConfig["Kids"];
+            currentLevelConfig = levelsConfig[groupLevel] || levelsConfig["Teens3-6"];
             
             // Update UI
             document.getElementById("currentGroupName").textContent = `Group: ${selectedGroupData.name}`;
