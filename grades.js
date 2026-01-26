@@ -55,7 +55,7 @@ const levelsConfig = {
         categories: [
             "Participation in Class", "Listening", "Speaking", "Reading", "Writing",
             "Respects Rules", "Cooperation with Peers", "Works Independently",
-            "Care with Material", "Homework", "Absences", "Portfolio"
+            "Care with Material", "Homework", "Absences", "Portfolio1","Portfolio2","Portfolio3","Portfolio4","Portfolio5","Portfolio6","Portfolio7"
         ],
         concepts: ["NI", "S", "G", "VG", "E"],
         conceptLegend: "NI=Needs Improvement, S=Satisfactory, G=Good, VG=Very Good, E=Excellent"
@@ -64,7 +64,7 @@ const levelsConfig = {
         categories: [
             "Participation in Class", "Listening", "Speaking", "Reading", "Writing",
             "Respects Rules", "Cooperation with Peers", "Works Independently",
-            "Care with Material", "Homework", "Absences", "Portfolio", "Project1", "Project2"
+            "Care with Material", "Homework", "Absences", "Portfolio1","Portfolio2","Portfolio3","Portfolio4","Portfolio5","Portfolio6","Portfolio7", "Portfolio8", "Project1", "Project2"
         ],
         concepts: ["NI", "S", "G", "VG", "E"],
         conceptLegend: "NI=Needs Improvement, S=Satisfactory, G=Good, VG=Very Good, E=Excellent"
